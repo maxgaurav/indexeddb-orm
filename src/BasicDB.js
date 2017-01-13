@@ -7,17 +7,19 @@ class BasicDB {
         };
 
         this.settings = settings;
+
         this.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 
         this.checkDB();
         this.checkSettings();
 
-        this.db = {
+        const db = {
             name : this.settings.dbName,
             version : this.settings.dbVersion
         };
 
         this.checkWebWorker();
+        this.idb = new DB(settings, db, this.indexedDB, this.webworker);
     }
 
     /**
@@ -56,11 +58,11 @@ class BasicDB {
      */
     checkWebWorker(){
 
-        if(this.settings.webWorkerPath){
+        // if(this.settings.webWorkerPath){
             if(window.Worker){
                 this.webworker.status = true;
-                this.webworker.worker = new window.Worker(this.settings.webWorkerPath);
+                this.webworker.worker = new window.Worker('src/WebWorker.js');
             }
-        }
+        // }
     }
 }
