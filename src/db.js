@@ -22,7 +22,8 @@ class DB {
             };
 
             request.onsuccess = function (e) {
-                resolve(e);
+                console.log(this.result);
+                resolve(e.target.result);
             };
         });
     }

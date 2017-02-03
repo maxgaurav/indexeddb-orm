@@ -1,30 +1,30 @@
 class Migration {
-    constructor(db, migrations){
+    constructor(db, migrations) {
         this.db = db;
         this.migrations = migrations;
         this.objectStores = [];
     }
 
-    createStore (schema) {
-        let migration = this;
+    createStore(schema) {
+        let mig = this;
         let primary = schema.primary || 'id';
 
-        let objectStore = migration.db.createObjectStore(schema.name, {keyPath : primary, autoIncrement : true});
-        migration.objectStores.push(objectStore);
+        let objectStore = mig.db.createObjectStore(schema.name, {keyPath: primary, autoIncrement: true});
+        mig.objectStores.push(objectStore);
 
-        if(schema.columns){
-            schema.columns.forEach((column) => migration.createIndex(column, objectStore));
+        if (schema.columns) {
+            schema.columns.forEach((column) => mig.makeIndex(column, objectStore));
         }
 
     }
 
-    run () {
-        let migration = this;
+    run() {
+        let mig = this;
 
-        migration.migrations.forEach((schema) => migration.createStore(schema));
+        mig.migrations.forEach((schema) => mig.createStore(schema));
     }
 
-    createIndex(column, objectStore) {
+    makeIndex(column, objectStore) {
         column.attributes = column.attributes || {};
         objectStore.createIndex(column.name, column.name, column.attributes);
     }
