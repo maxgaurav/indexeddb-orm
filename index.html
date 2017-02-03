@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="src/migration.js"></script>
+    <script src="src/db.js"></script>
+</head>
+<body>
+<script>
+    window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    let a = new DB(window.indexedDB, {
+        dbName : 'test',
+        dbVersion : 1,
+        migrations : [{
+            name : 'users',
+            primary : 'id',
+            columns : [{
+                name : 'email',
+                attributes : {
+                    unique : true
+                }
+            }]
+        },{
+            name : 'userContacts',
+            columns : [{
+                name : 'userId',
+            }]
+        }]
+    });
+
+    a.destroy('test');
+
+    a.connect().then((e) => {
+        console.log(e);
+    });
+</script>
+</body>
+</html>
