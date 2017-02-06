@@ -3,19 +3,17 @@ class Model {
         this.name = modelName;
         this.db = db;
         this.primary = primary;
-
-        this.tables = [];
+        this.tables = [this.name];
+        this.attributes = {};
     }
 
     find(id) {
         let model = this;
 
         return new Promise((resolve, reject) => {
-            let transaction = model.db.transaction(model.tables);
-            let obj = transaction.objectStore(model.name, Model.READONLY);
-            let index = obj.index(model.primary);
-            let result = null;
-            let request = index.get(id);
+            let transaction = model.db.transaction(model.tables, Model.READONLY);
+            let obj = transaction.objectStore(model.name);
+            let request = obj.get(id);
             
             request.onsuccess = function (e) {
                 resolve(e.target.result);
@@ -31,9 +29,9 @@ class Model {
     get() {
         let model = this;
 
-        return new Promise((reject, resolve) => {
-            let transaction = model.db.transaction(model.tables);
-            let obj = transaction.objectStore(model.name, Model.READONLY);
+        return new Promise((resolve, reject) => {
+            let transaction = model.db.transaction(model.tables, Model.READONLY);
+            let obj = transaction.objectStore(model.name);
             let result = [];
             let request = obj.openCursor();
 
@@ -48,17 +46,21 @@ class Model {
                 }else{
                     resolve(result);
                 }
+            };
+
+            request.onerror = function(e) {
+                reject(e);
             }
         });
     }
 
-    insert(data) {
+    create(data) {
         let model = this;
 
-        return new Promise((reject, resolve) => {
-            let transaction = model.db.transaction(model.tables);
+        return new Promise((resolve, reject) => {
+            let transaction = model.db.transaction(model.tables, Model.READWRITE);
 
-            let obj = transaction.objectStore(model.name, Model.READWRITE);
+            let obj = transaction.objectStore(model.name);
 
             data.createdAt = Date.now();
             data.updatedAt = Date.now();
@@ -75,6 +77,40 @@ class Model {
             };
         });
 
+    }
+
+    createMultiple (dataRecords) {
+        let model = this;
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.db.transaction(model.tables, Model.READWRITE);
+
+            let obj = transaction.objectStore(model.name);
+            let createdAt = Date.now();
+            let updatedAt = Date.now();
+            let result = [];
+
+            dataRecords.forEach((data) => {
+                data.createdAt = createdAt;
+                data.updatedAt = updatedAt;
+
+                let request = obj.add(data);
+
+                request.onerror = function(e) {
+                    reject(e);
+                };
+
+                request.onsuccess = function(e) {
+                    data[model.primary] = e.target.result;
+
+                    result.push(data);
+
+                    if(result.length === dataRecords.length){
+                        resolve(result);
+                    }
+                };
+            })
+        });
     }
 
     /**

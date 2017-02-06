@@ -22,8 +22,14 @@ class DB {
             };
 
             request.onsuccess = function (e) {
-                console.log(this.result);
-                resolve(e.target.result);
+                let models = {};
+
+                db.settings.migrations.forEach((schema) => {
+                    let primary = schema.primary || 'id';
+                    models[schema.name] = new Model(e.target.result, schema.name, primary);
+                });
+
+                resolve(models);
             };
         });
     }
