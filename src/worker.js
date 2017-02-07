@@ -1,4 +1,4 @@
-importScripts('db.js', 'model.js', 'migration.js');
+importScripts('db.js', 'builder.js', 'model.js', 'migration.js');
 
 let db, models;
 let errorNamespace = '-error';
@@ -12,9 +12,10 @@ self.addEventListener('message', (e) => {
 self.addEventListener('idb:worker:initialize', (e) => {
     "use strict";
 
-    let idb = self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB
+    let idb = self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB;
+    let idbKey = self.IDBKeyRange || self.webkitIDBKeyRange || self.msIDBKeyRange;
 
-    db = new DB(idb, e.detail.detail, false);
+    db = new DB(idb, idbKey, e.detail.detail, false);
 
     db.connect()
         .then((m) => {
@@ -91,6 +92,18 @@ self.addEventListener('idb:worker:get', (e) => {
     "use strict";
 
     models[e.detail.model].get(e.detail.detail)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(e => {
+            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+self.addEventListener('idb:worker:first', (e) => {
+    "use strict";
+
+    models[e.detail.model].first(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })

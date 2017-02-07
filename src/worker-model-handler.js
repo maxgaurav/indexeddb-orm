@@ -1,6 +1,8 @@
-class WorkerModelHandler {
+class WorkerModelHandler extends Builder{
 
     constructor(modelName, workerContent) {
+        super();
+
         this.name = modelName;
         this.worker = workerContent;
         this.setUpHandler();
@@ -27,8 +29,8 @@ class WorkerModelHandler {
              * @param e
              */
             function handler(e) {
-                model.removeListener(timestamp, action, handler);
-                model.removeListener(timestamp, action, errorHandler());
+                model.removeListener(timestamp, 'find', handler);
+                model.removeListener(timestamp, 'find-error', errorHandler());
 
                 resolve(e.detail);
             }
@@ -38,8 +40,8 @@ class WorkerModelHandler {
              * @param e
              */
             function errorHandler(e) {
-                model.removeListener(timestamp, action, errorHandler);
-                model.removeListener(timestamp, action, handler);
+                model.removeListener(timestamp, 'find', errorHandler);
+                model.removeListener(timestamp, 'find-error', handler);
                 reject(e.detail);
             }
 
@@ -61,15 +63,45 @@ class WorkerModelHandler {
             model.send({}, timestamp, 'get');
 
             function handler(e) {
-                model.removeListener(timestamp, action, handler);
-                model.removeListener(timestamp, action, errorHandler);
+                model.removeListener(timestamp, 'get', handler);
+                model.removeListener(timestamp, 'get-error', errorHandler);
 
                 resolve(e.detail);
             }
 
             function errorHandler(e) {
-                model.removeListener(timestamp, action, errorHandler);
-                model.removeListener(timestamp, action, handler);
+                model.removeListener(timestamp, 'get', errorHandler);
+                model.removeListener(timestamp, 'get-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    /**
+     * Function fetches list of result matching the criteria
+     * @returns {Promise}
+     */
+    first() {
+        let model = this;
+        return new Promise((resolve, reject) => {
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'first', handler);
+            model.on(timestamp, 'first-error', errorHandler);
+
+            model.send({}, timestamp, 'first');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'first', handler);
+                model.removeListener(timestamp, 'first-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'first', errorHandler);
+                model.removeListener(timestamp, 'first-error', handler);
                 reject(e.detail);
             }
 
@@ -123,15 +155,15 @@ class WorkerModelHandler {
             model.send(data, timestamp, 'createMultiple');
 
             function handler(e) {
-                model.removeListener(timestamp, action, handler);
-                model.removeListener(timestamp, action, errorHandler);
+                model.removeListener(timestamp, 'createMultiple', handler);
+                model.removeListener(timestamp, 'createMultiple-error', errorHandler);
 
                 resolve(e.detail);
             }
 
             function errorHandler(e) {
-                model.removeListener(timestamp, action, errorHandler);
-                model.removeListener(timestamp, action, handler);
+                model.removeListener(timestamp, 'createMultiple', errorHandler);
+                model.removeListener(timestamp, 'createMultiple-error', handler);
                 reject(e.detail);
             }
 

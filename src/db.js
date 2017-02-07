@@ -1,7 +1,8 @@
 class DB {
 
-    constructor(idb, settings, isWebWorker) {
+    constructor(idb, idbKey, settings, isWebWorker) {
         this.db = idb;
+        this.idbKey = idbKey;
         this.settings = settings;
         this.isWebWorker = isWebWorker || false;
     }
@@ -55,7 +56,11 @@ class DB {
                 if(e.data.action === 'initialize' && e.data.timestamp === timestamp) {
                     if (e.data.detail === true) {
                         db.settings.migrations.forEach((schema) => {
-                            models[schema.name] = new WorkerModelHandler(schema.name, worker, window);
+                            Object.defineProperty(models, schema.name, {
+                                get() {
+                                    return new WorkerModelHandler(schema.name, worker, window);
+                                }
+                            });
                         });
                         resolve(models);
                     } else {
@@ -76,6 +81,8 @@ class DB {
      * @param reject
      */
     createNormalHandler (resolve, reject) {
+        let db = this;
+
         let request = this.db.open(this.settings.dbName, this.settings.dbVersion);
 
         request.onupgradeneeded = function (e) {
@@ -92,7 +99,11 @@ class DB {
 
             db.settings.migrations.forEach((schema) => {
                 let primary = schema.primary || 'id';
-                models[schema.name] = new Model(e.target.result, schema.name, primary);
+                Object.defineProperty(models, schema.name, {
+                    get() {
+                        return new Model(e.target.result, db.idbKey, schema.name, primary);
+                    }
+                });
             });
 
             resolve(models);
