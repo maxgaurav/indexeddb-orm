@@ -144,6 +144,13 @@ class Builder {
     }
 
     between(attributeName, upper, lower) {
+        uppper = parseFloat(upper);
+        lower = parseFloat(lower);
+
+        if(isNaN(upper) || isNaN(lower)){
+            throw "Between is only for numeric values";
+        }
+
         this.builder.push({
             attribute : attributeName,
             value : [upper, lower],

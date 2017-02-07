@@ -51,7 +51,7 @@ class Model extends Builder{
                 let cursor = e.target.result;
 
                 if(cursor){
-                    if(model.checkBuilderValue()){
+                    if(model.checkBuilderValue(cursor.value)){
                         resolve(cursor.value);
                         return false;
                     }else{
@@ -88,7 +88,7 @@ class Model extends Builder{
                 let cursor = e.target.result;
 
                 if(cursor){
-                    if(model.checkBuilderValue()){
+                    if(model.checkBuilderValue(cursor.value)){
                         result.push(cursor.value);
                     }
                     cursor.continue();
@@ -216,51 +216,99 @@ class Model extends Builder{
         return index.openCursor(range);
     }
 
-    checkBuilderValue() {
+    checkBuilderValue(value) {
         let builder = this;
-        let condition = true;
-        let i;
+        let result = true;
+        let i,j;
+        for (i = 0; i < builder.builder.length; i++){
 
-        for (i = 0; i < builder.length; i++){
-            switch(builder.builder[i].type){
-                case 'and' :
-                    condition = true;
+            let condition = builder.builder[i];
+            switch(condition.type){
+
+                case 'and' : //case for one to one search
+
+                    if(!Model.helpers.checkNestedAttribute(condition.attribute, value, condition.value)){
+                        return false;
+                    }
                     break;
 
-                case 'in' :
-                    condition = true;
+                case 'in' : //case for list search
+
+                    for(j = 0; j < condition.value.length; j++) {
+                        result = Model.helpers.checkNestedAttribute(condition.attribute, value, condition.value[j]);
+                    }
+
+                    if(!result){
+                        return false;
+                    }
+
+                    result = true;
+
                     break;
 
-                case 'gte' :
-                    condition = true;
+                case 'gte' : //case for checking the value is greater than or is equal to the same
+                    result = true;
                     break;
 
-                case 'gt' :
-                    condition = true;
+                case 'gt' : //case for checking the value is greater than the same
+                    result = true;
                     break;
 
-                case 'lte' :
-                    condition = true;
+                case 'lte' : //case for checking the value is less than or is equal to the same
+                    result = true;
                     break;
 
-                case 'lt' :
-                    condition = true;
+                case 'lt' : //case for checking the value is less than the same
+                    result = true;
                     break;
 
-                case 'between' :
-                    condition = true;
+                case 'between' : //case for checking the value is between the given range(ONLY WORKS FOR NUMERIC)
+                    let lower = Model.helpers.getNestedAttribute(condition.attribute, condition.value[0]);
+                    let upper = Model.helpers.getNestedAttribute(condition.attribute, condition.value[1]);
+
+                    if(value === undefined) {
+                        return false;
+                    }
+
+                    if(lower >= value && upper <= value){
+                        return false
+                    }
+                    result = true;
                     break;
 
                 default:
-                    condition = true;
-            }
-
-            if(!condition) {
-                return condition;
+                    result = true;
             }
         }
 
-        return condition;
+        return result;
+    }
+
+    static get helpers() {
+
+        return {
+
+            checkNestedAttribute (attributeString, value, condition) {
+                return condition == Model.helpers.getNestedAttribute(attributeString, value)
+            },
+
+            getNestedAttribute(attributeString, value) {
+                let attributes = attributeString.split('.');
+                let i;
+                let content = value;
+
+                for(i = 0; i < attributes.length; i++) {
+                    if(value[attributes[i]] === undefined){
+                        return undefined;
+                    }
+
+                    content = value[attributes[i]];
+                }
+
+                return content;
+            }
+        };
+
     }
 
     /**
