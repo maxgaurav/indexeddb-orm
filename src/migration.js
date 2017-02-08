@@ -26,11 +26,7 @@ class Migration {
 
     makeIndex(column, objectStore) {
         column.attributes = column.attributes || {};
-        objectStore.createIndex(column.name, column.name, column.attributes);
+        column.index = column.index || column.name;
+        objectStore.createIndex(column.name, column.index, column.attributes);
     }
 }
-
-
-// export  {
-//     Migration
-// }

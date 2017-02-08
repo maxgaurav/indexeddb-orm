@@ -7,6 +7,13 @@ class Builder {
         this.tables = [];
     }
 
+    /**
+     * Sets the index builder value as an 'and' reference
+     *
+     * @param indexName string
+     * @param value mixed
+     * @returns {Builder}
+     */
     whereIndex(indexName, value) {
 
         this.indexBuilder = {
@@ -18,6 +25,12 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value as an 'in' reference
+     * @param indexName
+     * @param value
+     * @returns {Builder}
+     */
     whereIndexIn(indexName, value) {
 
         this.indexBuilder = {
@@ -29,6 +42,12 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value with point inclusive and sets greater than check
+     * @param indexName
+     * @param value
+     * @returns {Builder}
+     */
     indexGte(indexName, value) {
 
         this.indexBuilder = {
@@ -40,6 +59,12 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value with point not inclusive and sets greater than check
+     * @param indexName
+     * @param value
+     * @returns {Builder}
+     */
     indexGt(indexName, value) {
 
         this.indexBuilder = {
@@ -51,6 +76,12 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value with point inclusive and sets less than check
+     * @param indexName
+     * @param value
+     * @returns {Builder}
+     */
     indexLte(indexName, value) {
 
         this.indexBuilder = {
@@ -62,6 +93,13 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value with point not inclusive and sets less than check
+     *
+     * @param indexName
+     * @param value
+     * @returns {Builder}
+     */
     indexLt(indexName, value) {
 
         this.indexBuilder = {
@@ -73,6 +111,13 @@ class Builder {
         return this;
     }
 
+    /**
+     * Sets the index builder value with points inclusive and sets range between them
+     * @param indexName
+     * @param lower
+     * @param upper
+     * @returns {Builder}
+     */
     indexBetween(indexName, lower, upper) {
 
         this.indexBuilder = {
@@ -164,6 +209,7 @@ class Builder {
 
     relation(modelName, type, localKey, foreignKey, func, primary) {
         this.tables.push(modelName);
+
         this.relations.push({
             modelName : modelName,
             func : func,
@@ -190,11 +236,11 @@ class Builder {
                 let content = value;
 
                 for(i = 0; i < attributes.length; i++) {
-                    if(value[attributes[i]] === undefined){
+                    if(content[attributes[i]] === undefined){
                         return undefined;
                     }
 
-                    content = value[attributes[i]];
+                    content = content[attributes[i]];
                 }
 
                 return content;

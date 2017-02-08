@@ -47,7 +47,7 @@ class DB {
             let timestamp = Date.now();
 
             worker.postMessage({
-                detail : db.settings,
+                detail : JSON.stringify(db.settings),
                 action : 'initialize',
                 timestamp : timestamp
             });

@@ -5,8 +5,12 @@ let errorNamespace = '-error';
 
 self.addEventListener('message', (e) => {
     "use strict";
-
-    self.emit(e.data.detail, e.data.timestamp, e.data.action, e.data.model);
+    JSON.parse(e.data.detail);
+    let data = JSON.parse(e.data.detail, (key, value) => {
+        if(typeof value != 'string') return value;
+        return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+    });
+    self.emit(data, e.data.timestamp, e.data.action, e.data.model);
 });
 
 self.addEventListener('idb:worker:initialize', (e) => {
@@ -47,6 +51,7 @@ self.send = function (data, timestamp, action) {
         action: action,
         timestamp: timestamp,
     };
+
     self.postMessage(ev);
 };
 

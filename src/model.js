@@ -13,6 +13,11 @@ class Model extends Builder{
         this.attributes = {};
     }
 
+    /**
+     * Finds the result on the primary key defined
+     * @param id
+     * @returns {Promise}
+     */
     find(id) {
         let model = this;
 
@@ -32,6 +37,10 @@ class Model extends Builder{
         });
     }
 
+    /**
+     * Searches for first value in database and returns that
+     * @returns {Promise}
+     */
     first() {
         let model = this;
 
@@ -52,8 +61,52 @@ class Model extends Builder{
 
                 if(cursor){
                     if(model.checkBuilderValue(cursor.value)){
-                        resolve(cursor.value);
-                        return false;
+                        let relationsCompleted = 0;
+
+                        result = cursor.value;
+
+                        if(model.relations.length > 0 && (result !== null || result !== undefined)){
+
+
+                            model.relations.forEach((relation) => {
+
+                                let relationRequest = model.getRelationships(relation, model.transaction, model.getMainResult(result, relation.localKey, false), false);
+
+                                relationRequest.then((relationResult) => {
+
+                                    relationsCompleted++;
+
+                                    let defaultValue = model.getDefaultRelationValue(relation.type);
+                                    result[relation.modelName] = result[relation.modelName] || defaultValue;
+
+                                    switch (relation.type) {
+                                        case Model.RELATIONS.hasOne :
+                                            if (relationResult !== undefined) {
+                                                result[relation.modelName] = relationResult[relation.foreignKey] == result[relation.localKey] ? relationResult : result[relation.modelName];
+                                            }
+
+                                            break;
+                                        case Model.RELATIONS.hasMany :
+                                            if (relationResult.length > 0) {
+                                                result[relation.modelName] = relationResult.filter((relationResultItem) => {
+                                                    return relationResultItem[relation.foreignKey] == result[relation.localKey];
+                                                });
+                                            }
+                                            break;
+                                    }
+
+                                    if (relationsCompleted == model.relations.length) {
+                                        resolve(result);
+                                    }
+
+                                }).catch((err) => {
+                                    reject(err);
+                                });
+                            });
+                        }else{
+                            resolve(cursor.value);
+                            return false;
+                        }
                     }else{
                         cursor.continue();
                     }
@@ -69,6 +122,10 @@ class Model extends Builder{
         });
     }
 
+    /**
+     * Function searches throughout the database and returns a array of result
+     * @returns {Promise}
+     */
     get() {
         let model = this;
 
@@ -151,6 +208,11 @@ class Model extends Builder{
         });
     }
 
+    /**
+     * Function creates a single record
+     * @param data
+     * @returns {Promise}
+     */
     create(data) {
         let model = this;
 
@@ -176,6 +238,11 @@ class Model extends Builder{
 
     }
 
+    /**
+     * Function creates list of records passed
+     * @param dataRecords
+     * @returns {Promise}
+     */
     createMultiple (dataRecords) {
         let model = this;
 
@@ -210,6 +277,11 @@ class Model extends Builder{
         });
     }
 
+    /**
+     * Sets the index search criteria
+     * @param objectStore
+     * @returns {*}
+     */
     getIndexResult(objectStore) {
         let builder = this;
         let range;
@@ -263,6 +335,11 @@ class Model extends Builder{
         return index.openCursor(range);
     }
 
+    /**
+     * Checks common search criteria other than the index values
+     * @param value
+     * @returns {boolean}
+     */
     checkBuilderValue(value) {
         let builder = this;
         let result = true;
@@ -273,7 +350,6 @@ class Model extends Builder{
             switch(condition.type){
 
                 case 'and' : //case for one to one search
-
                     if(!Model.helpers.checkNestedAttribute(condition.attribute, value, condition.value)){
                         return false;
                     }
@@ -372,14 +448,29 @@ class Model extends Builder{
         return result;
     }
 
+    /**
+     * Creates a transaction
+     * @param tables
+     * @param mode
+     */
     createTransaction(tables, mode) {
         this.transaction = this.db.transaction(tables, mode)
     }
 
+    /**
+     * Sets IDBTransaction obejct to current model scope
+     * @param transaction
+     */
     setTransaction(transaction) {
         this.transaction = transaction
     }
 
+    /**
+     * Returns the IDBTransaction object set in current scope
+     * @param tables
+     * @param mode
+     * @returns {*|null}
+     */
     getTransaction(tables, mode) {
 
         if(!this.transaction) {
@@ -389,6 +480,13 @@ class Model extends Builder{
         return this.transaction;
     }
 
+    /**
+     * Returns the array or direct key value against the input give for the key specified
+     * @param result
+     * @param key
+     * @param isArray
+     * @returns {*}
+     */
     getMainResult (result, key, isArray) {
         if(isArray){
             return result.map((item) => {
@@ -399,6 +497,14 @@ class Model extends Builder{
         }
     }
 
+    /**
+     * Searches for relationships assigned with builder and fetches them
+     * @param relation
+     * @param transaction
+     * @param mainResult
+     * @param isArray
+     * @returns {Promise}
+     */
     getRelationships (relation, transaction, mainResult, isArray) {
 
         isArray = isArray || false;
@@ -412,7 +518,6 @@ class Model extends Builder{
         let relationModel = new Model(model.db, model.idbKey, relation.modelName, relation.primary);
 
         relationModel.setTransaction(transaction);
-        transaction = relationModel.getTransaction(model.tables, Model.READONLY);
 
         if(relation.func){
             let tempBuilder = new Builder();
@@ -451,58 +556,14 @@ class Model extends Builder{
                 relationReject(err);
             });
 
-            // let obj = transaction.objectStore(relationModel.name);
-            // let request;
-            // let relationResult = relationModel.getDefaultRelationValue(relation.type);
-            //
-            // if((isArray && mainResult.length === 0) || (!isArray && (mainResult === undefined || mainResult === null))){
-            //     relationResolve(relationResult);
-            // }
-            //
-            //
-            //
-            // request = relationModel.getIndexResult(obj);
-            //
-            // request.onsuccess = function (e) {
-            //     let relationCursor = e.target.result;
-            //
-            //     if(relationCursor) {
-            //         if(!relationModel.checkBuilderValue(relationCursor.value)){
-            //             relationCursor.continue();
-            //             return false;
-            //         }
-            //
-            //         switch (relation.type) {
-            //             case Model.RELATIONS.hasOne :
-            //                 relationResult = relationCursor.value;
-            //                 relationResolve(relationResult);
-            //                 return false;
-            //                 break;
-            //
-            //             case Model.RELATIONS.hasMany :
-            //                 relationResult.push(relationCursor.value);
-            //                 break;
-            //
-            //             default :
-            //                 throw "Correct Relation was not provided";
-            //         }
-            //         relationCursor.continue();
-            //     }else{
-            //
-            //
-            //
-            //         relationResolve(relationResult);
-            //     }
-            //
-            // };
-            //
-            // request.onerror = function(e) {
-            //     relationReject(e);
-            // };
-
         });
     }
 
+    /**
+     * Gets the default value of result. Null for hasOne and array for hasMany
+     * @param type
+     * @returns {*}
+     */
     getDefaultRelationValue(type) {
     switch (type) {
         case Model.RELATIONS.hasOne :
@@ -516,6 +577,7 @@ class Model extends Builder{
 
 
     /**
+     * Readwrite parameter of indexedDB
      * @return {string}
      */
     static get READWRITE() {
@@ -523,6 +585,7 @@ class Model extends Builder{
     }
 
     /**
+     * Readonly parameter of indexedDB
      * @return {string}
      */
     static get READONLY() {

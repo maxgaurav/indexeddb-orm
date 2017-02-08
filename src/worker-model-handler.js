@@ -190,8 +190,12 @@ class WorkerModelHandler extends Builder{
     send(data, timestamp, action) {
         let model = this;
 
+        let detail = JSON.stringify(data, (key, value) => {
+            return (typeof value === 'function' ) ? value.toString() : value;
+        });
+
         let e = {
-            detail : data,
+            detail : detail,
             action : action,
             timestamp : timestamp,
             model : model.name
