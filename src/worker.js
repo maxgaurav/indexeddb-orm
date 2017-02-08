@@ -27,7 +27,7 @@ self.addEventListener('idb:worker:initialize', (e) => {
 });
 
 self.emit = function (data, timestamp, action, model) {
-    let e = new self.CustomEvent('idb:worker:' + action, {
+    let ev = new self.CustomEvent('idb:worker:' + action, {
         detail: {
             detail: data,
             timestamp: timestamp,
@@ -36,78 +36,98 @@ self.emit = function (data, timestamp, action, model) {
         }
     });
 
-    self.dispatchEvent(e);
+    self.dispatchEvent(ev);
 };
 
 self.send = function (data, timestamp, action) {
     "use strict";
 
-    let e = {
+    let ev = {
         detail: data,
         action: action,
         timestamp: timestamp,
     };
-
-    self.postMessage(e);
+    self.postMessage(ev);
 };
 
 
 self.addEventListener('idb:worker:create', (e) => {
     "use strict";
 
-    models[e.detail.model].create(e.detail.detail)
+    let m = models[e.detail.model];
+
+    m.create(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })
-        .catch(e => {
-            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
 
 self.addEventListener('idb:worker:find', (e) => {
     "use strict";
 
-    models[e.detail.model].find(e.detail.detail)
+    let m = models[e.detail.model];
+    m.builder = e.detail.detail.builder;
+    m.indexBuilder = e.detail.detail.indexBuilder;
+    m.tables = e.detail.detail.tables;
+    m.relations = e.detail.detail.relations;
+
+    m.find(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })
-        .catch(e => {
-            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
 
 self.addEventListener('idb:worker:createMultiple', (e) => {
     "use strict";
 
-    models[e.detail.model].createMultiple(e.detail.detail)
+    let m = models[e.detail.model];
+    m.createMultiple(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })
-        .catch(e => {
-            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
 
 self.addEventListener('idb:worker:get', (e) => {
     "use strict";
 
-    models[e.detail.model].get(e.detail.detail)
+    let m = models[e.detail.model];
+    m.builder = e.detail.detail.builder;
+    m.indexBuilder = e.detail.detail.indexBuilder;
+    m.tables = e.detail.detail.tables;
+    m.relations = e.detail.detail.relations;
+
+    m.get(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })
-        .catch(e => {
-            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
 
 self.addEventListener('idb:worker:first', (e) => {
     "use strict";
 
-    models[e.detail.model].first(e.detail.detail)
+    let m = models[e.detail.model];
+    m.builder = e.detail.detail.builder;
+    m.indexBuilder = e.detail.detail.indexBuilder;
+    m.tables = e.detail.detail.tables;
+    m.relations = e.detail.detail.relations;
+
+    m.first(e.detail.detail)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })
-        .catch(e => {
-            self.send(e, e.detail.timestamp, e.detail.action + errorNamespace);
+        .catch(err => {
+            self.send(err, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });

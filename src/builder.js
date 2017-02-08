@@ -3,6 +3,8 @@ class Builder {
     constructor () {
         this.builder = [];
         this.indexBuilder = {};
+        this.relations = [];
+        this.tables = [];
     }
 
     whereIndex(indexName, value) {
@@ -158,5 +160,53 @@ class Builder {
         });
 
         return this;
+    }
+
+    relation(modelName, type, localKey, foreignKey, func, primary) {
+        this.tables.push(modelName);
+        this.relations.push({
+            modelName : modelName,
+            func : func,
+            localKey : localKey,
+            foreignKey : foreignKey,
+            type : type,
+            primary : primary
+        });
+
+        return this;
+    }
+
+    static get helpers() {
+
+        return {
+
+            checkNestedAttribute (attributeString, value, condition) {
+                return condition == Model.helpers.getNestedAttribute(attributeString, value)
+            },
+
+            getNestedAttribute(attributeString, value) {
+                let attributes = attributeString.split('.');
+                let i;
+                let content = value;
+
+                for(i = 0; i < attributes.length; i++) {
+                    if(value[attributes[i]] === undefined){
+                        return undefined;
+                    }
+
+                    content = value[attributes[i]];
+                }
+
+                return content;
+            }
+        };
+
+    }
+
+    static get RELATIONS() {
+        return {
+            hasOne : 'hasOne',
+            hasMany : 'hasMany'
+        }
     }
 }

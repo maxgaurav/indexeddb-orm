@@ -6,6 +6,7 @@ class WorkerModelHandler extends Builder{
         this.name = modelName;
         this.worker = workerContent;
         this.setUpHandler();
+        this.tables = [modelName];
     }
 
     /**
@@ -60,7 +61,12 @@ class WorkerModelHandler extends Builder{
             model.on(timestamp, 'get', handler);
             model.on(timestamp, 'get-error', errorHandler);
 
-            model.send({}, timestamp, 'get');
+            model.send({
+                tables : model.tables,
+                builder : model.builder,
+                indexBuilder : model.indexBuilder,
+                relations : model.relations
+            }, timestamp, 'get');
 
             function handler(e) {
                 model.removeListener(timestamp, 'get', handler);
@@ -90,7 +96,12 @@ class WorkerModelHandler extends Builder{
             model.on(timestamp, 'first', handler);
             model.on(timestamp, 'first-error', errorHandler);
 
-            model.send({}, timestamp, 'first');
+            model.send({
+                tables : model.tables,
+                builder : model.builder,
+                indexBuilder : model.indexBuilder,
+                relations : model.relations
+            }, timestamp, 'first');
 
             function handler(e) {
                 model.removeListener(timestamp, 'first', handler);
