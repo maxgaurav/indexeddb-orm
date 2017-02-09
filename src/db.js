@@ -86,7 +86,7 @@ class DB {
         let request = this.db.open(this.settings.dbName, this.settings.dbVersion);
 
         request.onupgradeneeded = function (e) {
-            let mig = new Migration(e.target.result, db.settings.migrations);
+            let mig = new Migration(e.target.result, e.target.transaction, db.settings.migrations);
             mig.run();
         };
 
