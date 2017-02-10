@@ -1,10 +1,11 @@
 class DB {
 
-    constructor(idb, idbKey, settings, isWebWorker) {
+    constructor(idb, idbKey, settings, useWebWorker) {
         this.db = idb;
         this.idbKey = idbKey;
         this.settings = settings;
-        this.isWebWorker = isWebWorker || false;
+        this.useWebWorker = useWebWorker || false;
+        this.isWebWorker = false;
     }
 
     /**
@@ -16,7 +17,7 @@ class DB {
         let db = this;
         return new Promise((resolve, reject) => {
 
-            if(db.isWebWorker){
+            if(db.useWebWorker){
                 db.createWorkerHandler(resolve, reject);
             }else{
                 db.createNormalHandler(resolve, reject);
@@ -62,6 +63,8 @@ class DB {
                                 }
                             });
                         });
+
+                        db.isWebWorker = true;
                         resolve(models);
                     } else {
                         db.createNormalHandler(resolve, reject);
