@@ -278,6 +278,115 @@ class Model extends Builder{
     }
 
     /**
+     * Function updates the various records with matching values
+     * @param data
+     * @returns {Promise}
+     */
+    update(data) {
+
+        let model = this;
+        let updatedAt = Date.now();
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.getTransaction(model.tables, Model.READWRITE);
+            let obj = transaction.objectStore(model.name);
+            let request, totalRecordsBeingUpdated = 0, totalRecordsUpdated = 0;
+
+            if(model.indexBuilder.type){
+                request = model.getIndexResult(obj);
+            }else{
+                request = obj.openCursor();
+            }
+
+            request.onsuccess = function (e) {
+                let cursor = e.target.result;
+
+                if(cursor){
+                    if(model.checkBuilderValue(cursor.value)){
+                        totalRecordsBeingUpdated++;
+
+                        let id = cursor.value[model.primary];
+                        let createdAt = cursor.value.createdAt;
+
+                        let result = Model.helpers.replaceNestedValues(data, cursor.value);
+                        result[model.primary] = id;
+                        result.createdAt = createdAt;
+                        result.updatedAt = updatedAt;
+
+                        let updateRequest = obj.put(result);
+
+                        updateRequest.onsuccess = function() {
+                            totalRecordsUpdated++;
+
+                            if(totalRecordsUpdated === totalRecordsBeingUpdated){
+                                resolve(true);
+                            }
+                        };
+
+                        updateRequest.onerror = function(err) {
+                            reject(err);
+                        };
+
+                    }
+                    cursor.continue();
+
+                }else{
+                    resolve();
+                }
+            };
+
+            request.onerror = function(e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     * Function updates the record at the given id
+     * @param id
+     * @param data
+     * @returns {Promise}
+     */
+    save(id, data) {
+        let model = this;
+        let updatedAt = Date.now();
+
+        return new Promise((resolve, reject) => {
+
+            model.find(id).then((result) => {
+
+                if(!result){
+                    reject('No record found');
+                }
+
+                let transaction = model.getTransaction(model.tables, Model.READWRITE, true);
+                let obj = transaction.objectStore(model.name);
+
+                let id = result[model.primary];
+                let createdAt = result.createdAt;
+
+                result = Model.helpers.replaceNestedValues(data, result);
+                result[model.primary] = id;
+                result.createdAt = createdAt;
+                result.updatedAt = updatedAt;
+
+                let request = obj.put(result);
+
+                request.onsuccess = function () {
+                    resolve(true);
+                };
+
+                request.onerror = function(e) {
+                    reject(e);
+                }
+            }).catch((err) => {
+                reject(err);
+            });
+
+        });
+    }
+
+    /**
      * Sets the index search criteria
      * @param objectStore
      * @returns {*}
@@ -471,9 +580,10 @@ class Model extends Builder{
      * @param mode
      * @returns {*|null}
      */
-    getTransaction(tables, mode) {
+    getTransaction(tables, mode, overwrite) {
+        overwrite = overwrite === undefined ? false : overwrite;
 
-        if(!this.transaction) {
+        if(!this.transaction || overwrite === true) {
             this.createTransaction(tables, mode);
         }
 

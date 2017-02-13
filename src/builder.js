@@ -244,7 +244,15 @@ class Builder {
                 }
 
                 return content;
-            }
+            },
+
+            replaceNestedValues(attributes, value) {
+                for(let attribute in attributes) {
+                    value[attribute] = attributes[attribute];
+                }
+
+                return value;
+            },
         };
 
     }

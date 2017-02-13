@@ -181,6 +181,62 @@ class WorkerModelHandler extends Builder{
         });
     }
 
+    update(data) {
+        let model = this;
+        return new Promise((resolve, reject) => {
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'update', handler);
+            model.on(timestamp, 'update-error', errorHandler);
+
+            model.send(data, timestamp, 'update');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'update', handler);
+                model.removeListener(timestamp, 'update-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'update', errorHandler);
+                model.removeListener(timestamp, 'update-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    save(id, data) {
+        let model = this;
+        return new Promise((resolve, reject) => {
+
+            let timestamp = Date.now();
+            let content = {
+                id : id,
+                data : data
+            };
+
+            model.on(timestamp, 'save', handler);
+            model.on(timestamp, 'save-error', errorHandler);
+            model.send(content, timestamp, 'save');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'save', handler);
+                model.removeListener(timestamp, 'save-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'save', errorHandler);
+                model.removeListener(timestamp, 'save-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
     /**
      * Communicates to webworker
      * @param data

@@ -136,3 +136,31 @@ self.addEventListener('idb:worker:first', (e) => {
             self.send(err, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
+
+self.addEventListener('idb:worker:update', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.update(e.detail.detail)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+self.addEventListener('idb:worker:save', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.save(e.detail.detail.id, e.detail.detail.data)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
