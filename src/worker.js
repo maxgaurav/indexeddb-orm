@@ -209,3 +209,31 @@ self.addEventListener('idb:worker:reduce', (e) => {
             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
         });
 });
+
+self.addEventListener('idb:worker:destroyId', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.destroyId(e.detail.detail)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+self.addEventListener('idb:worker:destroy', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.destroy()
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});

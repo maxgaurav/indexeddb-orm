@@ -249,6 +249,67 @@ class WorkerModelHandler extends Builder{
     }
 
     /**
+     * Function deletes the entries at the given point
+     * @param id
+     * @returns {Promise}
+     */
+    destroyId(id) {
+        let model = this;
+        return new Promise((resolve, reject) => {
+
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'destroyId', handler);
+            model.on(timestamp, 'destroyId-error', errorHandler);
+            model.send(id, timestamp, 'destroyId');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'destroyId', handler);
+                model.removeListener(timestamp, 'destroyId-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'destroyId', errorHandler);
+                model.removeListener(timestamp, 'destroyId-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    /**
+     * Function deletes the entries
+     * @returns {Promise}
+     */
+    destroy() {
+        let model = this;
+        return new Promise((resolve, reject) => {
+
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'destroy', handler);
+            model.on(timestamp, 'destroy-error', errorHandler);
+            model.send({}, timestamp, 'destroy');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'destroy', handler);
+                model.removeListener(timestamp, 'destroy-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'destroy', errorHandler);
+                model.removeListener(timestamp, 'destroy-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    /**
      * Function counts the number of records
      * @returns {Promise}
      */

@@ -313,7 +313,7 @@ class Model extends Builder{
                         result.createdAt = createdAt;
                         result.updatedAt = updatedAt;
 
-                        let updateRequest = obj.put(result);
+                        let updateRequest = cursor.update(result);
 
                         updateRequest.onsuccess = function() {
                             totalRecordsUpdated++;
@@ -324,6 +324,7 @@ class Model extends Builder{
                         };
 
                         updateRequest.onerror = function(err) {
+                            transaction.abort();
                             reject(err);
                         };
 
@@ -383,6 +384,95 @@ class Model extends Builder{
                 reject(err);
             });
 
+        });
+    }
+
+    /**
+     * Function deletes the entries at the given point
+     * @param id
+     * @returns {Promise}
+     */
+    destroyId(id) {
+        let model = this;
+
+
+        return new Promise((resolve, reject) => {
+            model.find(id).then((result) => {
+
+                if(!result){
+                    reject('result at id does not exists');
+                }
+
+                let transaction = model.getTransaction(model.tables, Model.READWRITE, true);
+                let obj = transaction.objectStore(model.name);
+                let request = obj.delete(id);
+
+                request.onsuccess = function (e) {
+                    resolve(e.target.result);
+                };
+
+                request.onerror = function (e) {
+                    reject(e);
+                };
+            }).catch(err => {
+                reject(err);
+            });
+
+
+        });
+    }
+
+    /**
+     * Function deletes the entries
+     * @returns {Promise}
+     */
+    destroy() {
+        let model = this;
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.getTransaction(model.tables, Model.READWRITE);
+            let obj = transaction.objectStore(model.name);
+            let request, totalRecordsBeingDeleted = 0, totalRecordsDeleted = 0;
+
+            if (model.indexBuilder.type) {
+                request = model.getIndexResult(obj);
+            } else {
+                request = obj.openCursor();
+            }
+
+            request.onsuccess = function (e) {
+                let cursor = e.target.result;
+
+                if (cursor) {
+                    if (model.checkBuilderValue(cursor.value)) {
+                        totalRecordsBeingDeleted++;
+
+                        let deleteRequest = cursor.delete();
+
+                        deleteRequest.onsuccess = function () {
+                            totalRecordsDeleted++;
+
+                            if (totalRecordsDeleted === totalRecordsBeingDeleted) {
+                                resolve(true);
+                            }
+                        };
+
+                        deleteRequest.onerror = function (err) {
+                            transaction.abort();
+                            reject(err);
+                        };
+
+                    }
+                    cursor.continue();
+
+                } else {
+                    resolve();
+                }
+            };
+
+            request.onerror = function (e) {
+                reject(e);
+            }
         });
     }
 
