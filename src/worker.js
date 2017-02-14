@@ -7,8 +7,10 @@ self.addEventListener('message', (e) => {
     "use strict";
     JSON.parse(e.data.detail);
     let data = JSON.parse(e.data.detail, (key, value) => {
-        if(typeof value != 'string') return value;
-        return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+        if(typeof value != 'string'){
+            return value;
+        }
+        return ( value.indexOf('function') >= 0 || value.indexOf('=>') >= 0) ? eval('('+value+')') : value;
     });
     self.emit(data, e.data.timestamp, e.data.action, e.data.model);
 });
@@ -157,6 +159,49 @@ self.addEventListener('idb:worker:save', (e) => {
     let m = models[e.detail.model];
 
     m.save(e.detail.detail.id, e.detail.detail.data)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+self.addEventListener('idb:worker:count', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.count()
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+self.addEventListener('idb:worker:average', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.average(e.detail.detail)
+        .then((result) => {
+            self.send(result, e.detail.timestamp, e.detail.action);
+        })
+        .catch(er => {
+            self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
+        });
+});
+
+
+self.addEventListener('idb:worker:reduce', (e) => {
+    "use strict";
+
+    let m = models[e.detail.model];
+
+    m.reduce(e.detail.detail.func, e.detail.detail.defaultCarry)
         .then((result) => {
             self.send(result, e.detail.timestamp, e.detail.action);
         })

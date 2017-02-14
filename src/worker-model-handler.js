@@ -181,6 +181,11 @@ class WorkerModelHandler extends Builder{
         });
     }
 
+    /**
+     * Function updates the various records with matching values
+     * @param data
+     * @returns {Promise}
+     */
     update(data) {
         let model = this;
         return new Promise((resolve, reject) => {
@@ -207,6 +212,12 @@ class WorkerModelHandler extends Builder{
         });
     }
 
+    /**
+     * Function updates the record at the given id
+     * @param id
+     * @param data
+     * @returns {Promise}
+     */
     save(id, data) {
         let model = this;
         return new Promise((resolve, reject) => {
@@ -231,6 +242,99 @@ class WorkerModelHandler extends Builder{
             function errorHandler(e) {
                 model.removeListener(timestamp, 'save', errorHandler);
                 model.removeListener(timestamp, 'save-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    /**
+     * Function counts the number of records
+     * @returns {Promise}
+     */
+    count() {
+        let model = this;
+        return new Promise((resolve, reject) => {
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'count', handler);
+            model.on(timestamp, 'count-error', errorHandler);
+
+            model.send({}, timestamp, 'count');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'count', handler);
+                model.removeListener(timestamp, 'count-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'count', errorHandler);
+                model.removeListener(timestamp, 'count-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    average(attribute) {
+        let model = this;
+        return new Promise((resolve, reject) => {
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'average', handler);
+            model.on(timestamp, 'average-error', errorHandler);
+
+            model.send(attribute, timestamp, 'average');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'average', handler);
+                model.removeListener(timestamp, 'average-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'average', errorHandler);
+                model.removeListener(timestamp, 'average-error', handler);
+                reject(e.detail);
+            }
+
+        });
+    }
+
+    /**
+     * Reduce function is called with each passing iterator value and reduced value is returned
+     * @param func
+     * @param defaultCarry
+     * @returns {Promise}
+     */
+    reduce(func, defaultCarry) {
+        let model = this;
+        return new Promise((resolve, reject) => {
+            let timestamp = Date.now();
+
+            model.on(timestamp, 'reduce', handler);
+            model.on(timestamp, 'reduce-error', errorHandler);
+
+            let data = {
+                func : func,
+                defaultCarry : defaultCarry
+            };
+
+            model.send(data, timestamp, 'reduce');
+
+            function handler(e) {
+                model.removeListener(timestamp, 'reduce', handler);
+                model.removeListener(timestamp, 'reduce-error', errorHandler);
+
+                resolve(e.detail);
+            }
+
+            function errorHandler(e) {
+                model.removeListener(timestamp, 'reduce', errorHandler);
+                model.removeListener(timestamp, 'reduce-error', handler);
                 reject(e.detail);
             }
 

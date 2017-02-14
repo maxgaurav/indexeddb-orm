@@ -387,6 +387,137 @@ class Model extends Builder{
     }
 
     /**
+     * Function counts the number of records
+     * @returns {Promise}
+     */
+    count() {
+        let model = this;
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.getTransaction(model.tables, Model.READONLY);
+            let obj = transaction.objectStore(model.name);
+            let result = 0;
+            let request;
+
+            if(model.indexBuilder.type){
+                request = model.getIndexResult(obj);
+            }else{
+                request = obj.openCursor();
+            }
+
+            request.onsuccess = function (e) {
+                let cursor = e.target.result;
+
+                if(cursor){
+                    if(model.checkBuilderValue(cursor.value)){
+                        result++;
+                    }
+
+                    cursor.continue();
+
+                }else{
+                    resolve(result);
+                }
+            };
+
+            request.onerror = function(e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     * Function averages the numeric value at the given point
+     * @param attribute
+     * @returns {Promise}
+     */
+    average (attribute) {
+        let model = this;
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.getTransaction(model.tables, Model.READONLY);
+            let obj = transaction.objectStore(model.name);
+            let result = 0, totalRecords = 0;
+            let request;
+
+            if(model.indexBuilder.type){
+                request = model.getIndexResult(obj);
+            }else{
+                request = obj.openCursor();
+            }
+
+            request.onsuccess = function (e) {
+                let cursor = e.target.result;
+
+                if(cursor){
+                    if(model.checkBuilderValue(cursor.value)){
+                        totalRecords++;
+                        let tempResult = Model.helpers.getNestedAttribute(attribute, cursor.value);
+                        tempResult = parseFloat(tempResult);
+                        tempResult = isNaN(tempResult) ? 0 : tempResult;
+                        result += tempResult;
+                    }
+
+                    cursor.continue();
+
+                }else{
+                    resolve(result/totalRecords);
+                }
+            };
+
+            request.onerror = function(e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
+     * Reduce function is called with each passing iterator value and reduced value is returned
+     * @param func
+     * @param defaultCarry
+     * @returns {Promise}
+     */
+    reduce (func, defaultCarry) {
+        let model = this;
+
+        if(typeof func !== 'function'){
+            throw "Parameter should be a function type";
+        }
+
+        return new Promise((resolve, reject) => {
+            let transaction = model.getTransaction(model.tables, Model.READONLY);
+            let obj = transaction.objectStore(model.name);
+            let result = defaultCarry;
+            let request;
+
+            if(model.indexBuilder.type){
+                request = model.getIndexResult(obj);
+            }else{
+                request = obj.openCursor();
+            }
+
+            request.onsuccess = function (e) {
+                let cursor = e.target.result;
+
+                if(cursor){
+                    if(model.checkBuilderValue(cursor.value)){
+                        result = func(cursor.value, result);
+                    }
+
+                    cursor.continue();
+
+                }else{
+                    resolve(result);
+                }
+            };
+
+            request.onerror = function(e) {
+                reject(e);
+            }
+        });
+    }
+
+    /**
      * Sets the index search criteria
      * @param objectStore
      * @returns {*}
@@ -576,8 +707,9 @@ class Model extends Builder{
 
     /**
      * Returns the IDBTransaction object set in current scope
-     * @param tables
-     * @param mode
+     * @param {Array} tables
+     * @param {String} mode
+     * @param {boolean} overwrite
      * @returns {*|null}
      */
     getTransaction(tables, mode, overwrite) {
@@ -627,8 +759,10 @@ class Model extends Builder{
          */
         let relationModel = new Model(model.db, model.idbKey, relation.modelName, relation.primary);
 
+        //setting the relation transaction same as parent transaction
         relationModel.setTransaction(transaction);
 
+        //if a secondry builder function was defined
         if(relation.func){
             let tempBuilder = new Builder();
 
@@ -640,6 +774,7 @@ class Model extends Builder{
             relationModel.builder = tempBuilder.builder;
         }
 
+        //checking type of parent result
         if(isArray){
             relationModel.whereIndexIn(relation.foreignKey, mainResult);
         }else{
@@ -649,6 +784,8 @@ class Model extends Builder{
         return new Promise((relationResolve, relationReject) => {
 
             let result;
+
+            //if relation type mentioned
             switch (relation.type) {
                 case Model.RELATIONS.hasOne :
                     result = relationModel.first();
