@@ -1,11 +1,12 @@
 class DB {
 
-    constructor(idb, idbKey, settings, useWebWorker) {
+    constructor(idb, idbKey, settings, useWebWorker, pathToWebWorker) {
         this.db = idb;
         this.idbKey = idbKey;
         this.settings = settings;
         this.useWebWorker = useWebWorker || false;
         this.isWebWorker = false;
+        this.pathToWebWorker = pathToWebWorker;
     }
 
     /**
@@ -43,7 +44,7 @@ class DB {
     createWorkerHandler (resolve, reject) {
         let db = this;
         try{
-            let worker = new window.Worker('/indexeddb/src/worker.js');
+            let worker = new window.Worker(db.pathToWebWorker);
             let models = {};
             let timestamp = Date.now();
 

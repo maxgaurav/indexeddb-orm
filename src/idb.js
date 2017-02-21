@@ -1,4 +1,4 @@
-function idb(settings, useWebWorker){
+window.idb = function (settings, useWebWorker, pathToWebWorker){
     "use strict";
 
     useWebWorker = useWebWorker === undefined ? true : useWebWorker;
@@ -13,7 +13,7 @@ function idb(settings, useWebWorker){
         throw "settings parameter is incorrectly structured";
     }
 
-    return new DB(idb, idbKeyRange, settings, checkWebWorker());
+    return new DB(idb, idbKeyRange, settings, checkWebWorker(), pathToWebWorker);
 
     function checkSettingsConfig(settings) {
         return true;
@@ -24,7 +24,7 @@ function idb(settings, useWebWorker){
             return false;
         }
 
-        return window.Worker;
+        return (window.Blob && window.Worker);
     }
 
-}
+};
