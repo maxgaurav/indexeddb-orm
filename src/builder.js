@@ -257,6 +257,10 @@ class Builder {
 
     }
 
+    get RELATIONS () {
+        return Builder.RELATIONS;
+    }
+
     static get RELATIONS() {
         return {
             hasOne : 'hasOne',
