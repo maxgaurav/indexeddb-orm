@@ -53,8 +53,10 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 ##Installation
 
 ##Usage
-* An setting parameter needs to be created for database structure handling. Models will be populated using the table names provided
+* An setting parameter needs to be created for database structure handling. Models will be populated using the table names provided.
+* Use the idb function and pass base configuration with database structure.
 ```javascript
+
 let settings = {
     dbName : 'nameOfDatabase',
     dbVersion : 1 //version of database
@@ -82,31 +84,35 @@ let settings = {
         }]
     }]
 };
+
+let config = {
+    settings : settings
+};
+
+let db = idb(config);
 ```
 
-* Use the idb function and pass the database structure as the first parameter.
-
+* By default usage of web worker is not enabled but if you want to use it then set **useWebWorker** property in config as true and set the property **pathToWebWorker** as the location of **worker.js** from build folder
 ```javascript
-let db = idb(settings);
+let config = {
+    settings : settings,
+    useWebWorker : true,
+    pathToWebWorker : '/path/to/build/worker.js',
+}
+````
 
-db.connect().then(function(models) {
-    /**
-    * Now you have access to models with name of tables as defined in structure
-    **/
-});
-
-```
-
-* By default usage of web worker is not enabled but if you want to use it then set second parameter as true and pass the location of **worker.js** from build folder
+* You can also pass an instance of window object in the function if you have special window wrapped object. 
+* You can also set a special *Promise* object in config. The promise object should provide an new instance and a function 
+as an parameter with resolve as functions first param and reject as second param. In general promise object should be same as native Promise
 ```javascript
-let db = idb(settings, true, '/path/to/build/worker.js');
-db.connect().then(function(models) {
-    /**
-    * Now the models will be an instance of worker models to allow 
-    * query to be executed in worker instance
-    **/
-});
-```
+
+let config = {
+    settings : settings,
+    window : $window, //wrapped window object of application
+    promise : $window.Q //special promise object retrieved from custom window
+}
+``` 
+
 
 ##Query Building
 
