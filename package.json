@@ -1,10 +1,12 @@
 {
-  "name": "indexeddb",
-  "version": "0.0.1",
+  "name": "indexeddb-orm",
+  "version": "0.9.0",
   "scripts": {
     "prod": "gulp --production",
     "dev": "gulp watch"
   },
+  "author" : "Max Gaurav max.gaurav@ithands.net",
+  "description": "A promise based wrapper for indexedDB",
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-core": "^6.21.0",
@@ -18,5 +20,19 @@
     "laravel-elixir": "^6.0.0-9",
     "laravel-elixir-replace": "^1.1.2",
     "laravel-elixir-webpack-official": "^1.0.2"
+  },
+  "keywords": [
+    "indexeddb",
+    "indexed-db",
+    "browser",
+    "database"
+  ],
+  "bugs" :{
+    "url" : "https://github.com/maxgaurav/indexeddb-orm/issues",
+    "email" : "max.gaurav@ithands.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxgaurav/indexeddb-orm.git"
   }
 }
