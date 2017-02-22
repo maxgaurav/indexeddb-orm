@@ -1,7 +1,11 @@
 window.idb = function (settings, useWebWorker, pathToWebWorker){
     "use strict";
 
-    useWebWorker = useWebWorker === undefined ? true : useWebWorker;
+    useWebWorker = useWebWorker === undefined ? false : useWebWorker;
+
+    if(useWebWorker && !pathToWebWorker){
+        throw "Path to worker not defined";
+    }
 
     let idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     let idbKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
