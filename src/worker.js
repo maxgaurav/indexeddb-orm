@@ -21,7 +21,7 @@ self.addEventListener('idb:worker:initialize', (e) => {
     let idb = self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB;
     let idbKey = self.IDBKeyRange || self.webkitIDBKeyRange || self.msIDBKeyRange;
 
-    db = new DB(idb, idbKey, e.detail.detail, false);
+    db = new DB(idb, idbKey, e.detail.detail, false, '', self.Promise);
 
     db.connect()
         .then((m) => {

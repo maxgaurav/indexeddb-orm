@@ -1,12 +1,13 @@
 class WorkerModelHandler extends Builder{
 
-    constructor(modelName, workerContent) {
+    constructor(modelName, workerContent, Q) {
         super();
 
         this.name = modelName;
         this.worker = workerContent;
         this.setUpHandler();
         this.tables = [modelName];
+        this.Promise = Q;
     }
 
     /**
@@ -17,7 +18,7 @@ class WorkerModelHandler extends Builder{
     find(id) {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'find', handler);
@@ -55,7 +56,7 @@ class WorkerModelHandler extends Builder{
      */
     get() {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'get', handler);
@@ -90,7 +91,7 @@ class WorkerModelHandler extends Builder{
      */
     first() {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'first', handler);
@@ -126,7 +127,7 @@ class WorkerModelHandler extends Builder{
      */
     create(data) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'create', handler);
@@ -157,7 +158,7 @@ class WorkerModelHandler extends Builder{
      */
     createMultiple(data) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'createMultiple', handler);
@@ -188,7 +189,7 @@ class WorkerModelHandler extends Builder{
      */
     update(data) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'update', handler);
@@ -220,7 +221,7 @@ class WorkerModelHandler extends Builder{
      */
     save(id, data) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
 
             let timestamp = Date.now();
             let content = {
@@ -255,7 +256,7 @@ class WorkerModelHandler extends Builder{
      */
     destroyId(id) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
 
             let timestamp = Date.now();
 
@@ -285,7 +286,7 @@ class WorkerModelHandler extends Builder{
      */
     destroy() {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
 
             let timestamp = Date.now();
 
@@ -315,7 +316,7 @@ class WorkerModelHandler extends Builder{
      */
     count() {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'count', handler);
@@ -341,7 +342,7 @@ class WorkerModelHandler extends Builder{
 
     average(attribute) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'average', handler);
@@ -373,7 +374,7 @@ class WorkerModelHandler extends Builder{
      */
     reduce(func, defaultCarry) {
         let model = this;
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let timestamp = Date.now();
 
             model.on(timestamp, 'reduce', handler);

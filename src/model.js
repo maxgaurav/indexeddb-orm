@@ -1,6 +1,6 @@
 class Model extends Builder{
 
-    constructor(db, idbKey, modelName, primary){
+    constructor(db, idbKey, modelName, primary, Q){
         super();
 
         this.name = modelName;
@@ -11,6 +11,7 @@ class Model extends Builder{
         this.hasIdbKey = this.idbKey ? true : false;
         this.transaction = null;
         this.attributes = {};
+        this.Promise = Q;
     }
 
     /**
@@ -21,7 +22,7 @@ class Model extends Builder{
     find(id) {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let request = obj.get(id);
@@ -44,7 +45,7 @@ class Model extends Builder{
     first() {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let result = null;
@@ -129,7 +130,7 @@ class Model extends Builder{
     get() {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let result = [];
@@ -216,7 +217,7 @@ class Model extends Builder{
     create(data) {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READWRITE);
 
             let obj = transaction.objectStore(model.name);
@@ -246,7 +247,7 @@ class Model extends Builder{
     createMultiple (dataRecords) {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READWRITE);
 
             let obj = transaction.objectStore(model.name);
@@ -287,7 +288,7 @@ class Model extends Builder{
         let model = this;
         let updatedAt = Date.now();
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READWRITE);
             let obj = transaction.objectStore(model.name);
             let request, totalRecordsBeingUpdated = 0, totalRecordsUpdated = 0;
@@ -352,7 +353,7 @@ class Model extends Builder{
         let model = this;
         let updatedAt = Date.now();
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
 
             model.find(id).then((result) => {
 
@@ -396,7 +397,7 @@ class Model extends Builder{
         let model = this;
 
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             model.find(id).then((result) => {
 
                 if(!result){
@@ -429,7 +430,7 @@ class Model extends Builder{
     destroy() {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READWRITE);
             let obj = transaction.objectStore(model.name);
             let request, totalRecordsBeingDeleted = 0, totalRecordsDeleted = 0;
@@ -483,7 +484,7 @@ class Model extends Builder{
     count() {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let result = 0;
@@ -524,7 +525,7 @@ class Model extends Builder{
     average (attribute) {
         let model = this;
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let result = 0, totalRecords = 0;
@@ -574,7 +575,7 @@ class Model extends Builder{
             throw "Parameter should be a function type";
         }
 
-        return new Promise((resolve, reject) => {
+        return new model.Promise((resolve, reject) => {
             let transaction = model.getTransaction(model.tables, Model.READONLY);
             let obj = transaction.objectStore(model.name);
             let result = defaultCarry;
@@ -871,7 +872,7 @@ class Model extends Builder{
             relationModel.whereIndex(relation.foreignKey, mainResult);
         }
 
-        return new Promise((relationResolve, relationReject) => {
+        return new model.Promise((relationResolve, relationReject) => {
 
             let result;
 

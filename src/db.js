@@ -1,12 +1,13 @@
 class DB {
 
-    constructor(idb, idbKey, settings, useWebWorker, pathToWebWorker) {
+    constructor(idb, idbKey, settings, useWebWorker, pathToWebWorker, Q) {
         this.db = idb;
         this.idbKey = idbKey;
         this.settings = settings;
         this.useWebWorker = useWebWorker || false;
         this.isWebWorker = false;
         this.pathToWebWorker = pathToWebWorker;
+        this.Promise = Q;
     }
 
     /**
@@ -16,7 +17,7 @@ class DB {
      */
     connect() {
         let db = this;
-        return new Promise((resolve, reject) => {
+        return new db.Promise((resolve, reject) => {
 
             if(db.useWebWorker){
                 db.createWorkerHandler(resolve, reject);
@@ -60,7 +61,7 @@ class DB {
                         db.settings.migrations.forEach((schema) => {
                             Object.defineProperty(models, schema.name, {
                                 get() {
-                                    return new WorkerModelHandler(schema.name, worker, window);
+                                    return new WorkerModelHandler(schema.name, worker, db.Promise);
                                 }
                             });
                         });
@@ -105,7 +106,7 @@ class DB {
                 let primary = schema.primary || 'id';
                 Object.defineProperty(models, schema.name, {
                     get() {
-                        return new Model(e.target.result, db.idbKey, schema.name, primary);
+                        return new Model(e.target.result, db.idbKey, schema.name, primary, db.Promise);
                     }
                 });
             });
