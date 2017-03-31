@@ -111,7 +111,49 @@ class DB {
                 });
             });
 
+            db.transaction = db.setTransactionHandler(e.target.result);
+
             resolve(models);
         };
+    }
+
+    /**
+     * Function creates the transaction handler to work in transactional level with database
+     * @param database
+     * @returns {Function}
+     */
+    setTransactionHandler(database) {
+        let db = this;
+
+        return function (tables, func) {
+
+            if(typeof func !== 'function'){
+                throw "Second parameter must be a type of function";
+            }
+
+            let transaction = database.transaction(tables, 'readwrite');
+            let models = {};
+
+            tables.forEach((table) => {
+
+                Object.defineProperty(models, table, {
+                    get() {
+
+                        let schema = db.settings.migrations.filter((mig) => {
+                            return mig.name === table;
+                        });
+
+                        let primary = schema.primary || 'id';
+
+                        let model = new Model(database, db.idbKey, table, primary, db.Promise);
+                        model.setTransaction(transaction);
+
+                        return model;
+                    }
+                });
+            });
+
+            func(models, transaction);
+        }
     }
 }
