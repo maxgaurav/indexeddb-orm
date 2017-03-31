@@ -1,8 +1,8 @@
-#IndexedDB ORM
+# IndexedDB ORM
 
 An indexedDB wrapper for accessing indexedDB as a promise base api implementation.
 
-##Table of Contents
+## Table of Contents
 * [Features](#features)
 * [Installation](#installation)
 * [Usage](#usage)
@@ -38,28 +38,34 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
     * [Deletion in table](#deletion-in-table)
         * [destroyId](#destroyId)
         * [destroy](#destroy)
+    * [Transactional Actions](#Transactional Actions)
     * [Aggregations](#aggregations)
         * [Count](#count)
         * [Average](#average)
         * [Reduce](#Reduce)
     
 
-##Features
+## Features
 * Create structure of database with indexes and versioning
 * Get model instances and query builder for both indexed columns and non indexed columns
 * Run queries on WebWorker
 * Create relation between multiple tables 
 
-##Installation
+## Installation
 
-##Usage
+```
+npm install indexeddb-orm
+
+```
+
+## Usage
 * An setting parameter needs to be created for database structure handling. Models will be populated using the table names provided.
 * Use the idb function and pass base configuration with database structure.
 ```javascript
 
 let settings = {
     dbName : 'nameOfDatabase',
-    dbVersion : 1 //version of database
+    dbVersion : 1, //version of database
     migrations : [{
         name : 'users', //name of table
         primary : 'id', //auto increment field (default id)
@@ -114,11 +120,11 @@ let config = {
 ``` 
 
 
-##Query Building
+## Query Building
 
-###Insertion of data
+### Insertion of data
 
-####Create
+#### Create
 * Inserting content to database using create.
 * Inserting content will automatically add a updatedAt and createdAt entry with timestamp
 ```javascript
@@ -135,7 +141,7 @@ db.connect(function(models) {
 ```
 
 
-####Create Multiple
+#### Create Multiple
 * Allows insertion of multiple content in a table
 
 ```javascript
@@ -167,9 +173,9 @@ db.connect(function(models) {
 }) 
 ```
 
-###Searching of the data
+### Searching of the data
 
-####Find
+#### Find
 * Can search for direct id value using the find operation and will return result if exists else will throw an error
 ```javascript
 db.connect().then(function(models) {
@@ -179,7 +185,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####First
+#### First
 * Will search for first occurrence in the table and return the value else return null
 
 ```javascript
@@ -190,7 +196,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####Get
+#### Get
 * Will search for all matching occurrence in the table and return the value else return blank array
 
 ```javascript
@@ -201,11 +207,11 @@ db.connect().then(function(models) {
 });
 ```
 
-###Index Searching
+### Index Searching
 * Direct search on indexes are possible but only one index search builder is allowed. This is due to limitation of indexedDB itself.
 * If you attempt to write another index query then the previous one will be overridden
 
-####whereIndex
+#### whereIndex
 Direct search on index. First parameter as the index name and second parameter as the index value
 ```javascript
 db.connect().then(function(models) {
@@ -219,7 +225,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexIn
+#### whereIndexIn
 Multiple search of index in the given range of values provided as array
 
 ```javascript
@@ -234,7 +240,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexGte
+#### whereIndexGte
 Search of index values against the point greater or equal to the given value. It is case sensitive
 
 ```javascript
@@ -249,7 +255,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexGt
+#### whereIndexGt
 Search of index values against the point greater only to the given value. It is case sensitive.
 
 ```javascript
@@ -264,7 +270,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexLte
+#### whereIndexLte
 Search of index values against the point less than or equal to the given value. It is case sensitive
 
 ```javascript
@@ -279,7 +285,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexLt
+#### whereIndexLt
 Search of index values against the point less than only to the given value. It is case sensitive.
 
 ```javascript
@@ -294,7 +300,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####whereIndexBetween
+#### whereIndexBetween
 Search of index values betweent the given lower and upper bound values. It is case sensitive for string values.
 
 ```javascript
@@ -309,12 +315,12 @@ db.connect().then(function(models) {
 });
 ```
 
-###Non Index Searching
+### Non Index Searching
 There will be some columns where indexes are not there you can combine index search queries with non index search queries
 and build an adequate query to filter the data. Since only single indexed query can be fired once you can use these query builder option to fire other point searches on remaining indexes. Non index searches are performance heavy operation so be careful of such searches. If needed then make non indexed columns as indexed.
 
 
-####where
+#### where
 Add a simple where clause to the query builder before or after the indexed builder to add condition. You can add multiple of these in succession.
 
 ```javascript
@@ -330,7 +336,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####Nested Attributes
+#### Nested Attributes
 To search for a value under a nested attribute you can pass a dot notation value to the query builder column name.
 
 ```javascript
@@ -344,7 +350,7 @@ db.connect().then(function(models) {
 ```
 
 
-####whereIn
+#### whereIn
 To search for result in a multiple search values for column then pass array as an value for the search
 
 ```javascript
@@ -357,7 +363,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####gte
+#### gte
 Search of values against the point greater or equal to the given value. It is case sensitive
 
 ```javascript
@@ -372,7 +378,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####gt
+#### gt
 Search of values against the point greater only to the given value. It is case sensitive.
 
 ```javascript
@@ -387,7 +393,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####lte
+#### lte
 Search of values against the point less than or equal to the given value. It is case sensitive
 
 ```javascript
@@ -402,7 +408,7 @@ db.connect().then(function(models) {
 });
 ```
 
-####lt
+#### lt
 Search of values against the point less than only to the given value. It is case sensitive.
 
 ```javascript
@@ -416,7 +422,7 @@ db.connect().then(function(models) {
     });
 });
 ```
-####whereIndexBetween
+#### whereIndexBetween
 Search of index values betweent the given lower and upper bound values. It is case sensitive for string values.
 
 ```javascript
@@ -431,7 +437,7 @@ db.connect().then(function(models) {
 });
 ```
 
-###Relations
+### Relations
 * Data from different tables can be fetched with association with current table using relations. There are two relations hasone and hasmany.
 
 ```javascript
@@ -484,9 +490,9 @@ models.users.whereIndexIn('id',[1,2,10,11])
     });
 ```
 
-###Updating of records
+### Updating of records
 
-####Save
+#### Save
 
 This will update the data at the given primary id of the table with content provided. The whole content will not be replaced 
 but only the properties provided. Primary key ,updatedAt and createdAt values will be ignored even if provided
@@ -502,7 +508,7 @@ models.users.save(1,  {
 });
 ```
 
-####update
+#### update
 
 This will update the data with matching values according to the query builder given of the table with content provided. The whole content will not be replaced 
 but only the properties provided. Primary key ,updatedAt and createdAt values will be ignored even if provided
@@ -518,10 +524,10 @@ models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).update(
 });
 ```
 
-###Deletions in table
+### Deletions in table
 
 
-####destroyId
+#### destroyId
 
 This will destroy the data at the given primary id of the table.
  
@@ -534,7 +540,7 @@ models.users.destroyId(3).then(function(result) {
 });
 ```
 
-####destroy
+#### destroy
 
 This will update the data with matching values according to the query builder given of the table with content provided. The whole content will not be replaced 
 but only the properties provided. Primary key ,updatedAt and createdAt values will be ignored even if provided
@@ -548,9 +554,47 @@ models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).destroy
 });
 ```
 
-###Aggregations
+###Transactional Actions
+Sometimes it is needed to work in a single transaction and commit the content once or fail throughout. For this purpose one
+can use the transaction functionality in the system.
 
-####Count
+The transaction is available after one connects to the database using the **connect** function and then a **transaction ** property is
+exposed to the main database instance.
+
+The transaction property takes in two parameters. First an array of tables on which transaction is going to take place. Second
+is a function which provides two parameters transactionalModel and transaction. The transactional model is a model wrapper around
+the tables provided and transaction is the **IDBTransaction** instance which all models are adhering to. 
+
+Calling **transaction.abort()** will cause the transaction to fail.
+
+#### NOTE: It is not available in when database is being assigned to worker using useWebWorker flag
+
+
+#### Usage
+```javascript
+    var database = new idb(config);
+
+    database.connect().then(function(models) {
+        
+        try{
+            //now a transaction property is exposed to database
+            database.transaction(['table1', 'table2'], function(transactionModel, transaction){
+                transactionModel.table1.create({...});
+                transactionModel.table2.create({...});
+                
+                transaction.abort();
+            });
+            
+            
+        }catch(e){
+            //Transaction error handling
+        }
+    });
+```
+
+### Aggregations
+
+#### Count
 
 The count will return total number of records in the table against the result obtained by query builer object
 
@@ -564,7 +608,7 @@ models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).count()
 });
 ```
 
-####Average
+#### Average
 
 Aggregate of the result at the given column will be provided. If the column contains non numeric value then it will be treated as a ZERO value 
 
@@ -585,7 +629,7 @@ models.users.whereIndex('userId', 10).where('firstName', 'Test').average('medica
 });
 ```
 
-####Reduce
+#### Reduce
 
 Reduce process can be fired using the reduce function passed. If needed an default value can be passed as a second parameter 
 
