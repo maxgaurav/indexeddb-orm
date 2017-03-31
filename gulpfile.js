@@ -14,6 +14,18 @@ let replace = require('laravel-elixir-replace');
  |
  */
 
+Elixir.webpack.mergeConfig({
+    devtool: 'source-map',
+    module: {
+        loaders: [
+            {
+                test: /\.js$/,
+                loader: 'babel-loader?presets[]=es2015'
+            }
+        ]
+    }
+});
+
 elixir((mix) => {
     mix.scripts(['./src/builder.js', './src/worker-model-handler.js', './src/model.js', './src/migration.js', './src/db.js', './src/idb.js'], './build/idb.js');
     mix.scripts(['./src/db.js', './src/builder.js', './src/model.js', './src/migration.js', './src/worker.js'], './build/worker.js');
