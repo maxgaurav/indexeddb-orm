@@ -2,7 +2,12 @@
 
 An indexedDB wrapper for accessing indexedDB as a promise base api implementation.
 
+[![npm](https://img.shields.io/npm/dt/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
+[![npm](https://img.shields.io/npm/v/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
+[![npm](https://img.shields.io/npm/l/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
+
 ## Table of Contents
+
 * [Features](#features)
 * [Installation](#installation)
 * [Usage](#usage)
@@ -52,10 +57,8 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 * Create relation between multiple tables 
 
 ## Installation
-
 ```
-npm install indexeddb-orm
-
+npm install indexeddb-orm --save
 ```
 
 ## Usage
