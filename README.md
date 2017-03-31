@@ -43,7 +43,7 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
     * [Deletion in table](#deletion-in-table)
         * [destroyId](#destroyId)
         * [destroy](#destroy)
-    * [Transactional Actions](#Transactional Actions)
+    * [Transactional Actions](#transactional-actions)
     * [Aggregations](#aggregations)
         * [Count](#count)
         * [Average](#average)
@@ -557,7 +557,7 @@ models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).destroy
 });
 ```
 
-###Transactional Actions
+### Transactional Actions
 Sometimes it is needed to work in a single transaction and commit the content once or fail throughout. For this purpose one
 can use the transaction functionality in the system.
 
