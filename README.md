@@ -4,7 +4,10 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 
 [![npm](https://img.shields.io/npm/dt/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
 [![npm](https://img.shields.io/npm/v/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
-[![npm](https://img.shields.io/npm/l/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Website
+[maxgaurav.github.io/indexeddb-orm/](https://maxgaurav.github.io/indexeddb-orm)
 
 ## Table of Contents
 
