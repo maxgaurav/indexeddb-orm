@@ -1,83 +1,77 @@
-class Migration {
-    constructor(db, transaction, migrations) {
-        /**
-         * @var IDBDatabase db
-         */
+var Migration = (function () {
+    function Migration(db, transaction, migrations) {
         this.db = db;
+        this.transaction = transaction;
         this.migrations = migrations;
         this.objectStores = [];
-
-        /**
-         * @var IDBTransaction transaction
-         */
-        this.transaction = transaction;
     }
-
-    createStore(schema) {
-        let mig = this;
-        let primary = schema.primary || 'id';
-
-        let objectStore = mig.db.createObjectStore(schema.name, {keyPath: primary, autoIncrement: true});
-        mig.objectStores.push(objectStore);
-
+    /**
+     * Function creates various stores
+     * @param {TableSchema} schema
+     */
+    Migration.prototype.createStore = function (schema) {
+        var _this = this;
+        var primary = schema.primary || '_id';
+        var objectStore = this.db.createObjectStore(schema.name, {
+            keyPath: primary,
+            autoIncrement: true
+        });
+        this.objectStores.push(objectStore);
         if (schema.columns) {
-            schema.columns.forEach((column) => mig.makeIndex(column, objectStore));
+            schema.columns.forEach(function (column) { return _this.makeIndex(column, objectStore); });
         }
-
-
-    }
-
-    run() {
-        let mig = this;
-
-        mig.migrations.forEach((schema) => {
-            if(mig.db.objectStoreNames.contains(schema.name)){
-
-                if(schema.drop){
-                    mig.db.deleteObjectStore(schema.name);
-                }else{
-                    mig.updateStore(schema);
+    };
+    /**
+     * Function runs the migration check on all schema
+     */
+    Migration.prototype.run = function () {
+        var _this = this;
+        this.migrations.forEach(function (schema) {
+            if (_this.db.objectStoreNames.contains(schema.name)) {
+                if (schema.drop) {
+                    _this.db.deleteObjectStore(schema.name);
                 }
-
-
-            }else{
-                mig.createStore(schema);
+                else {
+                    _this.updateStore(schema);
+                }
+            }
+            else {
+                _this.createStore(schema);
             }
         });
-    }
-
-    makeIndex(column, objectStore) {
+    };
+    // noinspection JSMethodCanBeStatic
+    Migration.prototype.makeIndex = function (column, objectStore) {
         column.attributes = column.attributes || {};
         column.index = column.index || column.name;
         objectStore.createIndex(column.name, column.index, column.attributes);
-    }
-
-    updateStore(schema) {
-        let mig = this;
-
-        let objectStore = mig.transaction.objectStore(schema.name);
-
+    };
+    /**
+     * Function updates the various store content
+     * @param {TableSchema} schema
+     */
+    Migration.prototype.updateStore = function (schema) {
+        var _this = this;
+        var objectStore = this.transaction.objectStore(schema.name);
         if (schema.columns) {
-
-            schema.columns.forEach((column) => {
-                if(!objectStore.indexNames.contains(column.name)){
-                    mig.makeIndex(column, objectStore)
+            schema.columns.forEach(function (column) {
+                if (!objectStore.indexNames.contains(column.name)) {
+                    _this.makeIndex(column, objectStore);
                 }
             });
         }
-
-        if(schema.dropColumns) {
-            schema.dropColumns.forEach((column) => {
-                if(objectStore.indexNames.contains(column)){
-                    mig.dropIndex(column, objectStore)
+        if (schema.dropColumns) {
+            schema.dropColumns.forEach(function (column) {
+                if (objectStore.indexNames.contains(column)) {
+                    _this.dropIndex(column, objectStore);
                 }
             });
         }
-    }
-
-    dropIndex(columnName, objectStore) {
-        debugger;
+    };
+    // noinspection JSMethodCanBeStatic
+    Migration.prototype.dropIndex = function (columnName, objectStore) {
         objectStore.deleteIndex(columnName);
-    }
-
-}
+    };
+    return Migration;
+}());
+export { Migration };
