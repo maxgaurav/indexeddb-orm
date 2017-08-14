@@ -111,6 +111,12 @@ var Builder = (function () {
         };
         return this;
     };
+    /**
+     * Filters non indexed value content as in and value of given attributes
+     * @param attributeName
+     * @param value
+     * @returns {Builder}
+     */
     Builder.prototype.whereIn = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -119,6 +125,12 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Filters values exactly  to the given value
+     * @param attributeName
+     * @param value
+     * @returns {Builder}
+     */
     Builder.prototype.where = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -127,6 +139,12 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Checks for value greater than or equal to the value given for the attribute
+     * @param attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
     Builder.prototype.gte = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -135,6 +153,12 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Checks for value greater than the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
     Builder.prototype.gt = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -143,6 +167,12 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Checks for value less than or equal the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
     Builder.prototype.lte = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -151,6 +181,12 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Checks for value less than or equal the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
     Builder.prototype.lt = function (attributeName, value) {
         this.builder.push({
             attribute: attributeName,
@@ -159,9 +195,14 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Filters content based on the between values given
+     * @param {string} attributeName
+     * @param {number} upper
+     * @param {number} lower
+     * @returns {Builder}
+     */
     Builder.prototype.between = function (attributeName, upper, lower) {
-        upper = parseFloat(upper);
-        lower = parseFloat(lower);
         if (isNaN(upper) || isNaN(lower)) {
             throw "Between is only for numeric values";
         }
@@ -172,6 +213,16 @@ var Builder = (function () {
         });
         return this;
     };
+    /**
+     * Adds relation to the main search content
+     * @param {string} modelName
+     * @param {string} type
+     * @param {string} localKey
+     * @param {string} foreignKey
+     * @param func
+     * @param {string} primary
+     * @returns {Builder}
+     */
     Builder.prototype.relation = function (modelName, type, localKey, foreignKey, func, primary) {
         if (func === void 0) { func = null; }
         if (primary === void 0) { primary = null; }

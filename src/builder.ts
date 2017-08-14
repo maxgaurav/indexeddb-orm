@@ -1,11 +1,17 @@
 import {Model} from './model';
 
+/**
+ * Main index query content
+ */
 interface IndexBuilder {
     index: string,
     value: any,
     type: string
 }
 
+/**
+ * Definition of relation for the main query builder
+ */
 export interface Relation {
     modelName: string,
     localKey: string,
@@ -16,6 +22,9 @@ export interface Relation {
     func?(builder: Builder): Builder,
 }
 
+/**
+ * Normal columns query content (columns without index)
+ */
 interface NormalBuilder {
     attribute: string,
     value: any,
@@ -138,7 +147,7 @@ export class Builder {
      * @param upper
      * @returns {Builder}
      */
-    indexBetween(indexName: string, lower, upper) {
+    indexBetween(indexName: string, lower:string|number|null, upper:string|number|null) {
 
         this.indexBuilder = {
             index: indexName,
@@ -149,7 +158,13 @@ export class Builder {
         return this;
     }
 
-    whereIn(attributeName, value) {
+    /**
+     * Filters non indexed value content as in and value of given attributes
+     * @param attributeName
+     * @param value
+     * @returns {Builder}
+     */
+    whereIn(attributeName: string, value:any) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -159,7 +174,13 @@ export class Builder {
         return this;
     }
 
-    where(attributeName, value) {
+    /**
+     * Filters values exactly  to the given value
+     * @param attributeName
+     * @param value
+     * @returns {Builder}
+     */
+    where(attributeName:string, value: any) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -169,8 +190,13 @@ export class Builder {
         return this;
     }
 
-
-    gte(attributeName, value) {
+    /**
+     * Checks for value greater than or equal to the value given for the attribute
+     * @param attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
+    gte(attributeName, value:string|number) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -180,7 +206,13 @@ export class Builder {
         return this;
     }
 
-    gt(attributeName, value) {
+    /**
+     * Checks for value greater than the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
+    gt(attributeName:string, value: string|number) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -190,7 +222,13 @@ export class Builder {
         return this;
     }
 
-    lte(attributeName, value) {
+    /**
+     * Checks for value less than or equal the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
+    lte(attributeName:string, value:string|number) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -200,7 +238,13 @@ export class Builder {
         return this;
     }
 
-    lt(attributeName, value) {
+    /**
+     * Checks for value less than or equal the value given for the attribute
+     * @param {string} attributeName
+     * @param {string | number} value
+     * @returns {Builder}
+     */
+    lt(attributeName:string, value:string|number) {
         this.builder.push({
             attribute: attributeName,
             value: value,
@@ -210,9 +254,14 @@ export class Builder {
         return this;
     }
 
-    between(attributeName, upper, lower) {
-        upper = parseFloat(upper);
-        lower = parseFloat(lower);
+    /**
+     * Filters content based on the between values given
+     * @param {string} attributeName
+     * @param {number} upper
+     * @param {number} lower
+     * @returns {Builder}
+     */
+    between(attributeName:string, upper:number, lower:number) {
 
         if (isNaN(upper) || isNaN(lower)) {
             throw "Between is only for numeric values";
@@ -227,6 +276,16 @@ export class Builder {
         return this;
     }
 
+    /**
+     * Adds relation to the main search content
+     * @param {string} modelName
+     * @param {string} type
+     * @param {string} localKey
+     * @param {string} foreignKey
+     * @param func
+     * @param {string} primary
+     * @returns {Builder}
+     */
     relation(modelName: string, type: string, localKey: string, foreignKey: string, func: any = null, primary: string | null = null) {
         this.tables.push(modelName);
 

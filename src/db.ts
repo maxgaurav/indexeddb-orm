@@ -127,7 +127,7 @@ export class DB {
                     });
                 });
 
-                resolve(models)
+                resolve(models);
 
             };
         });

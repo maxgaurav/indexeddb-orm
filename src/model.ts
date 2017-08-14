@@ -898,7 +898,7 @@ export class Model extends Builder implements ModelInterface{
      * @param type
      * @returns {*}
      */
-    getDefaultRelationValue(type:string) {
+    private getDefaultRelationValue(type:string) {
         switch (type) {
             case Model.RELATIONS.hasOne :
                 return null;
