@@ -1,15 +1,10 @@
-import {Migration, TableSchema} from "./migration";
+import {Migration} from "./migration";
 import {IDBStaticKeyRange, Model} from "./model";
+import {Models, Settings} from "./interfaces";
 
 interface IDBEventTarget extends EventTarget {
     result: IDBDatabase,
     transaction: IDBTransaction | null
-}
-
-export interface Settings {
-    migrations: TableSchema[],
-    name: string,
-    version: number
 }
 
 interface DBVersionChangeEvent extends IDBVersionChangeEvent {
@@ -18,10 +13,6 @@ interface DBVersionChangeEvent extends IDBVersionChangeEvent {
 
 interface DBSuccessEvent extends Event {
     target: IDBEventTarget
-}
-
-export interface Models {
-    [modelName: string]: Model
 }
 
 export class DB {
@@ -104,9 +95,8 @@ export class DB {
     // }
 
     /**
-     * Creates normal database instance and models
-     * @param resolve
-     * @param reject
+     * Function creates/opens database connection in main javascript thread
+     * @returns {Promise<Models>}
      */
     private createNormalHandler(): Promise<Models> {
 
@@ -119,15 +109,6 @@ export class DB {
                 this.migration.run();
             };
 
-            // let db = this;
-            //
-            // let request = this.db.open(this.settings.dbName, this.settings.dbVersion);
-            //
-            // request.onupgradeneeded = function (e) {
-            //     let mig = new Migration(e.target.result, e.target.transaction, db.settings.migrations);
-            //     mig.run();
-            // };
-            //
             request.onerror = function (e: ErrorEvent) {
                 reject(e.message);
             };
@@ -153,44 +134,4 @@ export class DB {
 
 
     }
-
-    /**
-     * Function creates the transaction handler to work in transactional level with database
-     * @param database
-     * @returns {Function}
-     */
-    // setTransactionHandler(database) {
-    //     let db = this;
-    //
-    //     return function (tables, func) {
-    //
-    //         if(typeof func !== 'function'){
-    //             throw "Second parameter must be a type of function";
-    //         }
-    //
-    //         let transaction = database.transaction(tables, 'readwrite');
-    //         let models = {};
-    //
-    //         tables.forEach((table) => {
-    //
-    //             Object.defineProperty(models, table, {
-    //                 get() {
-    //
-    //                     let schema = db.settings.migrations.filter((mig) => {
-    //                         return mig.name === table;
-    //                     });
-    //
-    //                     let primary = schema.primary || 'id';
-    //
-    //                     let model = new Model(database, db.idbKey, table, primary, db.Promise);
-    //                     model.setTransaction(transaction);
-    //
-    //                     return model;
-    //                 }
-    //             });
-    //         });
-    //
-    //         func(models, transaction);
-    //     }
-    // }
 }

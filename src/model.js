@@ -44,6 +44,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import { Builder } from './builder';
+/**
+ * Main Model class
+ */
 var Model = (function (_super) {
     __extends(Model, _super);
     function Model(db, idbKey, name, primary) {

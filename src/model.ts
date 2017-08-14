@@ -1,30 +1,70 @@
 import {Builder, Relation} from './builder';
+import {ModelInterface} from "./interfaces";
 
+/**
+ * Normal result fetch event target which contains the main result
+ */
 interface IDBResultEventTarget extends EventTarget {
     result: any
 }
 
+/**
+ * Cursor fetch event target containing the result value
+ */
 interface IDBCursorEventTarget extends EventTarget {
     result: IDBCursorWithValue
 }
 
+/**
+ * Main result event on normal operations
+ */
 interface IDBResultEvent extends Event {
     target: IDBResultEventTarget
 }
 
+/**
+ * Main result event on IDB cursor open events
+ */
 interface IDBCursorEvent extends Event {
     target: IDBCursorEventTarget
 }
 
+/**
+ * Static IDBKeyRange
+ */
 export interface IDBStaticKeyRange extends IDBKeyRange {
+    /**
+     * Bound's the search result query builder within the given values.
+     * @param x
+     * @param y
+     * @param {boolean} notContainX
+     * @param {boolean} notContainY
+     * @returns {IDBKeyRange}
+     */
     bound(x: any, y: any, notContainX?: boolean, notContainY?: boolean): IDBKeyRange,
+
+    /**
+     * Checks whether the key exists in the database
+     * @param key
+     * @returns {boolean}
+     */
     includes(key: any): boolean,
+
+    /**
+     *
+     * @param x
+     * @param {boolean} notContainX
+     * @returns {IDBKeyRange}
+     */
     lowerBound(x: any, notContainX?: boolean): IDBKeyRange,
     upperBound(x: any, notContainX?: boolean): IDBKeyRange,
     only(x: any): IDBKeyRange
 }
 
-export class Model extends Builder {
+/**
+ * Main Model class
+ */
+export class Model extends Builder implements ModelInterface{
 
     public tables: string[] = [];
     public hasIDBKey: boolean = false;

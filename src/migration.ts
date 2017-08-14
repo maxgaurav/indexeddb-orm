@@ -1,18 +1,6 @@
-interface TableColumn {
-    name: string,
-    index?: string[]|string,
-    attributes?: IDBIndexParameters
-}
+import {MigrationInterface, TableColumn, TableSchema} from "./interfaces";
 
-export interface TableSchema {
-    name: string,
-    primary?: string,
-    columns: TableColumn[],
-    drop?:boolean,
-    dropColumns?:string[]
-}
-
-export class Migration {
+export class Migration implements MigrationInterface{
 
     public objectStores : IDBObjectStore[] = [];
 

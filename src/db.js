@@ -118,9 +118,8 @@ var DB = (function () {
     //
     // }
     /**
-     * Creates normal database instance and models
-     * @param resolve
-     * @param reject
+     * Function creates/opens database connection in main javascript thread
+     * @returns {Promise<Models>}
      */
     DB.prototype.createNormalHandler = function () {
         var _this = this;
@@ -131,15 +130,6 @@ var DB = (function () {
                 _this.migration = new Migration(_this.idb, e.target.transaction, _this.settings.migrations);
                 _this.migration.run();
             };
-            // let db = this;
-            //
-            // let request = this.db.open(this.settings.dbName, this.settings.dbVersion);
-            //
-            // request.onupgradeneeded = function (e) {
-            //     let mig = new Migration(e.target.result, e.target.transaction, db.settings.migrations);
-            //     mig.run();
-            // };
-            //
             request.onerror = function (e) {
                 reject(e.message);
             };
