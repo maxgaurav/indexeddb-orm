@@ -173,6 +173,9 @@ var __generator = this && this.__generator || function (thisArg, body) {
 var Model = function (_super) {
     __extends(Model, _super);
     function Model(db, idbKey, name, primary) {
+        if (primary === void 0) {
+            primary = '_id';
+        }
         var _this = _super.call(this) || this;
         _this.db = db;
         _this.idbKey = idbKey;
@@ -192,11 +195,50 @@ var Model = function (_super) {
     Model.prototype.find = function (id) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var request = obj.get(id);
             request.onsuccess = function (e) {
-                resolve(e.target.result);
+                var relationsCompleted = 0;
+                var result = e.target.result;
+                if (_this.relations.length <= 0 || !result) {
+                    resolve(result);
+                    return;
+                }
+                _this.relations.forEach(function (relation) {
+                    return __awaiter(_this, void 0, void 0, function () {
+                        var relationResult, defaultValue;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    return [4 /*yield*/, this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, false), false)];
+                                case 1:
+                                    relationResult = _a.sent();
+                                    relationsCompleted++;
+                                    defaultValue = this.getDefaultRelationValue(relation.type);
+                                    result[relation.modelName] = result[relation.modelName] || defaultValue;
+                                    switch (relation.type) {
+                                        case Model.RELATIONS.hasOne:
+                                            if (relationResult !== undefined) {
+                                                result[relation.modelName] = relationResult[relation.foreignKey] == result[relation.localKey] ? relationResult : result[relation.modelName];
+                                            }
+                                            break;
+                                        case Model.RELATIONS.hasMany:
+                                            if (relationResult.length > 0) {
+                                                result[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                    return relationResultItem[relation.foreignKey] == result[relation.localKey];
+                                                });
+                                            }
+                                            break;
+                                    }
+                                    if (relationsCompleted == this.relations.length) {
+                                        resolve(result);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                });
             };
             request.onerror = function (e) {
                 reject(e.message);
@@ -210,7 +252,7 @@ var Model = function (_super) {
     Model.prototype.first = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = null;
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -276,7 +318,7 @@ var Model = function (_super) {
     Model.prototype.get = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = [];
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -338,7 +380,7 @@ var Model = function (_super) {
     Model.prototype.create = function (data) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             data.createdAt = Date.now();
             data.updatedAt = Date.now();
@@ -360,7 +402,7 @@ var Model = function (_super) {
     Model.prototype.createMultiple = function (dataRecords) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var createdAt = Date.now();
             var updatedAt = Date.now();
@@ -395,7 +437,7 @@ var Model = function (_super) {
         var _this = this;
         var updatedAt = Date.now();
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var totalRecordsBeingUpdated = 0,
                 totalRecordsUpdated = 0;
@@ -454,7 +496,7 @@ var Model = function (_super) {
                             if (!result) {
                                 reject('No record found');
                             }
-                            transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+                            transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
                             obj = transaction.objectStore(this.name);
                             id = result[this.primary];
                             createdAt = result.createdAt;
@@ -494,7 +536,7 @@ var Model = function (_super) {
                             if (!result) {
                                 reject('result at id does not exists');
                             }
-                            transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+                            transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
                             obj = transaction.objectStore(this.name);
                             request = obj.delete(id);
                             request.onsuccess = function (e) {
@@ -516,7 +558,7 @@ var Model = function (_super) {
     Model.prototype.destroy = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var request,
                 totalRecordsBeingDeleted = 0,
@@ -560,7 +602,7 @@ var Model = function (_super) {
     Model.prototype.count = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = 0;
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -588,7 +630,7 @@ var Model = function (_super) {
     Model.prototype.average = function (attribute) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = 0,
                 totalRecords = 0;
@@ -625,7 +667,7 @@ var Model = function (_super) {
             throw "Parameter should be a function type";
         }
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = defaultCarry;
             var request;
@@ -656,7 +698,6 @@ var Model = function (_super) {
      * @returns {*}
      */
     Model.prototype.getIndexResult = function (objectStore) {
-        var builder = this;
         var range;
         var index;
         if (!this.indexBuilder.type) {
@@ -859,6 +900,7 @@ var Model = function (_super) {
             relationModel.tables.push(relationModel.name);
             relationModel.relations = tempBuilder.relations;
             relationModel.builder = tempBuilder.builder;
+            relationModel.primary = relation.primary || '_id';
         }
         //checking type of parent result
         isArray ? relationModel.whereIndexIn(relation.foreignKey, mainResult) : relationModel.whereIndex(relation.foreignKey, mainResult);
@@ -920,6 +962,32 @@ var Model = function (_super) {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Function creates list of tables to be used in transaction for all relations
+     * @return {string[]}
+     */
+    Model.prototype.allTables = function () {
+        this.tables = [this.name];
+        this.tables = this.tables.concat(this.getRelationTables(this.relations));
+        return this.tables;
+    };
+    /**
+     * Function returns a list of tables called in nested query builder of relation
+     * @param {Relation[]} relations
+     * @return {Array}
+     */
+    Model.prototype.getRelationTables = function (relations) {
+        var _this = this;
+        var tables = [];
+        relations.forEach(function (relation) {
+            tables.push(relation.modelName);
+            if (relation.func) {
+                var builder = relation.func(new __WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]());
+                tables = tables.concat(_this.getRelationTables(builder.relations));
+            }
+        });
+        return tables;
+    };
     return Model;
 }(__WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]);
 
@@ -1512,9 +1580,10 @@ var DB = function () {
                 var models = {};
                 _this.settings.migrations.forEach(function (schema) {
                     var primary = schema.primary || 'id';
+                    var idbKey = _this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get: function get() {
-                            return new __WEBPACK_IMPORTED_MODULE_1__model__["a" /* Model */](e.target.result, this.idbKey, schema.name, primary);
+                            return new __WEBPACK_IMPORTED_MODULE_1__model__["a" /* Model */](e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });

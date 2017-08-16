@@ -173,6 +173,9 @@ var __generator = this && this.__generator || function (thisArg, body) {
 var Model = function (_super) {
     __extends(Model, _super);
     function Model(db, idbKey, name, primary) {
+        if (primary === void 0) {
+            primary = '_id';
+        }
         var _this = _super.call(this) || this;
         _this.db = db;
         _this.idbKey = idbKey;
@@ -192,11 +195,50 @@ var Model = function (_super) {
     Model.prototype.find = function (id) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var request = obj.get(id);
             request.onsuccess = function (e) {
-                resolve(e.target.result);
+                var relationsCompleted = 0;
+                var result = e.target.result;
+                if (_this.relations.length <= 0 || !result) {
+                    resolve(result);
+                    return;
+                }
+                _this.relations.forEach(function (relation) {
+                    return __awaiter(_this, void 0, void 0, function () {
+                        var relationResult, defaultValue;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    return [4 /*yield*/, this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, false), false)];
+                                case 1:
+                                    relationResult = _a.sent();
+                                    relationsCompleted++;
+                                    defaultValue = this.getDefaultRelationValue(relation.type);
+                                    result[relation.modelName] = result[relation.modelName] || defaultValue;
+                                    switch (relation.type) {
+                                        case Model.RELATIONS.hasOne:
+                                            if (relationResult !== undefined) {
+                                                result[relation.modelName] = relationResult[relation.foreignKey] == result[relation.localKey] ? relationResult : result[relation.modelName];
+                                            }
+                                            break;
+                                        case Model.RELATIONS.hasMany:
+                                            if (relationResult.length > 0) {
+                                                result[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                    return relationResultItem[relation.foreignKey] == result[relation.localKey];
+                                                });
+                                            }
+                                            break;
+                                    }
+                                    if (relationsCompleted == this.relations.length) {
+                                        resolve(result);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                });
             };
             request.onerror = function (e) {
                 reject(e.message);
@@ -210,7 +252,7 @@ var Model = function (_super) {
     Model.prototype.first = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = null;
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -276,7 +318,7 @@ var Model = function (_super) {
     Model.prototype.get = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = [];
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -338,7 +380,7 @@ var Model = function (_super) {
     Model.prototype.create = function (data) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             data.createdAt = Date.now();
             data.updatedAt = Date.now();
@@ -360,7 +402,7 @@ var Model = function (_super) {
     Model.prototype.createMultiple = function (dataRecords) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var createdAt = Date.now();
             var updatedAt = Date.now();
@@ -395,7 +437,7 @@ var Model = function (_super) {
         var _this = this;
         var updatedAt = Date.now();
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var totalRecordsBeingUpdated = 0,
                 totalRecordsUpdated = 0;
@@ -454,7 +496,7 @@ var Model = function (_super) {
                             if (!result) {
                                 reject('No record found');
                             }
-                            transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+                            transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
                             obj = transaction.objectStore(this.name);
                             id = result[this.primary];
                             createdAt = result.createdAt;
@@ -494,7 +536,7 @@ var Model = function (_super) {
                             if (!result) {
                                 reject('result at id does not exists');
                             }
-                            transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+                            transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
                             obj = transaction.objectStore(this.name);
                             request = obj.delete(id);
                             request.onsuccess = function (e) {
@@ -516,7 +558,7 @@ var Model = function (_super) {
     Model.prototype.destroy = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READWRITE);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READWRITE);
             var obj = transaction.objectStore(_this.name);
             var request,
                 totalRecordsBeingDeleted = 0,
@@ -560,7 +602,7 @@ var Model = function (_super) {
     Model.prototype.count = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = 0;
             var request = _this.indexBuilder.type ? _this.getIndexResult(obj) : obj.openCursor();
@@ -588,7 +630,7 @@ var Model = function (_super) {
     Model.prototype.average = function (attribute) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = 0,
                 totalRecords = 0;
@@ -625,7 +667,7 @@ var Model = function (_super) {
             throw "Parameter should be a function type";
         }
         return new Promise(function (resolve, reject) {
-            var transaction = _this.getTransaction(_this.tables, Model.READONLY);
+            var transaction = _this.getTransaction(_this.allTables(), Model.READONLY);
             var obj = transaction.objectStore(_this.name);
             var result = defaultCarry;
             var request;
@@ -656,7 +698,6 @@ var Model = function (_super) {
      * @returns {*}
      */
     Model.prototype.getIndexResult = function (objectStore) {
-        var builder = this;
         var range;
         var index;
         if (!this.indexBuilder.type) {
@@ -859,6 +900,7 @@ var Model = function (_super) {
             relationModel.tables.push(relationModel.name);
             relationModel.relations = tempBuilder.relations;
             relationModel.builder = tempBuilder.builder;
+            relationModel.primary = relation.primary || '_id';
         }
         //checking type of parent result
         isArray ? relationModel.whereIndexIn(relation.foreignKey, mainResult) : relationModel.whereIndex(relation.foreignKey, mainResult);
@@ -920,6 +962,32 @@ var Model = function (_super) {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Function creates list of tables to be used in transaction for all relations
+     * @return {string[]}
+     */
+    Model.prototype.allTables = function () {
+        this.tables = [this.name];
+        this.tables = this.tables.concat(this.getRelationTables(this.relations));
+        return this.tables;
+    };
+    /**
+     * Function returns a list of tables called in nested query builder of relation
+     * @param {Relation[]} relations
+     * @return {Array}
+     */
+    Model.prototype.getRelationTables = function (relations) {
+        var _this = this;
+        var tables = [];
+        relations.forEach(function (relation) {
+            tables.push(relation.modelName);
+            if (relation.func) {
+                var builder = relation.func(new __WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]());
+                tables = tables.concat(_this.getRelationTables(builder.relations));
+            }
+        });
+        return tables;
+    };
     return Model;
 }(__WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]);
 
@@ -1512,9 +1580,10 @@ var DB = function () {
                 var models = {};
                 _this.settings.migrations.forEach(function (schema) {
                     var primary = schema.primary || 'id';
+                    var idbKey = _this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get: function get() {
-                            return new __WEBPACK_IMPORTED_MODULE_1__model__["a" /* Model */](e.target.result, this.idbKey, schema.name, primary);
+                            return new __WEBPACK_IMPORTED_MODULE_1__model__["a" /* Model */](e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });
@@ -1875,7 +1944,7 @@ var WorkerHandler = function () {
                     case 0:
                         _b.trys.push([0, 2,, 3]);
                         this.settings = settings;
-                        this.db = new __WEBPACK_IMPORTED_MODULE_0__db__["a" /* DB */](this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings);
+                        this.db = new __WEBPACK_IMPORTED_MODULE_0__db__["a" /* DB */](this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings, false);
                         _a = this;
                         return [4 /*yield*/, this.db.connect()];
                     case 1:
@@ -1894,33 +1963,33 @@ var WorkerHandler = function () {
     };
     WorkerHandler.prototype.action = function (port, modelName, action, queryBuilder, content) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, e_2, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var model, result, e_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         if (!this.models.hasOwnProperty(modelName)) {
                             port.postMessage({ status: 'error', error: 'Invalid model called' });
                             return [2 /*return*/, false];
                         }
                         if (!this.models[modelName][action]) {
-                            console.log(action, queryBuilder, content);
                             port.postMessage({ status: 'error', error: 'Invalid action called' });
                             return [2 /*return*/, false];
                         }
-                        this.models[modelName].indexBuilder = queryBuilder.indexBuilder;
-                        this.models[modelName].builder = queryBuilder.normalBuilder;
-                        this.models[modelName].relations = queryBuilder.relations;
-                        this.models[modelName].tables = queryBuilder.tables;
-                        _b.label = 1;
+                        model = this.models[modelName];
+                        model.indexBuilder = queryBuilder.indexBuilder;
+                        model.builder = queryBuilder.normalBuilder;
+                        model.relations = queryBuilder.relations;
+                        model.tables = model.tables.concat(queryBuilder.tables);
+                        _a.label = 1;
                     case 1:
-                        _b.trys.push([1, 3,, 4]);
-                        return [4 /*yield*/, (_a = this.models[modelName])[action].apply(_a, content)];
+                        _a.trys.push([1, 3,, 4]);
+                        return [4 /*yield*/, model[action].apply(model, content)];
                     case 2:
-                        result = _b.sent();
+                        result = _a.sent();
                         port.postMessage({ status: 'success', content: result });
                         return [3 /*break*/, 4];
                     case 3:
-                        e_2 = _b.sent();
+                        e_2 = _a.sent();
                         port.postMessage({ status: 'error', error: e_2.message });
                         return [3 /*break*/, 4];
                     case 4:
@@ -1942,7 +2011,6 @@ var WorkerHandler = function () {
                 e.ports[0].close();
                 break;
             default:
-                debugger;
                 e.ports[0].postMessage({ status: 'fail', error: 'Incorrect command given' });
                 e.ports[0].close();
         }
@@ -1961,243 +2029,6 @@ var wh = new WorkerHandler(self);
 self.onmessage = function (e) {
     wh.onMessage(e);
 };
-// let db, models;
-// let errorNamespace = '-error';
-//
-// self.addEventListener('message', (e) => {
-//     "use strict";
-//     JSON.parse(e.data.detail);
-//     let data = JSON.parse(e.data.detail, (key, value) => {
-//         if(typeof value != 'string'){
-//             return value;
-//         }
-//         return ( value.indexOf('function') >= 0 || value.indexOf('=>') >= 0) ? eval('('+value+')') : value;
-//     });
-//     self.emit(data, e.data.timestamp, e.data.action, e.data.model);
-// });
-//
-// self.addEventListener('idb:worker:initialize', (e) => {
-//     "use strict";
-//
-//     let idb = self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB;
-//     let idbKey = self.IDBKeyRange || self.webkitIDBKeyRange || self.msIDBKeyRange;
-//
-//     db = new DB(idb, idbKey, e.detail.detail, false, '', self.Promise);
-//
-//     db.connect()
-//         .then((m) => {
-//             models = m;
-//             self.send(true, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch((e) => self.send(false, e.detail.timestamp, e.detail.action));
-//
-// });
-//
-// self.emit = function (data, timestamp, action, model) {
-//     let ev = new self.CustomEvent('idb:worker:' + action, {
-//         detail: {
-//             detail: data,
-//             timestamp: timestamp,
-//             action: action,
-//             model: model
-//         }
-//     });
-//
-//     self.dispatchEvent(ev);
-// };
-//
-// self.send = function (data, timestamp, action) {
-//     "use strict";
-//
-//     let ev = {
-//         detail: data,
-//         action: action,
-//         timestamp: timestamp,
-//     };
-//
-//     self.postMessage(ev);
-// };
-//
-//
-// self.addEventListener('idb:worker:create', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.create(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:find', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.find(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:createMultiple', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.createMultiple(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:get', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.get(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:first', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.first(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(err => {
-//             self.send(err, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:update', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.update(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:save', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.save(e.detail.detail.id, e.detail.detail.data)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:count', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.count()
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:average', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.average(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-//
-// self.addEventListener('idb:worker:reduce', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.reduce(e.detail.detail.func, e.detail.detail.defaultCarry)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:destroyId', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.destroyId(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:destroy', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.destroy()
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
 
 /***/ })
 /******/ ]);
