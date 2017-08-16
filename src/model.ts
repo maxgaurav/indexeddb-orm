@@ -70,7 +70,7 @@ export class Model extends Builder implements ModelInterface{
     public hasIDBKey: boolean = false;
     private transaction: IDBTransaction;
 
-    constructor(private db: IDBDatabase, private idbKey: IDBStaticKeyRange, public name: string, public primary: string) {
+    constructor(private db: IDBDatabase, private idbKey: IDBStaticKeyRange, public name: string, public primary: string = '_id') {
         super();
 
         this.tables.push(this.name);
@@ -85,12 +85,49 @@ export class Model extends Builder implements ModelInterface{
     find(id: number): Promise<any> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let request = obj.get(id);
 
             request.onsuccess = (e: IDBResultEvent) => {
-                resolve(e.target.result);
+                let relationsCompleted = 0;
+
+                let result = e.target.result;
+                if (this.relations.length <= 0 || !result) {
+                    resolve(result);
+                    return;
+                }
+
+                this.relations.forEach(async (relation) => {
+
+                    let relationResult: any = await this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, false), false);
+
+                    relationsCompleted++;
+
+                    let defaultValue = this.getDefaultRelationValue(relation.type);
+                    result[relation.modelName] = result[relation.modelName] || defaultValue;
+
+                    switch (relation.type) {
+                        case Model.RELATIONS.hasOne :
+                            if (relationResult !== undefined) {
+                                result[relation.modelName] = relationResult[relation.foreignKey] == result[relation.localKey] ? relationResult : result[relation.modelName];
+                            }
+
+                            break;
+                        case Model.RELATIONS.hasMany :
+                            if (relationResult.length > 0) {
+                                result[relation.modelName] = relationResult.filter((relationResultItem) => {
+                                    return relationResultItem[relation.foreignKey] == result[relation.localKey];
+                                });
+                            }
+                            break;
+                    }
+
+                    if (relationsCompleted == this.relations.length) {
+                        resolve(result);
+                    }
+
+                });
             };
 
             request.onerror = (e: ErrorEvent) => {
@@ -108,7 +145,7 @@ export class Model extends Builder implements ModelInterface{
 
         return new Promise((resolve, reject) => {
 
-            let transaction: IDBTransaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction: IDBTransaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let result: any = null;
             let request: IDBRequest = this.indexBuilder.type ? this.getIndexResult(obj) : obj.openCursor();
@@ -128,7 +165,6 @@ export class Model extends Builder implements ModelInterface{
                 let relationsCompleted = 0;
 
                 result = cursor.value;
-
                 if (this.relations.length <= 0 || !result) {
                     resolve(result);
                     return;
@@ -180,7 +216,7 @@ export class Model extends Builder implements ModelInterface{
     get(): Promise<any[]> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let result = [];
 
@@ -252,7 +288,7 @@ export class Model extends Builder implements ModelInterface{
     create(data): Promise<any> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READWRITE);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
 
             let obj = transaction.objectStore(this.name);
 
@@ -280,7 +316,7 @@ export class Model extends Builder implements ModelInterface{
      */
     createMultiple(dataRecords: any[]): Promise<any[]> {
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READWRITE);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
 
             let obj = transaction.objectStore(this.name);
             let createdAt = Date.now();
@@ -325,7 +361,7 @@ export class Model extends Builder implements ModelInterface{
         let updatedAt = Date.now();
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READWRITE);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
             let obj = transaction.objectStore(this.name);
             let totalRecordsBeingUpdated = 0, totalRecordsUpdated = 0;
 
@@ -393,7 +429,7 @@ export class Model extends Builder implements ModelInterface{
                 reject('No record found');
             }
 
-            let transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
             let obj = transaction.objectStore(this.name);
 
             let id = result[this.primary];
@@ -431,7 +467,7 @@ export class Model extends Builder implements ModelInterface{
                 reject('result at id does not exists');
             }
 
-            let transaction = this.getTransaction(this.tables, Model.READWRITE, true);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
             let obj = transaction.objectStore(this.name);
             let request = obj.delete(id);
 
@@ -453,7 +489,7 @@ export class Model extends Builder implements ModelInterface{
     destroy(): Promise<any> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READWRITE);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
             let obj = transaction.objectStore(this.name);
             let request, totalRecordsBeingDeleted = 0, totalRecordsDeleted = 0;
 
@@ -506,7 +542,7 @@ export class Model extends Builder implements ModelInterface{
     count(): Promise<number> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let result = 0;
             let request: IDBRequest = this.indexBuilder.type ? this.getIndexResult(obj) : obj.openCursor();
@@ -540,7 +576,7 @@ export class Model extends Builder implements ModelInterface{
     average(attribute: string): Promise<number> {
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let result = 0, totalRecords = 0;
             let request: IDBRequest = this.indexBuilder.type ? this.getIndexResult(obj) : obj.openCursor();
@@ -584,7 +620,7 @@ export class Model extends Builder implements ModelInterface{
         }
 
         return new Promise((resolve, reject) => {
-            let transaction = this.getTransaction(this.tables, Model.READONLY);
+            let transaction = this.getTransaction(this.allTables(), Model.READONLY);
             let obj = transaction.objectStore(this.name);
             let result = defaultCarry;
             let request;
@@ -621,10 +657,8 @@ export class Model extends Builder implements ModelInterface{
      * @returns {*}
      */
     private getIndexResult(objectStore: IDBObjectStore): IDBRequest {
-        let builder = this;
         let range;
         let index;
-
 
         if (!this.indexBuilder.type) {
             return objectStore.openCursor();
@@ -846,7 +880,6 @@ export class Model extends Builder implements ModelInterface{
      * @returns {Promise}
      */
     private getRelationships(relation: Relation, transaction: IDBTransaction, mainResult, isArray: boolean = false): Promise<any> {
-
         let relationModel = new Model(this.db, this.idbKey, relation.modelName, relation.primary);
 
         //setting the relation transaction same as parent transaction
@@ -862,6 +895,7 @@ export class Model extends Builder implements ModelInterface{
             relationModel.tables.push(relationModel.name);
             relationModel.relations = tempBuilder.relations;
             relationModel.builder = tempBuilder.builder;
+            relationModel.primary = relation.primary || '_id';
         }
 
         //checking type of parent result
@@ -924,6 +958,37 @@ export class Model extends Builder implements ModelInterface{
      */
     static get READONLY(): string {
         return "readonly";
+    }
+
+    /**
+     * Function creates list of tables to be used in transaction for all relations
+     * @return {string[]}
+     */
+    private allTables(): string[] {
+
+        this.tables = [this.name];
+        this.tables = this.tables.concat(this.getRelationTables(this.relations));
+
+        return this.tables;
+    }
+
+    /**
+     * Function returns a list of tables called in nested query builder of relation
+     * @param {Relation[]} relations
+     * @return {Array}
+     */
+    private getRelationTables(relations: Relation[]) {
+        let tables = [];
+        relations.forEach(relation => {
+            tables.push(relation.modelName);
+            if(relation.func) {
+                let builder = relation.func(new Builder);
+                tables = tables.concat(this.getRelationTables(builder.relations));
+
+            }
+        });
+
+        return tables;
     }
 
 }

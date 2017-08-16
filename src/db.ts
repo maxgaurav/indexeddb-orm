@@ -112,11 +112,11 @@ export class DB {
                 let models: Models = {};
 
                 this.settings.migrations.forEach((schema) => {
-
                     let primary = schema.primary || 'id';
+                    let idbKey = this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get () {
-                            return new Model(e.target.result, this.idbKey, schema.name, primary);
+                            return new Model(e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });

@@ -124,9 +124,10 @@ var DB = (function () {
                 var models = {};
                 _this.settings.migrations.forEach(function (schema) {
                     var primary = schema.primary || 'id';
+                    var idbKey = _this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get: function () {
-                            return new Model(e.target.result, this.idbKey, schema.name, primary);
+                            return new Model(e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });

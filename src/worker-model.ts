@@ -26,7 +26,6 @@ export class WorkerModel extends Builder implements ModelInterface{
     public first() : Promise<any> {
         return new Promise((resolve) => {
             let ms = new MessageChannel();
-
             this.worker.postMessage({command: 'action', modelName: this.name, query: this.getStringify(this.getBuilder()), action:  'first', content: this.getStringify([])}, [ms.port1]);
             ms.port2.onmessage = (e) => {
                 if(!e.data.status || e.data.status === 'error') {

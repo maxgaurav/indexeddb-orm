@@ -46,7 +46,7 @@ var WorkerHandler = (function () {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
                         this.settings = settings;
-                        this.db = new DB(this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings);
+                        this.db = new DB(this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings, false);
                         _a = this;
                         return [4 /*yield*/, this.db.connect()];
                     case 1:
@@ -64,33 +64,33 @@ var WorkerHandler = (function () {
     };
     WorkerHandler.prototype.action = function (port, modelName, action, queryBuilder, content) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, e_2, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var model, result, e_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         if (!this.models.hasOwnProperty(modelName)) {
                             port.postMessage({ status: 'error', error: 'Invalid model called' });
                             return [2 /*return*/, false];
                         }
                         if (!this.models[modelName][action]) {
-                            console.log(action, queryBuilder, content);
                             port.postMessage({ status: 'error', error: 'Invalid action called' });
                             return [2 /*return*/, false];
                         }
-                        this.models[modelName].indexBuilder = queryBuilder.indexBuilder;
-                        this.models[modelName].builder = queryBuilder.normalBuilder;
-                        this.models[modelName].relations = queryBuilder.relations;
-                        this.models[modelName].tables = queryBuilder.tables;
-                        _b.label = 1;
+                        model = this.models[modelName];
+                        model.indexBuilder = queryBuilder.indexBuilder;
+                        model.builder = queryBuilder.normalBuilder;
+                        model.relations = queryBuilder.relations;
+                        model.tables = model.tables.concat(queryBuilder.tables);
+                        _a.label = 1;
                     case 1:
-                        _b.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, (_a = this.models[modelName])[action].apply(_a, content)];
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, model[action].apply(model, content)];
                     case 2:
-                        result = _b.sent();
+                        result = _a.sent();
                         port.postMessage({ status: 'success', content: result });
                         return [3 /*break*/, 4];
                     case 3:
-                        e_2 = _b.sent();
+                        e_2 = _a.sent();
                         port.postMessage({ status: 'error', error: e_2.message });
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
@@ -111,7 +111,6 @@ var WorkerHandler = (function () {
                 e.ports[0].close();
                 break;
             default:
-                debugger;
                 e.ports[0].postMessage({ status: 'fail', error: 'Incorrect command given' });
                 e.ports[0].close();
         }
@@ -128,240 +127,3 @@ var WorkerHandler = (function () {
 }());
 var wh = new WorkerHandler(self);
 self.onmessage = function (e) { wh.onMessage(e); };
-// let db, models;
-// let errorNamespace = '-error';
-//
-// self.addEventListener('message', (e) => {
-//     "use strict";
-//     JSON.parse(e.data.detail);
-//     let data = JSON.parse(e.data.detail, (key, value) => {
-//         if(typeof value != 'string'){
-//             return value;
-//         }
-//         return ( value.indexOf('function') >= 0 || value.indexOf('=>') >= 0) ? eval('('+value+')') : value;
-//     });
-//     self.emit(data, e.data.timestamp, e.data.action, e.data.model);
-// });
-//
-// self.addEventListener('idb:worker:initialize', (e) => {
-//     "use strict";
-//
-//     let idb = self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB;
-//     let idbKey = self.IDBKeyRange || self.webkitIDBKeyRange || self.msIDBKeyRange;
-//
-//     db = new DB(idb, idbKey, e.detail.detail, false, '', self.Promise);
-//
-//     db.connect()
-//         .then((m) => {
-//             models = m;
-//             self.send(true, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch((e) => self.send(false, e.detail.timestamp, e.detail.action));
-//
-// });
-//
-// self.emit = function (data, timestamp, action, model) {
-//     let ev = new self.CustomEvent('idb:worker:' + action, {
-//         detail: {
-//             detail: data,
-//             timestamp: timestamp,
-//             action: action,
-//             model: model
-//         }
-//     });
-//
-//     self.dispatchEvent(ev);
-// };
-//
-// self.send = function (data, timestamp, action) {
-//     "use strict";
-//
-//     let ev = {
-//         detail: data,
-//         action: action,
-//         timestamp: timestamp,
-//     };
-//
-//     self.postMessage(ev);
-// };
-//
-//
-// self.addEventListener('idb:worker:create', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.create(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:find', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.find(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:createMultiple', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.createMultiple(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:get', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.get(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:first', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//     m.builder = e.detail.detail.builder;
-//     m.indexBuilder = e.detail.detail.indexBuilder;
-//     m.tables = e.detail.detail.tables;
-//     m.relations = e.detail.detail.relations;
-//
-//     m.first(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(err => {
-//             self.send(err, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:update', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.update(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:save', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.save(e.detail.detail.id, e.detail.detail.data)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:count', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.count()
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:average', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.average(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-//
-// self.addEventListener('idb:worker:reduce', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.reduce(e.detail.detail.func, e.detail.detail.defaultCarry)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:destroyId', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.destroyId(e.detail.detail)
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// });
-//
-// self.addEventListener('idb:worker:destroy', (e) => {
-//     "use strict";
-//
-//     let m = models[e.detail.model];
-//
-//     m.destroy()
-//         .then((result) => {
-//             self.send(result, e.detail.timestamp, e.detail.action);
-//         })
-//         .catch(er => {
-//             self.send(er, e.detail.timestamp, e.detail.action + errorNamespace);
-//         });
-// }); 
