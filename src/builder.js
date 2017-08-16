@@ -266,6 +266,14 @@ var Builder = (function () {
         enumerable: true,
         configurable: true
     });
+    Builder.prototype.getBuilder = function () {
+        return {
+            tables: this.tables,
+            indexBuilder: this.indexBuilder,
+            normalBuilder: this.builder,
+            relations: this.relations
+        };
+    };
     Object.defineProperty(Builder.prototype, "RELATIONS", {
         // noinspection JSMethodCanBeStatic
         get: function () {

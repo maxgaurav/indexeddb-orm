@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import { Migration } from "./migration";
 import { Model } from "./model";
+import { WorkerModel } from "./worker-model";
 var DB = (function () {
     function DB(db, idbKey, settings, useWorker, pathToWorker) {
         if (useWorker === void 0) { useWorker = false; }
@@ -54,14 +55,12 @@ var DB = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.createNormalHandler()];
-                    case 1: 
-                    // return new db.Promise((resolve, reject) => {
-                    //
-                    //     if(db.useWebWorker){
-                    //         db.createWorkerHandler(resolve, reject);
-                    //     }else{
-                    return [2 /*return*/, _a.sent()];
+                    case 0:
+                        if (!this.useWorker) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.createWorkerHandler()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [4 /*yield*/, this.createNormalHandler()];
+                    case 3: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -77,46 +76,34 @@ var DB = (function () {
     /**
      * Creates connection in web worker space and if web worker fails
      * then creates normal database connection instance
-     * @param resolve
-     * @param reject
+     * @return {Promise<Models>}
      */
-    // createWorkerHandler (resolve, reject) {
-    //     let db = this;
-    //     try{
-    //         let worker = new Worker(db.pathToWebWorker);
-    //         let models = {};
-    //         let timestamp = Date.now();
-    //
-    //         worker.postMessage({
-    //             detail : JSON.stringify(db.settings),
-    //             action : 'initialize',
-    //             timestamp : timestamp
-    //         });
-    //
-    //         worker.onmessage = function (e) {
-    //             if(e.data.action === 'initialize' && e.data.timestamp === timestamp) {
-    //                 if (e.data.detail === true) {
-    //                     db.settings.migrations.forEach((schema) => {
-    //                         Object.defineProperty(models, schema.name, {
-    //                             get() {
-    //                                 return new WorkerModelHandler(schema.name, worker, db.Promise);
-    //                             }
-    //                         });
-    //                     });
-    //
-    //                     db.isWebWorker = true;
-    //                     resolve(models);
-    //                 } else {
-    //                     db.createNormalHandler(resolve, reject);
-    //                 }
-    //             }
-    //         }
-    //
-    //     }catch (e) {
-    //         reject(e);
-    //     }
-    //
-    // }
+    DB.prototype.createWorkerHandler = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            var worker = new Worker(_this.pathToWorker);
+            var ms = new MessageChannel();
+            worker.postMessage({ command: 'init', settings: _this.settings }, [ms.port1]);
+            ms.port2.onmessage = function (e) {
+                if (e.data.status === 'error' || !e.data.status) {
+                    ms.port2.close();
+                    throw new Error(e.data.error || "Uncaught error <" + JSON.stringify(e.data) + ">");
+                }
+                var models = {};
+                _this.settings.migrations.forEach(function (schema) {
+                    var primary = schema.primary || 'id';
+                    Object.defineProperty(models, schema.name, {
+                        get: function () {
+                            return new WorkerModel(worker, schema.name, primary);
+                        }
+                    });
+                });
+                resolve(models);
+                ms.port2.close();
+                ms.port1.close();
+            };
+        });
+    };
     /**
      * Function creates/opens database connection in main javascript thread
      * @returns {Promise<Models>}

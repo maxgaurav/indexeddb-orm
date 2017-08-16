@@ -1,9 +1,10 @@
 import {Model} from './model';
+import {QueryBuilder} from "./worker";
 
 /**
  * Main index query content
  */
-interface IndexBuilder {
+export interface IndexBuilder {
     index: string,
     value: any,
     type: string
@@ -25,13 +26,20 @@ export interface Relation {
 /**
  * Normal columns query content (columns without index)
  */
-interface NormalBuilder {
+export interface NormalBuilder {
     attribute: string,
     value: any,
     type: string
 }
 
-export class Builder {
+export interface BuilderInterface {
+    builder: NormalBuilder[],
+    indexBuilder: IndexBuilder,
+    relations: Relation[],
+    tables: string[]
+}
+
+export class Builder implements BuilderInterface{
 
     constructor(public builder: NormalBuilder[] = [], public indexBuilder: IndexBuilder = <IndexBuilder>{}, public relations: Relation[] = [], public tables: string[] = []) {
     }
@@ -334,6 +342,15 @@ export class Builder {
             },
         };
 
+    }
+
+    public getBuilder(): QueryBuilder {
+        return {
+            tables: this.tables,
+            indexBuilder: this.indexBuilder,
+            normalBuilder: this.builder,
+            relations: this.relations
+        }
     }
 
     // noinspection JSMethodCanBeStatic

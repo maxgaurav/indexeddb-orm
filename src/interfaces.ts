@@ -3,6 +3,8 @@
  * Structure for creating columns in an object store
  *
  */
+import {BuilderInterface, IndexBuilder, NormalBuilder, Relation} from "./builder";
+
 export interface TableColumn {
     /**
      * The name of the column
@@ -151,7 +153,7 @@ export interface DBInterface{
  * Main model interface which will be used to take actions in tables of database to fetch/update/delete content.
  * The model interface will also provide ability to do query building
  */
-export interface ModelInterface {
+export interface ModelInterface extends BuilderInterface{
     /**
      * Finds the record based on primary key
      * @param {number} id

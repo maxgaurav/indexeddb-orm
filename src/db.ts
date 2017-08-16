@@ -1,6 +1,7 @@
 import {Migration} from "./migration";
 import {IDBStaticKeyRange, Model} from "./model";
 import {Models, Settings} from "./interfaces";
+import {WorkerModel} from "./worker-model";
 
 interface IDBEventTarget extends EventTarget {
     result: IDBDatabase,
@@ -31,14 +32,11 @@ export class DB {
      */
     public async connect(): Promise<Models> {
 
-        // return new db.Promise((resolve, reject) => {
-        //
-        //     if(db.useWebWorker){
-        //         db.createWorkerHandler(resolve, reject);
-        //     }else{
-        return await this.createNormalHandler();
-        // }
-        // });
+        if (this.useWorker) {
+            return await this.createWorkerHandler();
+        } else {
+            return await this.createNormalHandler();
+        }
     }
 
     /**
@@ -53,46 +51,42 @@ export class DB {
     /**
      * Creates connection in web worker space and if web worker fails
      * then creates normal database connection instance
-     * @param resolve
-     * @param reject
+     * @return {Promise<Models>}
      */
-    // createWorkerHandler (resolve, reject) {
-    //     let db = this;
-    //     try{
-    //         let worker = new Worker(db.pathToWebWorker);
-    //         let models = {};
-    //         let timestamp = Date.now();
-    //
-    //         worker.postMessage({
-    //             detail : JSON.stringify(db.settings),
-    //             action : 'initialize',
-    //             timestamp : timestamp
-    //         });
-    //
-    //         worker.onmessage = function (e) {
-    //             if(e.data.action === 'initialize' && e.data.timestamp === timestamp) {
-    //                 if (e.data.detail === true) {
-    //                     db.settings.migrations.forEach((schema) => {
-    //                         Object.defineProperty(models, schema.name, {
-    //                             get() {
-    //                                 return new WorkerModelHandler(schema.name, worker, db.Promise);
-    //                             }
-    //                         });
-    //                     });
-    //
-    //                     db.isWebWorker = true;
-    //                     resolve(models);
-    //                 } else {
-    //                     db.createNormalHandler(resolve, reject);
-    //                 }
-    //             }
-    //         }
-    //
-    //     }catch (e) {
-    //         reject(e);
-    //     }
-    //
-    // }
+    createWorkerHandler (): Promise<Models> {
+        return new Promise((resolve) => {
+            let worker = new Worker(this.pathToWorker);
+            let ms = new MessageChannel();
+
+            worker.postMessage({command: 'init', settings: this.settings}, [ms.port1]);
+            ms.port2.onmessage = (e) => {
+                if(e.data.status === 'error' || !e.data.status) {
+                    ms.port2.close();
+                    throw new Error(e.data.error || `Uncaught error <${JSON.stringify(e.data)}>`);
+                }
+
+                let models = {};
+
+                this.settings.migrations.forEach((schema) => {
+
+                    let primary = schema.primary || 'id';
+                    Object.defineProperty(models, schema.name, {
+                        get () {
+                            return new WorkerModel(worker, schema.name, primary);
+                        }
+                    });
+                });
+                resolve(models);
+                ms.port2.close();
+                ms.port1.close();
+            };
+
+
+
+
+        });
+
+    }
 
     /**
      * Function creates/opens database connection in main javascript thread
@@ -121,7 +115,7 @@ export class DB {
 
                     let primary = schema.primary || 'id';
                     Object.defineProperty(models, schema.name, {
-                        get() {
+                        get () {
                             return new Model(e.target.result, this.idbKey, schema.name, primary);
                         }
                     });
