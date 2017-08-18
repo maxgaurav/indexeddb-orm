@@ -6,8 +6,16 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 [![npm](https://img.shields.io/npm/v/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Version 2.0
+The new version of indexedb-orm now uses typescript for its primary language.
+
+## Version 1.0
+For older version please go to branch [orm-dev](https://github.com/maxgaurav/indexeddb-orm/tree/orm-1.0.1)
+
 ## Website
-[maxgaurav.github.io/indexeddb-orm/](https://maxgaurav.github.io/indexeddb-orm)
+[maxgaurav.github.io/indexeddb-orm](https://maxgaurav.github.io/indexeddb-orm)
+
+Examples coming soon to the website.
 
 ## Table of Contents
 
@@ -70,8 +78,8 @@ npm install indexeddb-orm --save
 ```javascript
 
 let settings = {
-    dbName : 'nameOfDatabase',
-    dbVersion : 1, //version of database
+    name : 'nameOfDatabase',
+    version : 1, //version of database
     migrations : [{
         name : 'users', //name of table
         primary : 'id', //auto increment field (default id)
@@ -97,34 +105,14 @@ let settings = {
     }]
 };
 
-let config = {
-    settings : settings
-};
 
-let db = idb(config);
+let db = idb(settings);
 ```
 
-* By default usage of web worker is not enabled but if you want to use it then set **useWebWorker** property in config as true and set the property **pathToWebWorker** as the location of **worker.js** from build folder
+* By default usage of web worker is not enabled but if you want to use it then set **useWebWorker** property in config as true and set the property **pathToWebWorker** as the location of **worker.js** from dist folder
 ```javascript
-let config = {
-    settings : settings,
-    useWebWorker : true,
-    pathToWebWorker : '/path/to/build/worker.js',
-}
+let db = idb(settings, true, '/absolute/path/to/worker.js');
 ````
-
-* You can also pass an instance of window object in the function if you have special window wrapped object. 
-* You can also set a special *Promise* object in config. The promise object should provide an new instance and a function 
-as an parameter with resolve as functions first param and reject as second param. In general promise object should be same as native Promise
-```javascript
-
-let config = {
-    settings : settings,
-    window : $window, //wrapped window object of application
-    promise : $window.Q //special promise object retrieved from custom window
-}
-``` 
-
 
 ## Query Building
 
@@ -454,7 +442,7 @@ models.users.whereIndexIn('id',[1,2,10,11])
     .get().then(function(results) {
         
         /**
-        * each results object will have an userContacts property with mathcing result with users table
+        * each results object will have an userContacts property with matching result with users table
        **/ 
     });
 ```
@@ -564,38 +552,41 @@ models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).destroy
 Sometimes it is needed to work in a single transaction and commit the content once or fail throughout. For this purpose one
 can use the transaction functionality in the system.
 
-The transaction is available after one connects to the database using the **connect** function and then a **transaction ** property is
-exposed to the main database instance.
+Open a transaction in any of the model and pass a list of models you want to open transaction in. All transaction are in read write.
 
-The transaction property takes in two parameters. First an array of tables on which transaction is going to take place. Second
-is a function which provides two parameters transactionalModel and transaction. The transactional model is a model wrapper around
-the tables provided and transaction is the **IDBTransaction** instance which all models are adhering to. 
+**NOTE:** If external content is needed then best pass it through the passableData parameter as in worker the data will available without any problem;
+
+If any of the builder would have a relation call then also add it to models listing as transaction is explicit to the listing provided.
 
 Calling **transaction.abort()** will cause the transaction to fail.
-
-#### NOTE: It is not available in when database is being assigned to worker using useWebWorker flag
 
 
 #### Usage
 ```javascript
-    var database = new idb(config);
+    let db = new idb(config);
 
-    database.connect().then(function(models) {
+    models = await db.connect();
+    let user = await models.users.openTransaction([models.userContacts, models.users], async (transaction, models, passableData) => {
+        //some model actions
+        let result = await models.userConcats.first();
         
-        try{
-            //now a transaction property is exposed to database
-            database.transaction(['table1', 'table2'], function(transactionModel, transaction){
-                transactionModel.table1.create({...});
-                transactionModel.table2.create({...});
-                
-                transaction.abort();
-            });
-            
-            
-        }catch(e){
-            //Transaction error handling
+        if(result._id !== 45) {
+            //if needed
+             transaction.abort();
         }
+        
+        let content = {
+            email : passableData.email,
+            content: result
+        };
+        
+        return models.users.create(content);
+       
+    }, {
+        data: 'attribute'
     });
+    
+    
 ```
 
 ### Aggregations
