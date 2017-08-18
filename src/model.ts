@@ -1,5 +1,5 @@
 import {Builder, Relation} from './builder';
-import {ModelInterface} from "./interfaces";
+import {ModelInterface, Models} from "./interfaces";
 
 /**
  * Normal result fetch event target which contains the main result
@@ -70,7 +70,7 @@ export class Model extends Builder implements ModelInterface{
     public hasIDBKey: boolean = false;
     private transaction: IDBTransaction;
 
-    constructor(private db: IDBDatabase, private idbKey: IDBStaticKeyRange, public name: string, public primary: string = '_id') {
+    constructor(public db: IDBDatabase, public idbKey: IDBStaticKeyRange, public name: string, public primary: string = '_id') {
         super();
 
         this.tables.push(this.name);
@@ -429,7 +429,7 @@ export class Model extends Builder implements ModelInterface{
                 reject('No record found');
             }
 
-            let transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
             let obj = transaction.objectStore(this.name);
 
             let id = result[this.primary];
@@ -467,7 +467,7 @@ export class Model extends Builder implements ModelInterface{
                 reject('result at id does not exists');
             }
 
-            let transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
+            let transaction = this.getTransaction(this.allTables(), Model.READWRITE);
             let obj = transaction.objectStore(this.name);
             let request = obj.delete(id);
 
@@ -852,6 +852,35 @@ export class Model extends Builder implements ModelInterface{
         }
 
         return this.transaction;
+    }
+
+    /**
+     * Opens a transaction and creates models encapsulated in the transaction so that all operations occur within the transaction
+     * @param {ModelInterface[]} models
+     * @param {(transaction: IDBTransaction, models: Models, passableData?: any) => Promise<any>} func
+     * @param passableData
+     * @return {Promise}
+     */
+    public openTransaction(models: ModelInterface[],func: (transaction: IDBTransaction, models: Models, passableData?:any) => Promise<any>, passableData: any = null): Promise<any> {
+
+        let tables = models.map(model => model.name);
+
+        let transaction = this.getTransaction(tables, Model.READWRITE);
+        let m = {};
+
+        models.forEach((model: Model) => {
+            Object.defineProperty(m, model.name, {
+                get () {
+                    let newModel = new Model(model.db, model.idbKey, model.name, model.primary);
+                    newModel.setTransaction(transaction);
+
+                    return newModel;
+                }
+            });
+        });
+
+
+        return func(transaction, m, passableData);
     }
 
     /**

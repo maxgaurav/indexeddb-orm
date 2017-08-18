@@ -38,6 +38,12 @@ var WorkerHandler = (function () {
     function WorkerHandler(workerSpace) {
         this.workerSpace = workerSpace;
     }
+    /**
+     * Initialization of db instance with model setup and migrations
+     * @param {Settings} settings
+     * @param port
+     * @return {Promise<void>}
+     */
     WorkerHandler.prototype.init = function (settings, port) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, e_1;
@@ -62,6 +68,16 @@ var WorkerHandler = (function () {
             });
         });
     };
+    /**
+     * Function executes the main action functions available in the database
+     *
+     * @param port
+     * @param {string} modelName
+     * @param {string} action
+     * @param {QueryBuilder} queryBuilder
+     * @param content
+     * @return {Promise<boolean>}
+     */
     WorkerHandler.prototype.action = function (port, modelName, action, queryBuilder, content) {
         return __awaiter(this, void 0, void 0, function () {
             var model, result, e_2;
@@ -98,6 +114,45 @@ var WorkerHandler = (function () {
             });
         });
     };
+    /**
+     * Function handles the transaction handling in database
+     * @param port
+     * @param models
+     * @param content
+     * @param modelName: string
+     * @return {Promise<void>}
+     */
+    WorkerHandler.prototype.transaction = function (port, modelName, models, content) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var m, result, e_3, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!this.models.hasOwnProperty(modelName)) {
+                            port.postMessage({ status: 'error', error: 'Invalid model called' });
+                            return [2 /*return*/, false];
+                        }
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        m = models.map(function (model) {
+                            return _this.models[model.name];
+                        });
+                        return [4 /*yield*/, (_a = this.models[modelName]).openTransaction.apply(_a, [m].concat(content))];
+                    case 2:
+                        result = _b.sent();
+                        port.postMessage({ status: 'success', content: result });
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_3 = _b.sent();
+                        port.postMessage({ status: 'error', error: e_3.message });
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
     WorkerHandler.prototype.onMessage = function (e) {
         switch (e.data.command) {
             case 'init':
@@ -105,6 +160,9 @@ var WorkerHandler = (function () {
                 break;
             case 'action':
                 this.action(e.ports[0], e.data.modelName, e.data.action, this.parse(e.data.query), this.parse(e.data.content));
+                break;
+            case 'transaction':
+                this.transaction(e.ports[0], e.data.modelName, e.data.models, this.parse(e.data.content));
                 break;
             case 'test':
                 console.info(e.data, e.ports);
@@ -115,6 +173,11 @@ var WorkerHandler = (function () {
                 e.ports[0].close();
         }
     };
+    /**
+     * Function parses the string content
+     * @param {string} content
+     * @return {any}
+     */
     WorkerHandler.prototype.parse = function (content) {
         return JSON.parse(content, function (key, value) {
             if (typeof value != 'string') {

@@ -1,5 +1,6 @@
-import {ModelInterface} from "./interfaces";
+import {ModelInterface, Models} from "./interfaces";
 import {Builder} from "./builder";
+import {Model} from "./model";
 
 export class WorkerModel extends Builder implements ModelInterface{
 
@@ -219,6 +220,35 @@ export class WorkerModel extends Builder implements ModelInterface{
             let ms = new MessageChannel();
 
             this.worker.postMessage({command: 'action', modelName: this.name, query: this.getStringify(this.getBuilder()), action : 'reduce', content: this.getStringify([func, defaultCarry])}, [ms.port1]);
+            ms.port2.onmessage = (e) => {
+                if(!e.data.status || e.data.status === 'error') {
+                    throw new Error(e.data.error);
+                }
+
+                resolve(e.data.content);
+            }
+        });
+    }
+
+    /**
+     * Opens a transaction which can be used by the caller independently to manipulate the transaction
+     * @param {ModelInterface[]} models
+     * @param {(transaction: IDBTransaction, passableData?: any) => Promise} func
+     * @param passableData
+     * @return Promise
+     */
+    public openTransaction(models: ModelInterface[],func: (transaction: IDBTransaction, models: Models, passableData?:any) => Promise<any>, passableData: any = null): Promise<any> {
+        return new Promise(resolve => {
+            let ms = new MessageChannel();
+
+            let m = models.map(model => {
+                return {
+                    name: model.name,
+                    primary: model.primary
+                }
+            });
+
+            this.worker.postMessage({command: 'transaction', modelName: m[0].name, models: m, content: this.getStringify([func, passableData])}, [ms.port1]);
             ms.port2.onmessage = (e) => {
                 if(!e.data.status || e.data.status === 'error') {
                     throw new Error(e.data.error);

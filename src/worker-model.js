@@ -215,6 +215,33 @@ var WorkerModel = (function (_super) {
             };
         });
     };
+    /**
+     * Opens a transaction which can be used by the caller independently to manipulate the transaction
+     * @param {ModelInterface[]} models
+     * @param {(transaction: IDBTransaction, passableData?: any) => Promise} func
+     * @param passableData
+     * @return Promise
+     */
+    WorkerModel.prototype.openTransaction = function (models, func, passableData) {
+        var _this = this;
+        if (passableData === void 0) { passableData = null; }
+        return new Promise(function (resolve) {
+            var ms = new MessageChannel();
+            var m = models.map(function (model) {
+                return {
+                    name: model.name,
+                    primary: model.primary
+                };
+            });
+            _this.worker.postMessage({ command: 'transaction', modelName: m[0].name, models: m, content: _this.getStringify([func, passableData]) }, [ms.port1]);
+            ms.port2.onmessage = function (e) {
+                if (!e.data.status || e.data.status === 'error') {
+                    throw new Error(e.data.error);
+                }
+                resolve(e.data.content);
+            };
+        });
+    };
     // noinspection JSMethodCanBeStatic
     WorkerModel.prototype.getStringify = function (content) {
         return JSON.stringify(content, function (key, value) {

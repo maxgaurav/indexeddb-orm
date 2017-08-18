@@ -3,7 +3,7 @@
  * Structure for creating columns in an object store
  *
  */
-import {BuilderInterface, IndexBuilder, NormalBuilder, Relation} from "./builder";
+import {BuilderInterface} from "./builder";
 
 export interface TableColumn {
     /**
@@ -155,6 +155,16 @@ export interface DBInterface{
  */
 export interface ModelInterface extends BuilderInterface{
     /**
+     * Primary keyPath column of table in object store/table
+     */
+    primary: string,
+
+    /**
+     * Name of the table/object store
+     */
+    name: string,
+
+    /**
      * Finds the record based on primary key
      * @param {number} id
      * @returns {Promise<any>}
@@ -241,16 +251,45 @@ export interface ModelInterface extends BuilderInterface{
      */
     reduce(func: (value: any, result: any) => any, defaultCarry: any): Promise<any>,
 
+    /**
+     * Opens an IDBTransaction object where all database actions are wrapped in a transaction
+     * @param {(transaction: IDBTransaction, models: Models , passableData?: any) => void} func
+     * @param {ModelInterface[]} models
+     * @param passableData
+     * @return Promise{any}
+     */
+    openTransaction(models: ModelInterface[],func: (transaction: IDBTransaction, models: Models, passableData?: any) => Promise<any>, passableData?: any): Promise<any>
+
 }
 
 export interface MigrationInterface {
+    /**
+     * List of object sores created
+     */
     objectStores: IDBObjectStore[],
 
+    /**
+     * Creates a object store in the database
+     * @param {TableSchema} schema
+     */
     createStore(schema: TableSchema): void,
 
+    /**
+     * Runs the migrations given and updates/creates various tables/object stores
+     */
     run(): void,
 
+    /**
+     * Creates a index in the object store
+     * @param {TableColumn} column
+     * @param {IDBObjectStore} objectStore
+     */
     makeIndex(column: TableColumn, objectStore: IDBObjectStore): void,
 
+    /**
+     * Drops an index in the object store
+     * @param {string} column
+     * @param {IDBObjectStore} objectStore
+     */
     dropIndex(column: string, objectStore: IDBObjectStore): void
 }

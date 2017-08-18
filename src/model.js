@@ -360,7 +360,7 @@ var Model = (function (_super) {
                         if (!result) {
                             reject('No record found');
                         }
-                        transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
+                        transaction = this.getTransaction(this.allTables(), Model.READWRITE);
                         obj = transaction.objectStore(this.name);
                         id = result[this.primary];
                         createdAt = result.createdAt;
@@ -397,7 +397,7 @@ var Model = (function (_super) {
                         if (!result) {
                             reject('result at id does not exists');
                         }
-                        transaction = this.getTransaction(this.allTables(), Model.READWRITE, true);
+                        transaction = this.getTransaction(this.allTables(), Model.READWRITE);
                         obj = transaction.objectStore(this.name);
                         request = obj.delete(id);
                         request.onsuccess = function (e) {
@@ -712,6 +712,29 @@ var Model = (function (_super) {
             return this.createTransaction(tables, mode);
         }
         return this.transaction;
+    };
+    /**
+     * Opens a transaction and creates models encapsulated in the transaction so that all operations occur within the transaction
+     * @param {ModelInterface[]} models
+     * @param {(transaction: IDBTransaction, models: Models, passableData?: any) => Promise<any>} func
+     * @param passableData
+     * @return {Promise}
+     */
+    Model.prototype.openTransaction = function (models, func, passableData) {
+        if (passableData === void 0) { passableData = null; }
+        var tables = models.map(function (model) { return model.name; });
+        var transaction = this.getTransaction(tables, Model.READWRITE);
+        var m = {};
+        models.forEach(function (model) {
+            Object.defineProperty(m, model.name, {
+                get: function () {
+                    var newModel = new Model(model.db, model.idbKey, model.name, model.primary);
+                    newModel.setTransaction(transaction);
+                    return newModel;
+                }
+            });
+        });
+        return func(transaction, m, passableData);
     };
     /**
      * Returns the array or direct key value against the input give for the key specified
