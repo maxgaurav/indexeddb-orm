@@ -361,7 +361,8 @@ export class Builder implements BuilderInterface{
     static get RELATIONS() {
         return {
             hasOne: 'hasOne',
-            hasMany: 'hasMany'
+            hasMany: 'hasMany',
+            hasManyMultiEntry: 'hasManyMultiEntry'
         }
     }
 }

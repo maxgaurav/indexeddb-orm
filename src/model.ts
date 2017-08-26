@@ -121,6 +121,14 @@ export class Model extends Builder implements ModelInterface{
                                 });
                             }
                             break;
+
+                        case Model.RELATIONS.hasManyMultiEntry:
+                            if(relationResult.length > 0) {
+                                result[relation.modelName] = relationResult.filter(relationResultItem => {
+                                    return result[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
+                                });
+                            }
+                            break;
                     }
 
                     if (relationsCompleted == this.relations.length) {
@@ -193,6 +201,13 @@ export class Model extends Builder implements ModelInterface{
                                 });
                             }
                             break;
+                        case Model.RELATIONS.hasManyMultiEntry:
+                            if(relationResult.length > 0) {
+                                result[relation.modelName] = relationResult.filter(relationResultItem => {
+                                    return result[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
+                                });
+                            }
+                            break;
                     }
 
                     if (relationsCompleted == this.relations.length) {
@@ -243,13 +258,14 @@ export class Model extends Builder implements ModelInterface{
 
                 this.relations.forEach(async (relation) => {
 
-                    let relationResult: any = this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, true), true);
+                    let relationResult: any = await this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, true), true);
 
                     relationsCompleted++;
 
                     result = result.map(item => {
 
                         let defaultValue = this.getDefaultRelationValue(relation.type);
+
                         item[relation.modelName] = item[relation.modelName] || defaultValue;
 
                         switch (relation.type) {
@@ -263,6 +279,13 @@ export class Model extends Builder implements ModelInterface{
                                 if (relationResult.length > 0) {
                                     item[relation.modelName] = relationResult.filter((relationResultItem) => {
                                         return relationResultItem[relation.foreignKey] == item[relation.localKey];
+                                    });
+                                }
+                                break;
+                            case Model.RELATIONS.hasManyMultiEntry:
+                                if(relationResult.length > 0) {
+                                    item[relation.modelName] = relationResult.filter(relationResultItem => {
+                                        return item[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
                                     });
                                 }
                                 break;
@@ -942,6 +965,21 @@ export class Model extends Builder implements ModelInterface{
                 case Model.RELATIONS.hasMany :
                     result = relationModel.get();
                     break;
+                case Model.RELATIONS.hasManyMultiEntry :
+
+                    let multiEntries: any[] = [];
+                    if(isArray) {
+                         multiEntries = mainResult.reduce((content, carry) => {
+                            content.forEach(c => carry.push(c));
+                            return carry;
+                        },[]);
+                    }else{
+                        multiEntries = mainResult
+                    }
+
+                    result = relationModel.whereIndexIn(relation.foreignKey, multiEntries).get();
+
+                    break;
                 default :
                     throw "Invalid relation type provided";
             }
@@ -966,6 +1004,7 @@ export class Model extends Builder implements ModelInterface{
             case Model.RELATIONS.hasOne :
                 return null;
             case Model.RELATIONS.hasMany :
+            case Model.RELATIONS.hasManyMultiEntry :
                 return [];
             default :
                 return null;

@@ -286,7 +286,8 @@ var Builder = (function () {
         get: function () {
             return {
                 hasOne: 'hasOne',
-                hasMany: 'hasMany'
+                hasMany: 'hasMany',
+                hasManyMultiEntry: 'hasManyMultiEntry'
             };
         },
         enumerable: true,
