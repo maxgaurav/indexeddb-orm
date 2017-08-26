@@ -230,6 +230,13 @@ var Model = function (_super) {
                                                 });
                                             }
                                             break;
+                                        case Model.RELATIONS.hasManyMultiEntry:
+                                            if (relationResult.length > 0) {
+                                                result[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                    return result[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
+                                                });
+                                            }
+                                            break;
                                     }
                                     if (relationsCompleted == this.relations.length) {
                                         resolve(result);
@@ -296,6 +303,13 @@ var Model = function (_super) {
                                                 });
                                             }
                                             break;
+                                        case Model.RELATIONS.hasManyMultiEntry:
+                                            if (relationResult.length > 0) {
+                                                result[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                    return result[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
+                                                });
+                                            }
+                                            break;
                                     }
                                     if (relationsCompleted == this.relations.length) {
                                         resolve(result);
@@ -341,28 +355,40 @@ var Model = function (_super) {
                         var _this = this;
                         var relationResult;
                         return __generator(this, function (_a) {
-                            relationResult = this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, true), true);
-                            relationsCompleted++;
-                            result = result.map(function (item) {
-                                var defaultValue = _this.getDefaultRelationValue(relation.type);
-                                item[relation.modelName] = item[relation.modelName] || defaultValue;
-                                switch (relation.type) {
-                                    case Model.RELATIONS.hasOne:
-                                        if (relationResult !== undefined) {
-                                            item[relation.modelName] = relationResult[relation.foreignKey] == item[relation.localKey] ? relationResult : item[relation.modelName];
+                            switch (_a.label) {
+                                case 0:
+                                    return [4 /*yield*/, this.getRelationships(relation, this.transaction, this.getMainResult(result, relation.localKey, true), true)];
+                                case 1:
+                                    relationResult = _a.sent();
+                                    relationsCompleted++;
+                                    result = result.map(function (item) {
+                                        var defaultValue = _this.getDefaultRelationValue(relation.type);
+                                        item[relation.modelName] = item[relation.modelName] || defaultValue;
+                                        switch (relation.type) {
+                                            case Model.RELATIONS.hasOne:
+                                                if (relationResult !== undefined) {
+                                                    item[relation.modelName] = relationResult[relation.foreignKey] == item[relation.localKey] ? relationResult : item[relation.modelName];
+                                                }
+                                                break;
+                                            case Model.RELATIONS.hasMany:
+                                                if (relationResult.length > 0) {
+                                                    item[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                        return relationResultItem[relation.foreignKey] == item[relation.localKey];
+                                                    });
+                                                }
+                                                break;
+                                            case Model.RELATIONS.hasManyMultiEntry:
+                                                if (relationResult.length > 0) {
+                                                    item[relation.modelName] = relationResult.filter(function (relationResultItem) {
+                                                        return item[relation.localKey].indexOf(relationResultItem[relation.foreignKey]) !== -1;
+                                                    });
+                                                }
+                                                break;
                                         }
-                                        break;
-                                    case Model.RELATIONS.hasMany:
-                                        if (relationResult.length > 0) {
-                                            item[relation.modelName] = relationResult.filter(function (relationResultItem) {
-                                                return relationResultItem[relation.foreignKey] == item[relation.localKey];
-                                            });
-                                        }
-                                        break;
-                                }
-                                return item;
-                            });
-                            return [2 /*return*/];
+                                        return item;
+                                    });
+                                    return [2 /*return*/];
+                            }
                         });
                     });
                 });
@@ -941,6 +967,20 @@ var Model = function (_super) {
                 case Model.RELATIONS.hasMany:
                     result = relationModel.get();
                     break;
+                case Model.RELATIONS.hasManyMultiEntry:
+                    var multiEntries = [];
+                    if (isArray) {
+                        multiEntries = mainResult.reduce(function (content, carry) {
+                            content.forEach(function (c) {
+                                return carry.push(c);
+                            });
+                            return carry;
+                        }, []);
+                    } else {
+                        multiEntries = mainResult;
+                    }
+                    result = relationModel.whereIndexIn(relation.foreignKey, multiEntries).get();
+                    break;
                 default:
                     throw "Invalid relation type provided";
             }
@@ -962,6 +1002,7 @@ var Model = function (_super) {
             case Model.RELATIONS.hasOne:
                 return null;
             case Model.RELATIONS.hasMany:
+            case Model.RELATIONS.hasManyMultiEntry:
                 return [];
             default:
                 return null;
@@ -1326,7 +1367,8 @@ var Builder = function () {
         get: function get() {
             return {
                 hasOne: 'hasOne',
-                hasMany: 'hasMany'
+                hasMany: 'hasMany',
+                hasManyMultiEntry: 'hasManyMultiEntry'
             };
         },
         enumerable: true,
