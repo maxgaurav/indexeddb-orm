@@ -14,9 +14,9 @@
   "description": "A promise based wrapper for indexedDB",
   "devDependencies": {
     "cross-env": "^5.0.2",
-    "laravel-mix": "~1.4.2",
-    "ts-loader": "^2.3.2",
-    "typescript": "^2.4.2"
+    "laravel-mix": "~1.5.1",
+    "ts-loader": "~3.1.1",
+    "typescript": "~2.5.2"
   },
   "keywords": [
     "indexeddb",
