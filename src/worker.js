@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -33,8 +34,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { DB } from "./db";
-var WorkerHandler = (function () {
+Object.defineProperty(exports, "__esModule", { value: true });
+var db_1 = require("./db");
+var WorkerHandler = /** @class */ (function () {
     function WorkerHandler(workerSpace) {
         this.workerSpace = workerSpace;
     }
@@ -52,7 +54,7 @@ var WorkerHandler = (function () {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
                         this.settings = settings;
-                        this.db = new DB(this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings, false);
+                        this.db = new db_1.DB(this.workerSpace.indexedDB, this.workerSpace.IDBKeyRange, this.settings, false);
                         _a = this;
                         return [4 /*yield*/, this.db.connect()];
                     case 1:

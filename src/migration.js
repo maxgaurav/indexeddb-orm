@@ -1,4 +1,6 @@
-var Migration = (function () {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Migration = /** @class */ (function () {
     function Migration(db, transaction, migrations) {
         this.db = db;
         this.transaction = transaction;
@@ -74,4 +76,4 @@ var Migration = (function () {
     };
     return Migration;
 }());
-export { Migration };
+exports.Migration = Migration;

@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -8,8 +9,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { Builder } from "./builder";
-var WorkerModel = (function (_super) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var builder_1 = require("./builder");
+var WorkerModel = /** @class */ (function (_super) {
     __extends(WorkerModel, _super);
     function WorkerModel(worker, name, primary) {
         var _this = _super.call(this) || this;
@@ -249,5 +251,5 @@ var WorkerModel = (function (_super) {
         });
     };
     return WorkerModel;
-}(Builder));
-export { WorkerModel };
+}(builder_1.Builder));
+exports.WorkerModel = WorkerModel;

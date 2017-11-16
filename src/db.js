@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -33,10 +34,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { Migration } from "./migration";
-import { Model } from "./model";
-import { WorkerModel } from "./worker-model";
-var DB = (function () {
+Object.defineProperty(exports, "__esModule", { value: true });
+var migration_1 = require("./migration");
+var model_1 = require("./model");
+var worker_model_1 = require("./worker-model");
+var DB = /** @class */ (function () {
     function DB(db, idbKey, settings, useWorker, pathToWorker) {
         if (useWorker === void 0) { useWorker = false; }
         if (pathToWorker === void 0) { pathToWorker = ''; }
@@ -94,7 +96,7 @@ var DB = (function () {
                     var primary = schema.primary || 'id';
                     Object.defineProperty(models, schema.name, {
                         get: function () {
-                            return new WorkerModel(worker, schema.name, primary);
+                            return new worker_model_1.WorkerModel(worker, schema.name, primary);
                         }
                     });
                 });
@@ -114,7 +116,7 @@ var DB = (function () {
             var request = _this.db.open(_this.settings.name, _this.settings.version);
             request.onupgradeneeded = function (e) {
                 _this.idb = e.target.result;
-                _this.migration = new Migration(_this.idb, e.target.transaction, _this.settings.migrations);
+                _this.migration = new migration_1.Migration(_this.idb, e.target.transaction, _this.settings.migrations);
                 _this.migration.run();
             };
             request.onerror = function (e) {
@@ -127,7 +129,7 @@ var DB = (function () {
                     var idbKey = _this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get: function () {
-                            return new Model(e.target.result, idbKey, schema.name, primary);
+                            return new model_1.Model(e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });
@@ -137,4 +139,4 @@ var DB = (function () {
     };
     return DB;
 }());
-export { DB };
+exports.DB = DB;

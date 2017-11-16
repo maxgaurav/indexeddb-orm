@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -43,11 +44,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { Builder } from './builder';
+Object.defineProperty(exports, "__esModule", { value: true });
+var builder_1 = require("./builder");
 /**
  * Main Model class
  */
-var Model = (function (_super) {
+var Model = /** @class */ (function (_super) {
     __extends(Model, _super);
     function Model(db, idbKey, name, primary) {
         if (primary === void 0) { primary = '_id'; }
@@ -793,7 +795,7 @@ var Model = (function (_super) {
         relationModel.setTransaction(transaction);
         //if a secondary builder function was defined
         if (relation.func) {
-            var tempBuilder = new Builder();
+            var tempBuilder = new builder_1.Builder();
             tempBuilder = relation.func(tempBuilder);
             relationModel.tables = tempBuilder.tables;
             relationModel.tables.push(relationModel.name);
@@ -895,12 +897,12 @@ var Model = (function (_super) {
         relations.forEach(function (relation) {
             tables.push(relation.modelName);
             if (relation.func) {
-                var builder = relation.func(new Builder);
+                var builder = relation.func(new builder_1.Builder);
                 tables = tables.concat(_this.getRelationTables(builder.relations));
             }
         });
         return tables;
     };
     return Model;
-}(Builder));
-export { Model };
+}(builder_1.Builder));
+exports.Model = Model;

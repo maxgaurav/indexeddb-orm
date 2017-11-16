@@ -1,5 +1,7 @@
-import { Model } from './model';
-var Builder = (function () {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var model_1 = require("./model");
+var Builder = /** @class */ (function () {
     function Builder(builder, indexBuilder, relations, tables) {
         if (builder === void 0) { builder = []; }
         if (indexBuilder === void 0) { indexBuilder = {}; }
@@ -241,7 +243,7 @@ var Builder = (function () {
         get: function () {
             return {
                 checkNestedAttribute: function (attributeString, value, condition) {
-                    return condition == Model.helpers.getNestedAttribute(attributeString, value);
+                    return condition == model_1.Model.helpers.getNestedAttribute(attributeString, value);
                 },
                 getNestedAttribute: function (attributeString, value) {
                     var attributes = attributeString.split('.');
@@ -295,4 +297,4 @@ var Builder = (function () {
     });
     return Builder;
 }());
-export { Builder };
+exports.Builder = Builder;

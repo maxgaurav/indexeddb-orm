@@ -65,11 +65,11 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Model; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__builder__ = __webpack_require__(1);
+
+
 var __extends = this && this.__extends || function () {
     var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (d, b) {
         d.__proto__ = b;
@@ -166,11 +166,12 @@ var __generator = this && this.__generator || function (thisArg, body) {
         }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-
+Object.defineProperty(exports, "__esModule", { value: true });
+var builder_1 = __webpack_require__(1);
 /**
  * Main Model class
  */
-var Model = function (_super) {
+var Model = /** @class */function (_super) {
     __extends(Model, _super);
     function Model(db, idbKey, name, primary) {
         if (primary === void 0) {
@@ -947,7 +948,7 @@ var Model = function (_super) {
         relationModel.setTransaction(transaction);
         //if a secondary builder function was defined
         if (relation.func) {
-            var tempBuilder = new __WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]();
+            var tempBuilder = new builder_1.Builder();
             tempBuilder = relation.func(tempBuilder);
             relationModel.tables = tempBuilder.tables;
             relationModel.tables.push(relationModel.name);
@@ -1050,25 +1051,26 @@ var Model = function (_super) {
         relations.forEach(function (relation) {
             tables.push(relation.modelName);
             if (relation.func) {
-                var builder = relation.func(new __WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]());
+                var builder = relation.func(new builder_1.Builder());
                 tables = tables.concat(_this.getRelationTables(builder.relations));
             }
         });
         return tables;
     };
     return Model;
-}(__WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]);
-
+}(builder_1.Builder);
+exports.Model = Model;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Builder; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__model__ = __webpack_require__(0);
 
-var Builder = function () {
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var model_1 = __webpack_require__(0);
+var Builder = /** @class */function () {
     function Builder(builder, indexBuilder, relations, tables) {
         if (builder === void 0) {
             builder = [];
@@ -1322,7 +1324,7 @@ var Builder = function () {
         get: function get() {
             return {
                 checkNestedAttribute: function checkNestedAttribute(attributeString, value, condition) {
-                    return condition == __WEBPACK_IMPORTED_MODULE_0__model__["a" /* Model */].helpers.getNestedAttribute(attributeString, value);
+                    return condition == model_1.Model.helpers.getNestedAttribute(attributeString, value);
                 },
                 getNestedAttribute: function getNestedAttribute(attributeString, value) {
                     var attributes = attributeString.split('.');
@@ -1376,17 +1378,15 @@ var Builder = function () {
     });
     return Builder;
 }();
-
+exports.Builder = Builder;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DB; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__migration__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__model__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__worker_model__ = __webpack_require__(4);
+
+
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) {
@@ -1467,10 +1467,11 @@ var __generator = this && this.__generator || function (thisArg, body) {
         }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-
-
-
-var DB = function () {
+Object.defineProperty(exports, "__esModule", { value: true });
+var migration_1 = __webpack_require__(3);
+var model_1 = __webpack_require__(0);
+var worker_model_1 = __webpack_require__(4);
+var DB = /** @class */function () {
     function DB(db, idbKey, settings, useWorker, pathToWorker) {
         if (useWorker === void 0) {
             useWorker = false;
@@ -1535,7 +1536,7 @@ var DB = function () {
                     var primary = schema.primary || 'id';
                     Object.defineProperty(models, schema.name, {
                         get: function get() {
-                            return new __WEBPACK_IMPORTED_MODULE_2__worker_model__["a" /* WorkerModel */](worker, schema.name, primary);
+                            return new worker_model_1.WorkerModel(worker, schema.name, primary);
                         }
                     });
                 });
@@ -1555,7 +1556,7 @@ var DB = function () {
             var request = _this.db.open(_this.settings.name, _this.settings.version);
             request.onupgradeneeded = function (e) {
                 _this.idb = e.target.result;
-                _this.migration = new __WEBPACK_IMPORTED_MODULE_0__migration__["a" /* Migration */](_this.idb, e.target.transaction, _this.settings.migrations);
+                _this.migration = new migration_1.Migration(_this.idb, e.target.transaction, _this.settings.migrations);
                 _this.migration.run();
             };
             request.onerror = function (e) {
@@ -1568,7 +1569,7 @@ var DB = function () {
                     var idbKey = _this.idbKey;
                     Object.defineProperty(models, schema.name, {
                         get: function get() {
-                            return new __WEBPACK_IMPORTED_MODULE_1__model__["a" /* Model */](e.target.result, idbKey, schema.name, primary);
+                            return new model_1.Model(e.target.result, idbKey, schema.name, primary);
                         }
                     });
                 });
@@ -1578,15 +1579,17 @@ var DB = function () {
     };
     return DB;
 }();
-
+exports.DB = DB;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Migration; });
-var Migration = function () {
+
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Migration = /** @class */function () {
     function Migration(db, transaction, migrations) {
         this.db = db;
         this.transaction = transaction;
@@ -1662,15 +1665,15 @@ var Migration = function () {
     };
     return Migration;
 }();
-
+exports.Migration = Migration;
 
 /***/ }),
 /* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return WorkerModel; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__builder__ = __webpack_require__(1);
+
+
 var __extends = this && this.__extends || function () {
     var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function (d, b) {
         d.__proto__ = b;
@@ -1687,8 +1690,9 @@ var __extends = this && this.__extends || function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 }();
-
-var WorkerModel = function (_super) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var builder_1 = __webpack_require__(1);
+var WorkerModel = /** @class */function (_super) {
     __extends(WorkerModel, _super);
     function WorkerModel(worker, name, primary) {
         var _this = _super.call(this) || this;
@@ -1930,8 +1934,8 @@ var WorkerModel = function (_super) {
         });
     };
     return WorkerModel;
-}(__WEBPACK_IMPORTED_MODULE_0__builder__["a" /* Builder */]);
-
+}(builder_1.Builder);
+exports.WorkerModel = WorkerModel;
 
 /***/ }),
 /* 5 */
@@ -1942,12 +1946,14 @@ module.exports = __webpack_require__(6);
 
 /***/ }),
 /* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__db__ = __webpack_require__(2);
 
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var db_1 = __webpack_require__(2);
+window.DB = db_1.DB;
 window.idb = function (settings, useWorker, pathToWorker) {
     if (useWorker === void 0) {
         useWorker = false;
@@ -1965,7 +1971,7 @@ window.idb = function (settings, useWorker, pathToWorker) {
     if (!IDBKeyRange) {
         throw "IDBKeyRange not available";
     }
-    return new __WEBPACK_IMPORTED_MODULE_0__db__["a" /* DB */](indexedDB, IDBKeyRange, settings, useWorker, pathToWorker);
+    return new db_1.DB(indexedDB, IDBKeyRange, settings, useWorker, pathToWorker);
 };
 
 /***/ })
