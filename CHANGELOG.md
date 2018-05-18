@@ -1,6 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/maxgaurav/indexeddb-orm) Latest Release _(Breaking Changes)_
+## [2.1.0](https://github.com/maxgaurav/indexeddb-orm) Latest Release
+- Addition of Multi-Entry relation
+- Add documentation of usage of multi-entry relation 
+
+## [2.0.0](https://github.com/maxgaurav/indexeddb-orm) Release _(Breaking Changes)_
 
 ### Change
 - Main code base moved to typescript
