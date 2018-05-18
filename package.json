@@ -1,6 +1,6 @@
 {
   "name": "indexeddb-orm",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "scripts": {
     "dev": "npm run development",
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
@@ -13,8 +13,8 @@
   "author": "Max Gaurav max.gaurav@ithands.net",
   "description": "A promise based wrapper for indexedDB",
   "devDependencies": {
-    "cross-env": "^5.0.2",
-    "laravel-mix": "~1.5.1",
+    "cross-env": "^5.1",
+    "laravel-mix": "2.1.*",
     "ts-loader": "~3.1.1",
     "typescript": "~2.5.2"
   },
