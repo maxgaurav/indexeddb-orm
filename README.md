@@ -10,7 +10,7 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 The new version of indexedb-orm now uses typescript for its primary language.
 
 ## Version 1.0
-For older version please go to branch [orm-dev](https://github.com/maxgaurav/indexeddb-orm/tree/orm-1.0.1)
+For older version please go to branch [orm-1.0.1](https://github.com/maxgaurav/indexeddb-orm/tree/orm-1.0.1)
 
 ## Website
 [maxgaurav.github.io/indexeddb-orm](https://maxgaurav.github.io/indexeddb-orm)
@@ -48,6 +48,11 @@ Examples coming soon to the website.
         * [lt](#lt)
         * [between](#between)
     * [Relations](#relations)
+        * [Has One](#has-one)
+        * [Has Many](#has-many)
+        * [Has Many Multi Entry](#has-many-multientry)
+        * [Custom Relation Builder](#custom-relation-builder)
+        * [Nested Relations](#nested-relations)
     * [Updating of Records](#updating-of-records)
         * [save](#save)
         * [update](#update)
@@ -432,21 +437,67 @@ db.connect().then(function(models) {
 ```
 
 ### Relations
-* Data from different tables can be fetched with association with current table using relations. There are two relations hasone and hasmany.
+Data from different tables can be fetched with association with current table using relations. The system supports following relations
+
+ * Has One
+ * Has Many
+ * Has Many Multi-Entry
+ 
+The relation builder is used to add a relation to the model for it to fetch. The first value is the name of model, followed
+by the relation type, then the local key of relation model, then local key of calling model and finally a callback to filter the values of relation model further which contains builder reference of relation model. The builder reference can also be used to fetch nested relations with same stratergy.  
+
+ 
+#### Has One
+
+The has one relation maps a single column of primary model containing the id reference of other table/object store directly. The matching relation will be single object instance mapped to table name property. If no matching relation is found then the item will be empty.
+
+Example a user instance having one user contact. The user contact fetching the user model using relation.
 
 ```javascript
+models.userProfiles.relation('users', models.users.RELATIONS.hasOne, 'id', 'userId')
+    .get().then(function(result) {
+        /**
+        * each userProfile object will contain a matching users object as users property
+        */
+    })
+```
 
+#### Has Many
+The has many relation maps single column of primary model containing the id reference of other table/object store with
+with matching id. 
+
+Example a user having multiple contacts. The user model query with all contacts associated.
+
+
+```javascript
 models.users.whereIndexIn('id',[1,2,10,11])
     .where('isAdmin', true)
     .relation('userContacts',models.users.RELATIONS.hasMany, 'id', 'userId')
     .get().then(function(results) {
         
         /**
-        * each results object will have an userContacts property with matching result with users table
-       **/ 
+         * each results object will have an userContacts property with matching result with users table
+        **/ 
     });
 ```
 
+#### Has Many Multi Entry
+
+The has many multi entry relation works just like has many but the primary model column value is an array set as
+ multi-entry index.
+ 
+Example a address table/object store having relation to multiple users using userIds as array with mutli entry index.
+
+```
+models.addresss.relation('users', models.users.RELATIONS.hasManyMultyEntry, 'id', 'userIds')
+    .get().then(function(results) {
+        /**
+         * each reulsts object will have an users property which will be an array of matching users.
+        /**
+    })
+``` 
+
+#### Custom Relation Builder
 * You also refine the relationship using the final parameter by passing a function which will receive a builder function
 and can build using the common non indexed query builder functions.
 
@@ -460,11 +511,12 @@ models.users.whereIndexIn('id',[1,2,10,11])
     .get().then(function(results) {
         
         /**
-        * each results object will have an userContacts property with mathcing result with users table
-       **/ 
+         * each results object will have an userContacts property with matching result with users table
+        **/ 
     });
 ```
 
+#### Nested Relations
 * You can also call for nested relation to nth level using the secondry query builder of the relation
 
 ```javascript
