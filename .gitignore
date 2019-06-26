@@ -1,6 +1,5 @@
 .idea
 /node_modules
-index.html
-mix-manifest.json
+/index.html
 .DS_Store
 hot

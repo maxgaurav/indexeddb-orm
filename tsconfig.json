@@ -6,13 +6,15 @@
     "experimentalDecorators": true,
     "lib": [
       "dom",
-      "es2015"
+      "es7"
     ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": false,
-    "target": "es5",
-    "allowJs": true
+    "module": "es6",
+    "moduleResolution": "classic",
+    "sourceMap": true,
+    "target": "es2017",
+    "allowJs": false,
+    "strict": true,
+    "outDir": "dist/es2015",
   },
   "include": [
     "src/**/*.ts"
