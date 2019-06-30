@@ -1,40 +1,33 @@
-import {DB} from './db';
-import {IDBStaticKeyRange, Settings} from "./interfaces";
+import {Connector} from "./connection/connector.js";
+import {Model} from "./models/model.js";
+import {Migration} from "./migration/migration.js";
+import {CursorDirection, RelationTypes} from "./models/model.interface.js";
+import {Database} from "./migration/migration.interface.js";
+import {WindowInterface} from "./window.interface.js";
 
-declare global {
-    interface Window {
-        idb(settings: Settings, useWorker?: boolean, pathToWorker?: string) : DB,
-        DB,
-        mozIndexedDB: IDBFactory,
-        webkitIndexedDB: IDBFactory,
-        msIndexedDB: IDBFactory,
-        IDBKeyRange: IDBKeyRange,
-        webkitIDBKeyRange: IDBKeyRange,
-        msIDBKeyRange: IDBKeyRange
+declare const window: WindowInterface;
+
+((window) => {
+  window.idb = (schema: Database) => {
+    return new Connector(schema);
+  };
+
+  window.idbTypes = {
+    CursorTypes: {
+      'AscendingUnique': CursorDirection.AscendingUnique,
+      'Ascending': CursorDirection.Ascending,
+      'Descending': CursorDirection.Descending,
+      'DescendingUnique': CursorDirection.DescendingUnique
+    },
+    RelationTypes: {
+      'HasManyThroughMultiEntry': RelationTypes.HasManyThroughMultiEntry,
+      'HasManyMultiEntry': RelationTypes.HasManyMultiEntry,
+      'HasMany': RelationTypes.HasMany,
+      'HasOne': RelationTypes.HasOne
     }
-}
-
-window.DB = DB;
-
-window.idb = (settings: Settings, useWorker : boolean = false, pathToWorker: string = '') : DB => {
-
-    // noinspection TypeScriptUnresolvedVariable
-    let indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-    // noinspection TypeScriptUnresolvedVariable
-    let IDBKeyRange = <IDBStaticKeyRange>(window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange);
-
-    if(!indexedDB) {
-        throw "Indexed DB not supported";
-    }
-
-    if(!IDBKeyRange) {
-        throw "IDBKeyRange not available";
-    }
-
-    return new DB(indexedDB, IDBKeyRange, settings, useWorker, pathToWorker);
-
-};
+  };
+})(window);
 
 
-
+export {Connector, Model, Migration, RelationTypes, CursorDirection};
 

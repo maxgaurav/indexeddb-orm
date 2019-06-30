@@ -1,30 +1,50 @@
 import {ConnectorInterface} from "./connector.interface.js";
-import {Database} from "../migration/migration.interface.js";
+import {Database, MigrationInterface, TableSchema} from "../migration/migration.interface.js";
 import {DBSuccessEvent, DBVersionChangeEvent} from "./idb-event.interface.js";
 import {WindowInterface} from "../window.interface.js";
 import {Migration} from "../migration/migration.js";
+import {ModelInterface, ModelKeysInterface} from "../models/model.interface.js";
+import {Model} from "../models/model.js";
 
-declare let window: WindowInterface;
+declare const window: WindowInterface;
+
 
 export class Connector implements ConnectorInterface {
 
-  public dbOpenConnection: IDBOpenDBRequest | null = null;
+  private dbOpenConnection: IDBOpenDBRequest | null = null;
 
-  public constructor(private migrationSchema: Database) {
+  protected migration: Migration | null = null;
+
+  protected database: IDBDatabase | null = null;
+
+  public constructor(public migrationSchema: Database) {
   }
 
   /**
    * Create/Update and connect the database
    */
-  public connect(): Promise<any> {
+  public connect(): Promise<ModelKeysInterface> {
     this.dbOpenConnection = this.indexedDB().open(this.migrationSchema.name, this.migrationSchema.version);
-    this.dbOpenConnection.addEventListener('success', (event) => this.completeHandler(event as DBSuccessEvent));
-    this.dbOpenConnection.addEventListener('error', (event) => this.errorHandler(event as ErrorEvent));
-    this.dbOpenConnection.addEventListener('upgradeneeded', async (event) => {
-      await this.migrateHandler(event as DBVersionChangeEvent);
-    });
 
-    return Promise.resolve('');
+    return new Promise((resolve, reject) => {
+
+      if (this.dbOpenConnection === null) {
+        throw new Error('Database connection did not open');
+      }
+
+      this.dbOpenConnection.addEventListener('success', (event) => {
+        const models = this.completeHandler(event as DBSuccessEvent);
+        resolve(models);
+      });
+
+      this.dbOpenConnection.addEventListener('error', (event) => {
+        reject(event);
+      });
+
+      this.dbOpenConnection.addEventListener('upgradeneeded', async (event) => {
+        await this.migrateHandler(event as DBVersionChangeEvent);
+      });
+    });
   }
 
   public destroy(): Promise<boolean> {
@@ -46,11 +66,36 @@ export class Connector implements ConnectorInterface {
     return true;
   }
 
-  protected errorHandler(event: ErrorEvent) {
-    // @todo handle error
+  protected completeHandler(event: DBSuccessEvent): { [key: string]: ModelInterface } {
+    const storeNames = this.migrationSchema.tables.map(table => table.name);
+    const transaction = event.target.transaction || event.target.result.transaction(storeNames);
+    this.database = event.target.result;
+
+    const migration = new Migration(this.migrationSchema.tables, event.target.result, transaction);
+    this.migration = migration;
+
+    const stores = migration.listObjectStores();
+    const models: { [key: string]: ModelInterface } = {};
+
+    for (const store of stores) {
+      const table = <TableSchema>this.migrationSchema.tables.find(schema => schema.name === store.name);
+
+
+      Object.defineProperty(models, store.name, {
+        get: () => {
+          return new Model(event.target.result, table, this);
+        }
+      });
+    }
+
+    return models;
   }
 
-  protected completeHandler(event: DBSuccessEvent) {
+  public getMigration(): MigrationInterface | null {
+    return this.migration;
+  }
 
+  public getDatabase(): IDBDatabase | null {
+    return this.database;
   }
 }

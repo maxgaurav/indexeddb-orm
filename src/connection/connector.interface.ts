@@ -1,11 +1,15 @@
+import {MigrationInterface} from "../migration/migration.interface.js";
+
 export interface ConnectorInterface {
-  dbOpenConnection: IDBOpenDBRequest | null;
 
   connect(): Promise<any>;
 
   destroy(): Promise<boolean>;
 
   indexedDB(): IDBFactory;
-}
 
+  getMigration(): MigrationInterface | null;
+
+  getDatabase(): IDBDatabase | null;
+}
 

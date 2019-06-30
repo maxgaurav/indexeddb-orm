@@ -14,7 +14,7 @@ export class Migration implements MigrationInterface {
       }
 
       this.createColumns(table, table.objectStore);
-      this.dropOldColumns(table, table.objectStore)
+      this.dropOldColumns(table, table.objectStore);
     }
 
     for (const tableName of this.allStoreNames()) {
@@ -78,5 +78,14 @@ export class Migration implements MigrationInterface {
     }
 
     return names;
+  }
+
+  public listObjectStores(): IDBObjectStore[] {
+    const stores: IDBObjectStore[] = [];
+    for (const tableName of this.allStoreNames()) {
+      stores.push((this.transaction as IDBTransaction).objectStore(tableName));
+    }
+
+    return stores;
   }
 }

@@ -1,15 +1,10 @@
 {
   "rulesDirectory": [
-    "dist/tools/tslint",
     "node_modules/vrsource-tslint-rules/rules",
     "node_modules/tslint-eslint-rules/dist/rules",
     "node_modules/tslint-no-toplevel-property-access/rules"
   ],
   "rules": {
-    "file-header": [
-      true,
-      "Copyright Google Inc\\."
-    ],
     "no-console": [
       true,
       "log"
@@ -67,5 +62,7 @@
     "no-inner-declarations": [
       true,
       "function"
-    ]
+    ],
+    "quotemark": [true, "single"]
   }
+}

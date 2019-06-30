@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "declaration": false,
+    "declarationMap": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
@@ -14,13 +15,14 @@
     "target": "es2017",
     "allowJs": false,
     "strict": true,
-    "outDir": "dist/es2015",
+    "outDir": "dist/es2015"
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "other"
   ],
   "compileOnSave": true
 }

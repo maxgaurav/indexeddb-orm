@@ -8,6 +8,8 @@ export interface MigrationInterface {
   createIndex(column: TableColumn, objectStore: IDBObjectStore): IDBIndex;
 
   dropIndex(column: string, objectStore: IDBObjectStore): boolean;
+
+  listObjectStores(): IDBObjectStore[];
 }
 
 export interface TableColumn {
