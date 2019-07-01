@@ -7,7 +7,7 @@ module.exports = {
     filename: './idb.js',
   },
   optimization: {
-    minimize: false
+    minimize: true
   },
   module: {
     rules: [{

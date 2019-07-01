@@ -2,7 +2,8 @@
   "name": "indexeddb-orm",
   "version": "2.1.0",
   "scripts": {
-    "dev": ""
+    "build.browser.module": "./node_modules/.bin/tsc --build tsconfig.json",
+    "build.browser.all": "./node_modules/.bin/webpack --config=webpack.config.js --mode=production"
   },
   "author": "Max Gaurav max.gaurav@ithands.net",
   "description": "A promise based wrapper for indexedDB",
