@@ -9,10 +9,23 @@ export abstract class Aggregate extends QueryBuilder implements AggregateInterfa
     super();
   }
 
+  /**
+   * Creates request instance to fetch/update data in database
+   * @param objectStore
+   */
   protected abstract request(objectStore: IDBObjectStore): IDBRequest;
 
+  /**
+   * Returns new/existing transaction instance being used by the model
+   * @param stores
+   * @param mode
+   * @param overwrite
+   */
   protected abstract getTransaction(stores: string[], mode: TransactionModes, overwrite?: boolean): IDBTransaction;
 
+  /**
+   * Returns the count of matching records
+   */
   public count(): Promise<number> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
@@ -53,6 +66,11 @@ export abstract class Aggregate extends QueryBuilder implements AggregateInterfa
     });
   }
 
+  /**
+   * Returns average of attribute value on matching records.
+   * If value is not numeric then its skipped
+   * @param attribute
+   */
   public average(attribute: string): Promise<number> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
@@ -86,7 +104,11 @@ export abstract class Aggregate extends QueryBuilder implements AggregateInterfa
     });
   }
 
-
+  /**
+   * Provides reduce action on matching records to return a single value
+   * @param func
+   * @param defaultCarry
+   */
   public reduce(func: (value: any, result: any) => any, defaultCarry: any): Promise<any>;
   public reduce<T>(func: (value: any, result: any) => any, defaultCarry: any): Promise<T>;
   public reduce<T extends any, U extends any>(func: (value: U, result: any) => any, defaultCarry: any): Promise<T> {

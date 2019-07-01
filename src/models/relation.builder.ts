@@ -10,8 +10,15 @@ import {QueryBuilder} from "./query-builder.js";
 
 export class RelationBuilder implements RelationQueryBuilder {
 
+  /**
+   * Array of relations to be loaded
+   */
   public relations: Relation[] = [];
 
+  /**
+   * Returns list of relation tables required by the model action
+   * @param relations
+   */
   public relationTables(relations: Relation[]): string[] {
 
     let tables: string[] = [];
@@ -34,6 +41,10 @@ export class RelationBuilder implements RelationQueryBuilder {
     return tables;
   }
 
+  /**
+   * Returns relation table name for the model being added as relation
+   * @param model
+   */
   public relationTableName(model: ModelInterface | string): string {
     if (model instanceof Model) {
       return model.table.name;
@@ -42,6 +53,10 @@ export class RelationBuilder implements RelationQueryBuilder {
     return <string>model;
   }
 
+  /**
+   * Adds relation to be fetched
+   * @param relations
+   */
   public with(relations: Relation[]): RelationQueryBuilder | ModelInterface {
     // first filtering existing relations for same table
 
@@ -55,6 +70,8 @@ export class RelationBuilder implements RelationQueryBuilder {
   }
 
   /**
+   * Adds relation to be fetched
+   *
    * @deprecated
    * @param modelName
    * @param type

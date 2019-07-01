@@ -1,6 +1,8 @@
 import {TableSchema} from "../migration/migration.interface.js";
 import {Connector} from "../connection/connector.js";
 
+export const DEFAULT_PRIMARY_ID = '_id';
+
 export interface AggregateInterface {
   count(): Promise<number>;
 
@@ -57,7 +59,7 @@ export interface RelationInterface {
 
   bindResults(parentResults: any | any[], relationResults: any[], relation: Relation): Promise<any>;
 
-  get(results: any[]): Promise<any[]>;
+  fetch(results: any[]): Promise<any[]>;
 }
 
 export enum QueryTypes {
@@ -140,14 +142,16 @@ export interface TransactionHandling {
   setTransaction(transaction: IDBTransaction): void;
 
   createTransaction(stores: string[], mode: TransactionModes): IDBTransaction;
+
+  openTransaction(mode: TransactionModes): {models: ModelKeysInterface, transaction: IDBTransaction};
 }
 
 export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling {
   table: TableSchema;
 
-  get<T>(): Promise<T[]>;
+  all<T>(): Promise<T[]>;
 
-  get(): Promise<any[]>;
+  all(): Promise<any[]>;
 
   create<T>(data: any): Promise<T>;
 
@@ -157,17 +161,17 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
 
   createMultiple(entries: any[]): Promise<any[]>;
 
-  update(data: any): Promise<number>;
+  update(data: any, mergeDeep: boolean): Promise<number>;
 
   delete(id: any): Promise<boolean>;
 
   destroy(): Promise<boolean>;
 
-  deleteIndex(indexName:string, value: any, isMulti: boolean): Promise<boolean>;
+  deleteIndex(indexName: string, value: any, isMulti: boolean): Promise<boolean>;
 
-  find<T>(id: any): Promise<T>;
+  find<T>(id: any): Promise<T | null>;
 
-  find(id: any): Promise<any>;
+  find(id: any): Promise<any | null>;
 
   findIndex<T>(indexName: string, id: any): Promise<T>;
 
@@ -184,6 +188,9 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
    * @param id
    */
   destroyId(id: any): Promise<boolean>;
+
+  truncate(): Promise<boolean>;
+
 }
 
 export interface ModelKeysInterface {

@@ -1,6 +1,7 @@
 import {
+  DEFAULT_PRIMARY_ID,
   IndexBuilder,
-  ModelInterface,
+  ModelInterface, ModelKeysInterface,
   RelationTypes,
   TransactionModes
 } from "./model.interface.js";
@@ -22,8 +23,11 @@ export class Model extends Aggregate implements ModelInterface {
     super(db, table);
   }
 
-  public get<T>(): Promise<T[]>;
-  public get(): Promise<any[]> {
+  /**
+   * Returns list of all matching records.
+   */
+  public all<T>(): Promise<T[]>;
+  public all(): Promise<any[]> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
@@ -60,6 +64,9 @@ export class Model extends Aggregate implements ModelInterface {
 
   }
 
+  /**
+   * Returns fist matching record
+   */
   public first<T>(): Promise<T>;
   public first(): Promise<any> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
@@ -81,7 +88,7 @@ export class Model extends Aggregate implements ModelInterface {
           result = cursor.value;
         }
 
-        if (result || this.relations.length === 0) {
+        if (!result || this.relations.length === 0) {
           resolve(result || null);
         }
 
@@ -96,8 +103,12 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
-  public find<T>(id: any): Promise<T>;
-  public find(id: any): Promise<any> {
+  /**
+   * Finds the record on primary key or returns null
+   * @param id
+   */
+  public find<T>(id: any): Promise<T | null>;
+  public find(id: any): Promise<any | null> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
@@ -108,7 +119,7 @@ export class Model extends Aggregate implements ModelInterface {
       request.addEventListener<'success'>("success", async (event) => {
         const result = (event as IDBResultEvent).target.result;
 
-        if (result || this.relations.length === 0) {
+        if (!result || this.relations.length === 0) {
           resolve(result || null);
         }
 
@@ -116,13 +127,18 @@ export class Model extends Aggregate implements ModelInterface {
 
         await Promise.all(relations);
 
-        resolve(result);
+        resolve(result || null);
       });
 
       request.addEventListener<'error'>("error", (error) => reject(error));
     });
   }
 
+  /**
+   * Finds value at index.
+   * @param indexName
+   * @param id
+   */
   public findIndex<T>(indexName: string, id: any): Promise<T>;
   public findIndex(indexName: string, id: any): Promise<any> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
@@ -132,11 +148,10 @@ export class Model extends Aggregate implements ModelInterface {
 
     return new Promise<any[]>((resolve, reject) => {
 
-      let result: any;
       request.addEventListener<'success'>("success", async (event) => {
         const result = (event as IDBResultEvent).target.result;
 
-        if (result || this.relations.length === 0) {
+        if (!result || this.relations.length === 0) {
           resolve(result || null);
         }
 
@@ -151,6 +166,10 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Creates new record entry
+   * @param data
+   */
   public create<T>(data: any): Promise<T>;
   public create(data: any): Promise<any> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
@@ -168,6 +187,10 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Creates multiple record entry by passing array of entries to be created
+   * @param entries
+   */
   public createMultiple<T>(entries: any[]): Promise<T[]>;
   public createMultiple(entries: any[]): Promise<any[]> {
     const tables = this.relationTables(this.relations).concat(this.table.name);
@@ -194,6 +217,10 @@ export class Model extends Aggregate implements ModelInterface {
     return Promise.all(promises);
   }
 
+  /**
+   * Deletes matching entry.
+   * If no builder/index for filtering is provided then throws error.
+   */
   public destroy(): Promise<boolean> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.Write);
@@ -238,6 +265,10 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Delete record at id of primary key
+   * @param id
+   */
   public async delete(id: any): Promise<boolean> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.Write);
@@ -250,6 +281,12 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Delete records matching index.
+   * @param indexName
+   * @param value
+   * @param isMulti
+   */
   public deleteIndex(indexName: string, value: any, isMulti: boolean = false): Promise<boolean> {
     this.indexBuilder = null;
     this.builder = [];
@@ -262,6 +299,23 @@ export class Model extends Aggregate implements ModelInterface {
   }
 
   /**
+   * Clears entire object store
+   */
+  public truncate(): Promise<boolean> {
+    const tables = [this.table.name];
+    const transaction = this.getTransaction(tables, TransactionModes.Write);
+    const objectStore = transaction.objectStore(this.table.name);
+    const request = objectStore.clear();
+
+    return new Promise<boolean>((resolve, reject) => {
+      request.addEventListener<'success'>("success", () => resolve(true));
+      request.addEventListener<'error'>("error", (error) => reject(error));
+    });
+  }
+
+  /**
+   * Delete record at id
+   *
    * @deprecated
    * @param id
    */
@@ -269,7 +323,13 @@ export class Model extends Aggregate implements ModelInterface {
     return this.delete(id);
   }
 
-  public update(data: any): Promise<number> {
+  /**
+   * Updates all matching records.
+   * By default deep merges the input data with existing data records.
+   * @param data
+   * @param mergeDeep
+   */
+  public update(data: any, mergeDeep: boolean = true): Promise<number> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.Write);
     const objectStore = transaction.objectStore(this.table.name);
@@ -285,7 +345,8 @@ export class Model extends Aggregate implements ModelInterface {
           if (!this.allowedToProcess(cursor.value)) {
             return cursor.continue();
           }
-          updatePromises.push(this.save(cursor.value[this.primaryId], data));
+
+          updatePromises.push(this.save(cursor.value[this.primaryId], data, mergeDeep));
           totalUpdatedRecords++;
           cursor.continue();
         }
@@ -298,16 +359,23 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Updates the records at id
+   * By default deep merges the input data with existing data record.
+   *
+   * @param id
+   * @param data
+   * @param mergeDeep
+   */
   public async save(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
-
+    const tables = [this.table.name];
+    const transaction = this.getTransaction(tables, TransactionModes.Write);
     const record = await this.find<any>(id);
 
     if (!record) {
       return Promise.reject('No record found.');
     }
 
-    const tables = [this.table.name];
-    const transaction = this.getTransaction(tables, TransactionModes.Write, true);
     const objectStore = transaction.objectStore(this.table.name);
     const saveData = mergeDeep ? _mergeDeep(record, data) : data;
     saveData[this.primaryId] = id;
@@ -321,6 +389,13 @@ export class Model extends Aggregate implements ModelInterface {
     });
   }
 
+  /**
+   * Retrieves current transaction and if ne transaction exists then creates new one.
+   *
+   * @param stores
+   * @param mode
+   * @param overwrite
+   */
   public getTransaction(stores: string[], mode: TransactionModes, overwrite: boolean = false): IDBTransaction {
     if (this.transaction === null || overwrite) {
       this.transaction = this.createTransaction(stores, mode);
@@ -328,10 +403,19 @@ export class Model extends Aggregate implements ModelInterface {
     return this.transaction;
   }
 
+  /**
+   * Sets transaction for the model
+   * @param transaction
+   */
   public setTransaction(transaction: IDBTransaction): void {
     this.transaction = transaction;
   }
 
+  /**
+   * Creates new transaction
+   * @param stores
+   * @param mode
+   */
   public createTransaction(stores: string[], mode: TransactionModes): IDBTransaction {
     const transaction = this.db.transaction(stores, mode);
     this.setTransaction(transaction);
@@ -339,19 +423,52 @@ export class Model extends Aggregate implements ModelInterface {
     return transaction;
   }
 
-  protected request(object: IDBObjectStore): IDBRequest {
+  /**
+   * Opens new transaction for all models and returns transaction instance
+   * @param mode
+   */
+  public openTransaction(mode: TransactionModes): { models: ModelKeysInterface, transaction: IDBTransaction } {
+
+    const transaction = this.db.transaction(this.connector.migrationSchema.tables.map(table => table.name));
+
+    const models: { [key: string]: ModelInterface } = {};
+
+    for (const table of this.connector.migrationSchema.tables) {
+
+      Object.defineProperty(models, table.name, {
+        get: () => {
+          const model = new Model(<IDBDatabase>this.db, table, this.connector);
+          model.setTransaction(transaction);
+          return model;
+        }
+      });
+    }
+
+    return {models, transaction};
+  }
+
+  /**
+   * Opens IDBRequest to perform action on object store
+   * @param objectStore
+   */
+  protected request(objectStore: IDBObjectStore): IDBRequest {
     const direction = this.cursor || undefined;
 
     if (this.indexBuilder) {
       const keyRange = this.keyRange(this.indexBuilder);
-      const cursor = this.indexBuilder.index !== this.primaryId ? object.index(this.indexBuilder.index) : object;
+      const cursor = this.indexBuilder.index !== this.primaryId ? objectStore.index(this.indexBuilder.index) : objectStore;
       return cursor.openCursor(keyRange, direction);
     } else {
-      return object.openCursor(undefined, direction);
+      return objectStore.openCursor(undefined, direction);
     }
 
   }
 
+  /**
+   * Loads relations against the model results
+   *
+   * @param results
+   */
   protected loadRelations(results: any[]): Promise<any>[] {
     const relationsArray: Promise<any>[] = [];
 
@@ -360,19 +477,19 @@ export class Model extends Aggregate implements ModelInterface {
       switch (relation.type) {
         case RelationTypes.HasOne:
           loader = new HasOne(this.db, this.connector, this, relation);
-          relationsArray.push(loader.get(results));
+          relationsArray.push(loader.fetch(results));
           break;
         case RelationTypes.HasMany:
           loader = new HasMany(this.db, this.connector, this, relation);
-          relationsArray.push(loader.get(results));
+          relationsArray.push(loader.fetch(results));
           break;
         case RelationTypes.HasManyMultiEntry:
           loader = new HasManyMulti(this.db, this.connector, this, relation);
-          relationsArray.push(loader.get(results));
+          relationsArray.push(loader.fetch(results));
           break;
         case RelationTypes.HasManyThroughMultiEntry:
           loader = new HasManyThroughMulti(this.db, this.connector, this, relation);
-          relationsArray.push(loader.get(results));
+          relationsArray.push(loader.fetch(results));
           break;
         default:
           throw new Error(`Unknown relation ${relation.type}`);
@@ -382,8 +499,11 @@ export class Model extends Aggregate implements ModelInterface {
     return relationsArray;
   }
 
+  /**
+   * The primary key of the model
+   */
   public get primaryId(): string {
-    return this.table.primary || '_id';
+    return this.table.primary || DEFAULT_PRIMARY_ID;
   }
 
 }

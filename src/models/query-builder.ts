@@ -11,10 +11,26 @@ import {nestedAttributeValue} from "../utils.js";
 
 export class QueryBuilder extends RelationBuilder implements QueryBuilderInterface {
 
+  /**
+   * Index filter setting
+   */
   public indexBuilder: IndexBuilder | null = null;
+
+  /**
+   * Non indexed columns search settings
+   */
   public builder: Builder[] = [];
+
+  /**
+   * Search direction and type
+   */
   public cursor: CursorDirection | null = null;
 
+  /**
+   * Search on exact index value
+   * @param indexName
+   * @param value
+   */
   public whereIndex(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -25,6 +41,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search on multiple indexed value
+   * @param indexName
+   * @param values
+   */
   public whereIndexIn(indexName: string, values: any[]): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -35,6 +56,12 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search on MultiEntry index value
+   * @param indexName
+   * @param values
+   * @param unique
+   */
   public whereMultiIndexIn(indexName: string, values: any[], unique: boolean = false): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -45,6 +72,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search index value where index greater then equal to value
+   * @param indexName
+   * @param value
+   */
   public indexGte(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -54,6 +86,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search index where index greater than value
+   * @param indexName
+   * @param value
+   */
   public indexGt(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -63,6 +100,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search index where index less than equal value
+   * @param indexName
+   * @param value
+   */
   public indexLte(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -73,6 +115,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search index where index less than value
+   * @param indexName
+   * @param value
+   */
   public indexLt(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -82,6 +129,12 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search index between values but not inclusive.
+   * @param indexName
+   * @param lower
+   * @param upper
+   */
   public indexBetween(indexName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
@@ -91,6 +144,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute where value is same
+   * @param attributeName
+   * @param value
+   */
   public where(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -100,6 +158,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute where attribute value match one of the values
+   * @param attributeName
+   * @param values
+   */
   public whereIn(attributeName: string, values: any[]): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -110,6 +173,12 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute where attribute value is array type and matches one of the value
+   * @param attributeName
+   * @param values
+   * @param unique
+   */
   public whereInArray(attributeName: string, values: any[], unique: boolean = false): QueryBuilderInterface | ModelInterface {
 
     this.builder.push({
@@ -121,6 +190,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute value is greater then or equal value
+   * @param attributeName
+   * @param value
+   */
   public gte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -130,6 +204,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute value is greater than value
+   * @param attributeName
+   * @param value
+   */
   public gt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -139,6 +218,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute value is less than equal value
+   * @param attributeName
+   * @param value
+   */
   public lte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -148,6 +232,11 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute value is less than value
+   * @param attributeName
+   * @param value
+   */
   public lt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -157,6 +246,12 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Search attribute value between bound values.
+   * @param attributeName
+   * @param lower
+   * @param upper
+   */
   public between(attributeName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
@@ -171,6 +266,10 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return this;
   }
 
+  /**
+   * Returns IDBKeyRange on indexed filter
+   * @param indexBuilder
+   */
   public keyRange(indexBuilder: IndexBuilder): IDBKeyRange {
 
     let range: IDBKeyRange;
@@ -216,6 +315,10 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     return range;
   }
 
+  /**
+   * Checks if the attribute value is allowed to be processed according to attribute filters
+   * @param result
+   */
   protected allowedToProcess(result: any): boolean {
 
     for (const builder of this.builder) {

@@ -13,7 +13,7 @@ export class HasOne extends Relations {
     super();
   }
 
-  public async get(results: any[]): Promise<any[]> {
+  public async fetch(results: any[]): Promise<any[]> {
     let model = this.getRelationModel(this.relation);
     model = this.filteredModel(model, this.relation);
 
@@ -28,7 +28,7 @@ export class HasOne extends Relations {
       model.whereIndexIn(this.relation.foreignKey, values)
         .cursorDirection(CursorDirection.AscendingUnique);
 
-      relationResults = await model.get();
+      relationResults = await model.all();
     }
 
     return this.bindResults(results, relationResults, this.relation);

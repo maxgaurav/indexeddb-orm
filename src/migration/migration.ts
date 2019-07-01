@@ -1,9 +1,14 @@
 import {MigrationInterface, TableColumn, TableSchema} from "./migration.interface.js";
+import {DEFAULT_PRIMARY_ID} from "../models/model.interface.js";
 
 export class Migration implements MigrationInterface {
   constructor(public tables: TableSchema[], public db: IDBDatabase, public transaction: IDBTransaction | null) {
   }
 
+  /**
+   * Runs the migration action to update the database with new stores or deletes unwanted stored and then creates or
+   * drops indexes for the stores.
+   */
   public async run(): Promise<TableSchema[]> {
     for (const table of this.tables) {
       if (!this.db.objectStoreNames.contains(table.name)) {
@@ -26,20 +31,34 @@ export class Migration implements MigrationInterface {
     return this.tables;
   }
 
+  /**
+   * Creates an index in object store
+   * @param column
+   * @param objectStore
+   */
   public createIndex(column: TableColumn, objectStore: IDBObjectStore): IDBIndex {
     const attributes = column.attributes || {};
     const index = column.index || column.name;
     return objectStore.createIndex(column.name, index, attributes);
   }
 
+  /**
+   * Drops an index in object store
+   * @param column
+   * @param objectStore
+   */
   public dropIndex(column: string, objectStore: IDBObjectStore): boolean {
     objectStore.deleteIndex(column);
 
     return true;
   }
 
+  /**
+   * Creates new object store
+   * @param schema
+   */
   public createObjectStore(schema: TableSchema): IDBObjectStore {
-    let primary = schema.primary || '_id';
+    let primary = schema.primary || DEFAULT_PRIMARY_ID;
 
     return this.db.createObjectStore(schema.name, {
       keyPath: primary,
@@ -47,10 +66,19 @@ export class Migration implements MigrationInterface {
     });
   }
 
+  /**
+   * Drops existing object store
+   * @param schema
+   */
   public dropObjectStore(schema: TableSchema): boolean {
     return true;
   }
 
+  /**
+   * Creates various indexes on object store
+   * @param table
+   * @param objectStore
+   */
   protected createColumns(table: TableSchema, objectStore: IDBObjectStore) {
     for (const column of table.columns) {
 
@@ -60,6 +88,11 @@ export class Migration implements MigrationInterface {
     }
   }
 
+  /**
+   * Drops indexes in object store
+   * @param table
+   * @param objectStore
+   */
   protected dropOldColumns(table: TableSchema, objectStore: IDBObjectStore) {
     const indexNames = objectStore.indexNames;
     for (let i = 0; i < indexNames.length; i++) {
@@ -70,6 +103,9 @@ export class Migration implements MigrationInterface {
 
   }
 
+  /**
+   * Returns a list of all object store names which are in current database
+   */
   private allStoreNames(): string[] {
     const names: string[] = [];
 
@@ -80,6 +116,9 @@ export class Migration implements MigrationInterface {
     return names;
   }
 
+  /**
+   * Returns all object store instances in database
+   */
   public listObjectStores(): IDBObjectStore[] {
     const stores: IDBObjectStore[] = [];
     for (const tableName of this.allStoreNames()) {

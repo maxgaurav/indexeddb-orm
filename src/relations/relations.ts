@@ -1,20 +1,44 @@
-import {ModelInterface, Relation, RelationInterface} from "../models/model.interface.js";
+import {DEFAULT_PRIMARY_ID, ModelInterface, Relation, RelationInterface} from "../models/model.interface.js";
 import {Model} from "../models/model.js";
 import {QueryBuilder} from "../models/query-builder.js";
 import {Connector} from "../connection/connector.js";
 
 export abstract class Relations implements RelationInterface {
 
+  /**
+   * IDBDatabase
+   */
   public abstract db: IDBDatabase;
 
+  /**
+   * Connection instance
+   */
   public abstract connector: Connector;
 
+  /**
+   * Relation object defining the relation to parent model
+   */
   public abstract relation: Relation;
 
+  /**
+   * Binds relation result to parent result.
+   * @param parentResults
+   * @param relationResults
+   * @param relation
+   */
   public abstract bindResults(parentResults: any | any[], relationResults: any[], relation: Relation): Promise<any>;
 
-  public abstract get(results: any[]): Promise<any[]>;
+  /**
+   * Fetches relation results
+   * @param results
+   */
+  public abstract fetch(results: any[]): Promise<any[]>;
 
+  /**
+   * Sets builder values created through callback function
+   * @param model
+   * @param relation
+   */
   public filteredModel(model: ModelInterface, relation: Relation): ModelInterface {
     const builder = new QueryBuilder();
 
@@ -28,6 +52,10 @@ export abstract class Relations implements RelationInterface {
     return model;
   }
 
+  /**
+   * Retrieves th relation model instance
+   * @param relation
+   */
   public getRelationModel(relation: Relation): ModelInterface {
     let model: ModelInterface;
 
@@ -45,8 +73,13 @@ export abstract class Relations implements RelationInterface {
     return model;
   }
 
+  /**
+   * Retrieves the local key of parent model
+   * @param model
+   * @param relation
+   */
   public getLocalKey(model: ModelInterface, relation: Relation): string {
-    const primaryKey = model.table.primary || '_id';
+    const primaryKey = model.table.primary || DEFAULT_PRIMARY_ID;
     return relation.localKey ? relation.localKey : primaryKey;
   }
 }

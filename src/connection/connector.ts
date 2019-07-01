@@ -3,25 +3,36 @@ import {Database, MigrationInterface, TableSchema} from "../migration/migration.
 import {DBSuccessEvent, DBVersionChangeEvent} from "./idb-event.interface.js";
 import {WindowInterface} from "../window.interface.js";
 import {Migration} from "../migration/migration.js";
-import {ModelInterface, ModelKeysInterface} from "../models/model.interface.js";
+import {ModelInterface, ModelKeysInterface, TransactionModes} from "../models/model.interface.js";
 import {Model} from "../models/model.js";
 
 declare const window: WindowInterface;
 
-
+/**
+ *
+ */
 export class Connector implements ConnectorInterface {
 
+  /**
+   * Database open request
+   */
   private dbOpenConnection: IDBOpenDBRequest | null = null;
 
+  /**
+   * Migration builder instance
+   */
   protected migration: Migration | null = null;
 
+  /**
+   * IndexedDB Database instance
+   */
   protected database: IDBDatabase | null = null;
 
   public constructor(public migrationSchema: Database) {
   }
 
   /**
-   * Create/Update and connect the database
+   * Create/Update and connects the database
    */
   public connect(): Promise<ModelKeysInterface> {
     this.dbOpenConnection = this.indexedDB().open(this.migrationSchema.name, this.migrationSchema.version);
@@ -47,8 +58,11 @@ export class Connector implements ConnectorInterface {
     });
   }
 
-  public destroy(): Promise<boolean> {
-    const request = this.indexedDB().deleteDatabase(this.migrationSchema.name);
+  /**
+   * Deletes the database
+   */
+  public destroy(databaseName: string): Promise<boolean> {
+    const request = this.indexedDB().deleteDatabase(databaseName);
     return new Promise((resolve, reject) => {
       request.addEventListener('success', () => resolve(true));
       request.addEventListener('error', (e) => reject(e));
@@ -56,16 +70,27 @@ export class Connector implements ConnectorInterface {
 
   }
 
+  /**
+   * Returns the IDBFactory.
+   */
   public indexedDB(): IDBFactory {
     return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
   }
 
+  /**
+   * Called when database version is updated. Runs migrations to update schema structure
+   * @param event
+   */
   public async migrateHandler(event: DBVersionChangeEvent): Promise<boolean> {
     const migration = new Migration(this.migrationSchema.tables, event.target.result, event.target.transaction);
     this.migrationSchema.tables = await migration.run();
     return true;
   }
 
+  /**
+   * Called when connection to database is successful. Creates various models for the tables.
+   * @param event
+   */
   protected completeHandler(event: DBSuccessEvent): { [key: string]: ModelInterface } {
     const storeNames = this.migrationSchema.tables.map(table => table.name);
     const transaction = event.target.transaction || event.target.result.transaction(storeNames);
@@ -91,11 +116,44 @@ export class Connector implements ConnectorInterface {
     return models;
   }
 
+  /**
+   * Returns migration instance
+   */
   public getMigration(): MigrationInterface | null {
     return this.migration;
   }
 
+  /**
+   * Returns database instance
+   */
   public getDatabase(): IDBDatabase | null {
     return this.database;
+  }
+
+  /**
+   * Opens a transaction to allow fine control on commits.
+   * @param mode
+   */
+  public openTransaction(mode: TransactionModes): {models: ModelKeysInterface, transaction: IDBTransaction} {
+    if (this.database === null) {
+      throw new Error('First initialize the connection using connect.');
+    }
+
+    const transaction = this.database.transaction(this.migrationSchema.tables.map(table => table.name));
+
+    const models: { [key: string]: ModelInterface } = {};
+
+    for (const table of this.migrationSchema.tables) {
+
+      Object.defineProperty(models, table.name, {
+        get: () => {
+          const model = new Model(<IDBDatabase>this.database, table, this);
+          model.setTransaction(transaction);
+          return model;
+        }
+      });
+    }
+
+    return {models, transaction};
   }
 }
