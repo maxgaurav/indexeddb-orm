@@ -3,6 +3,7 @@ import {TableSchema} from "../migration/migration.interface.js";
 import {QueryBuilder} from "./query-builder.js";
 import {IDBResultEvent} from "../connection/idb-event.interface.js";
 import {OrmRelationBuilder} from "./orm-relation-builder.js";
+import {nestedAttributeValue} from "../utils.js";
 
 export abstract class Aggregate extends OrmRelationBuilder implements AggregateInterface {
 
@@ -89,11 +90,12 @@ export abstract class Aggregate extends OrmRelationBuilder implements AggregateI
           if (!this.allowedToProcess(cursor.value)) {
             return cursor.continue();
           }
-          if (!isNaN(parseFloat(cursor.value[attribute]))) {
+          const value = nestedAttributeValue(attribute, cursor.value);
+          if (!isNaN(parseFloat(value))) {
             total += parseFloat(cursor.value[attribute]);
-            count++;
           }
 
+          count++;
           return cursor.continue();
         }
 
