@@ -7,7 +7,7 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Version 2.1.0
-For older version please go to branch [2.1.0](https://github.com/maxgaurav/indexeddb-orm/tree/orm-1.0.1)
+For older version please go to branch [2.1.0](https://github.com/maxgaurav/indexeddb-orm/tree/orm-2.1.0)
 
 ## Website
 [maxgaurav.github.io/indexeddb-orm](https://maxgaurav.github.io/indexeddb-orm)
