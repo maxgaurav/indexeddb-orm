@@ -1,6 +1,26 @@
 # Changelog
 
-## [2.1.0](https://github.com/maxgaurav/indexeddb-orm) Latest Release
+## [3.0.0]() Latest Release
+
+### Added
+- Added **with** to add relation handling. Takes in array of relations.
+- Added **withCustom** to add relation of ORM as string values.
+- Added **delete** to replace **destroyId**.
+- Added **deleteIndex** to delete matching values directly on index.
+- Added ORM class instance extending Model class to be used over default Model class
+- Added new relation **HasManyThroughMultiEntry**. 
+- Providing both es6 module for modular programming and direct script based injection through **idb.js**
+
+### Deprecation
+- Deprecated **relation** function on models to add relation. Use **with**.
+- Deprecated **destroyId** function mon models. Use **delete**.
+
+### Removals
+- Worker instance handling
+- Deletion of indexes and object stores by providing drop settings is removed. These are now handled automatically by comparing
+existing database structure with table schemas provided.
+
+## [2.1.0](https://github.com/maxgaurav/indexeddb-orm) 
 - Addition of Multi-Entry relation
 - Add documentation of usage of multi-entry relation 
 
@@ -30,6 +50,7 @@
 ### Removed
 - Removed build folder and replaced with dist folder
 - Removed **transaction** function from the main database **DB** instance. Instead use **_model_.openTransaction**
+- Removed **get** function and replaced with **all**. 
 
 ## [1.0.1](https://github.com/maxgaurav/indexeddb-orm/tree/orm-1.0.1) Initial Release
 - Add base DB interface 
