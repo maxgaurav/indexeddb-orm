@@ -8,27 +8,37 @@ export class HasMany extends Relations {
     public db: IDBDatabase,
     public connector: Connector,
     protected parentModel: ModelInterface,
-    public relation: Relation
+    public childRelation: Relation
   ) {
     super();
   }
 
+  /**
+   * Fetch relation results
+   * @param results
+   */
   public async fetch(results: any[]): Promise<any> {
-    let model = this.getRelationModel(this.relation);
-    model = this.filteredModel(model, this.relation);
+    let model = this.getRelationModel(this.childRelation);
+    model = this.filteredModel(model, this.childRelation);
 
-    const values = results.map(result => result[this.getLocalKey(this.parentModel, this.relation)]);
-    model.whereIndexIn(this.relation.foreignKey, values);
+    const values = results.map(result => result[this.getLocalKey(this.parentModel, this.childRelation)]);
+    model.whereIndexIn(this.childRelation.foreignKey, values);
 
     const relationResults = await model.all();
 
-    return this.bindResults(results, relationResults, this.relation);
+    return this.bindResults(results, relationResults, this.childRelation);
   }
 
+  /**
+   * Bind relation results to parent results
+   * @param parentResults
+   * @param relationResults
+   * @param relation
+   */
   public bindResults(parentResults: any[], relationResults: any, relation: Relation): Promise<any> {
-    const localKey = this.getLocalKey(this.parentModel, this.relation);
+    const localKey = this.getLocalKey(this.parentModel, this.childRelation);
     parentResults.forEach(parentResult => {
-      parentResult[this.getRelationModel(relation).table.name] = relationResults.filter(
+      parentResult[this.getAttributeName(this.parentModel, relation)] = relationResults.filter(
         (relationResult: any) => relationResult[relation.foreignKey] === parentResult[localKey]
       );
     });

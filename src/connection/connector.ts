@@ -108,7 +108,14 @@ export class Connector implements ConnectorInterface {
 
       Object.defineProperty(models, store.name, {
         get: () => {
-          return new Model(event.target.result, table, this);
+
+          if (table.ormClass) {
+            return new table.ormClass(event.target.result, table, this);
+          } else {
+            return new Model(event.target.result, table, this);
+          }
+
+
         }
       });
     }

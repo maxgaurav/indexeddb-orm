@@ -7,8 +7,10 @@ import {
 } from "./model.interface.js";
 import {Model} from "./model.js";
 import {QueryBuilder} from "./query-builder.js";
+import {Connector} from "../connection/connector.js";
+import {TableSchema} from "../migration/migration.interface.js";
 
-export class RelationBuilder implements RelationQueryBuilder {
+export abstract class RelationBuilder implements RelationQueryBuilder {
 
   /**
    * Array of relations to be loaded
@@ -16,45 +18,20 @@ export class RelationBuilder implements RelationQueryBuilder {
   public relations: Relation[] = [];
 
   /**
-   * Returns list of relation tables required by the model action
-   * @param relations
+   * Custom relations list
    */
-  public relationTables(relations: Relation[]): string[] {
+  public customRelations: string[] = [];
 
-    let tables: string[] = [];
-
-    for (const relation of relations) {
-      let tableName = '';
-      if (relation.model instanceof Model) {
-        tableName = relation.model.table.name;
-      } else {
-        tableName = <string>relation.model;
-      }
-
-      tables.push(tableName);
-      if (relation.func) {
-        const builder = relation.func(new QueryBuilder());
-        tables = tables.concat(this.relationTables(builder.relations));
-      }
-    }
-
-    return tables;
+  /**
+   * Returns list of childRelation tables required by the model action
+   * @param tables
+   */
+  public tableNames(tables: TableSchema[]): string[] {
+    return tables.map(table => table.name);
   }
 
   /**
-   * Returns relation table name for the model being added as relation
-   * @param model
-   */
-  public relationTableName(model: ModelInterface | string): string {
-    if (model instanceof Model) {
-      return model.table.name;
-    }
-
-    return <string>model;
-  }
-
-  /**
-   * Adds relation to be fetched
+   * Adds childRelation to be fetched
    * @param relations
    */
   public with(relations: Relation[]): RelationQueryBuilder | ModelInterface {
@@ -70,7 +47,7 @@ export class RelationBuilder implements RelationQueryBuilder {
   }
 
   /**
-   * Adds relation to be fetched
+   * Adds childRelation to be fetched
    *
    * @deprecated
    * @param modelName
@@ -100,4 +77,17 @@ export class RelationBuilder implements RelationQueryBuilder {
     return this;
   }
 
+  /**
+   * Adds custom relations
+   * @param relations
+   */
+  public withCustom(relations: string[]): RelationQueryBuilder | ModelInterface {
+    const filteredRelations = this.customRelations.filter(
+      relation => !relations.find(
+        newRelation => newRelation === relation)
+    );
+    this.customRelations = filteredRelations.concat(relations);
+
+    return this;
+  }
 }

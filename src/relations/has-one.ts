@@ -8,38 +8,38 @@ export class HasOne extends Relations {
     public db: IDBDatabase,
     public connector: Connector,
     protected parentModel: ModelInterface,
-    public relation: Relation
+    public childRelation: Relation
   ) {
     super();
   }
 
   public async fetch(results: any[]): Promise<any[]> {
-    let model = this.getRelationModel(this.relation);
-    model = this.filteredModel(model, this.relation);
+    let model = this.getRelationModel(this.childRelation);
+    model = this.filteredModel(model, this.childRelation);
 
     let relationResults: any[] = [];
     // optimizing query
     if (results.length === 1) {
-      model.whereIndex(this.relation.foreignKey, results[0][this.getLocalKey(this.parentModel, this.relation)]);
+      model.whereIndex(this.childRelation.foreignKey, results[0][this.getLocalKey(this.parentModel, this.childRelation)]);
       relationResults = [await model.first()];
 
     } else {
-      const values = results.map(result => result[this.getLocalKey(this.parentModel, this.relation)]);
-      model.whereIndexIn(this.relation.foreignKey, values)
+      const values = results.map(result => result[this.getLocalKey(this.parentModel, this.childRelation)]);
+      model.whereIndexIn(this.childRelation.foreignKey, values)
         .cursorDirection(CursorDirection.AscendingUnique);
 
       relationResults = await model.all();
     }
 
-    return this.bindResults(results, relationResults, this.relation);
+    return this.bindResults(results, relationResults, this.childRelation);
   }
 
   public bindResults(parentResults: any[], relationResults: any[], relation: Relation): Promise<any[]> {
-    const localKey = this.getLocalKey(this.parentModel, this.relation);
+    const localKey = this.getLocalKey(this.parentModel, this.childRelation);
     parentResults.forEach(result => {
 
       const mappedResult = relationResults.find(relationResult => relationResult[relation.foreignKey] === result[localKey]);
-      result[this.getRelationModel(relation).table.name] = mappedResult || null;
+      result[this.getAttributeName(this.parentModel, relation)] = mappedResult || null;
     });
     return Promise.resolve(parentResults);
   }

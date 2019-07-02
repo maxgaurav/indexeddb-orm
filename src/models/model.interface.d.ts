@@ -1,5 +1,9 @@
 import { TableSchema } from "../migration/migration.interface.js";
 import { Connector } from "../connection/connector.js";
+import { HasOne } from "../relations/has-one.js";
+import { HasMany } from "../relations/has-many.js";
+import { HasManyThroughMulti } from "../relations/has-many-through-multi.js";
+import { HasManyMulti } from "../relations/has-many-multi.js";
 export declare const DEFAULT_PRIMARY_ID = "_id";
 export interface AggregateInterface {
     count(): Promise<number>;
@@ -19,28 +23,35 @@ export declare enum RelationTypes {
     HasManyMultiEntry = "hasManyMultiEntry",
     HasManyThroughMultiEntry = "hasManyThroughMultiEntry"
 }
-export interface RelationResult {
-    relation: Relation;
-    results: any | any[] | undefined;
-}
 export interface Relation {
     model: ModelInterface | string;
     type: RelationTypes;
     foreignKey: string;
-    localKey?: string;
+    attributeName?: string | undefined;
+    localKey?: string | undefined;
     func?(builder: QueryBuilderInterface): QueryBuilderInterface;
+}
+export interface OrmRelationBuilderInterface {
+    hasOne(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasOne;
+    hasMany(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasMany;
+    hasManyMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyMulti;
+    hasManyThroughMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyThroughMulti;
 }
 export interface RelationQueryBuilder {
     relations: Relation[];
-    relationTables(relations: Relation[]): string[];
-    relationTableName(model: ModelInterface | string): string;
-}
-export interface RelationInterface {
-    db: IDBDatabase;
-    connector: Connector;
-    relation: Relation;
-    bindResults(parentResults: any | any[], relationResults: any[], relation: Relation): Promise<any>;
-    fetch(results: any[]): Promise<any[]>;
+    customRelations: string[];
+    tableNames(relations: TableSchema[]): string[];
+    with(relations: Relation[]): RelationQueryBuilder | ModelInterface;
+    withCustom(relations: string[]): RelationQueryBuilder | ModelInterface;
+    /**
+     * @deprecated
+     * @param modelName
+     * @param type
+     * @param localKey
+     * @param foreignKey
+     * @param func
+     */
+    relation(modelName: string, type: RelationTypes, localKey: string, foreignKey: string, func?: (builder: QueryBuilderInterface) => QueryBuilderInterface): RelationQueryBuilder | ModelInterface;
 }
 export declare enum QueryTypes {
     Between = "between",
@@ -99,6 +110,12 @@ export interface TransactionHandling {
         models: ModelKeysInterface;
         transaction: IDBTransaction;
     };
+}
+export interface ModelConstructorInterface {
+    new (db: IDBDatabase, table: TableSchema, connector: Connector): ModelInterface;
+    (...args: string[]): ModelInterface;
+    readonly prototype: ModelInterface;
+    TableName: string;
 }
 export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling {
     table: TableSchema;

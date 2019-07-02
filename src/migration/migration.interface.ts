@@ -1,3 +1,5 @@
+import {ModelConstructorInterface, ModelInterface} from "../models/model.interface.js";
+
 export interface MigrationInterface {
   run(): Promise<TableSchema[]>;
 
@@ -21,8 +23,9 @@ export interface TableColumn {
 
 export interface TableSchema {
   name: string;
-  primary?: string;
   columns: TableColumn[];
+  ormClass?: ModelConstructorInterface;
+  primary?: string;
   objectStore?: IDBObjectStore | null;
 }
 

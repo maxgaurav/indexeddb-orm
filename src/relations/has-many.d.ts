@@ -5,8 +5,18 @@ export declare class HasMany extends Relations {
     db: IDBDatabase;
     connector: Connector;
     protected parentModel: ModelInterface;
-    relation: Relation;
-    constructor(db: IDBDatabase, connector: Connector, parentModel: ModelInterface, relation: Relation);
+    childRelation: Relation;
+    constructor(db: IDBDatabase, connector: Connector, parentModel: ModelInterface, childRelation: Relation);
+    /**
+     * Fetch relation results
+     * @param results
+     */
     fetch(results: any[]): Promise<any>;
+    /**
+     * Bind relation results to parent results
+     * @param parentResults
+     * @param relationResults
+     * @param relation
+     */
     bindResults(parentResults: any[], relationResults: any, relation: Relation): Promise<any>;
 }

@@ -1,26 +1,26 @@
 import { ModelInterface, QueryBuilderInterface, Relation, RelationQueryBuilder, RelationTypes } from "./model.interface.js";
-export declare class RelationBuilder implements RelationQueryBuilder {
+import { TableSchema } from "../migration/migration.interface.js";
+export declare abstract class RelationBuilder implements RelationQueryBuilder {
     /**
      * Array of relations to be loaded
      */
     relations: Relation[];
     /**
-     * Returns list of relation tables required by the model action
-     * @param relations
+     * Custom relations list
      */
-    relationTables(relations: Relation[]): string[];
+    customRelations: string[];
     /**
-     * Returns relation table name for the model being added as relation
-     * @param model
+     * Returns list of childRelation tables required by the model action
+     * @param tables
      */
-    relationTableName(model: ModelInterface | string): string;
+    tableNames(tables: TableSchema[]): string[];
     /**
-     * Adds relation to be fetched
+     * Adds childRelation to be fetched
      * @param relations
      */
     with(relations: Relation[]): RelationQueryBuilder | ModelInterface;
     /**
-     * Adds relation to be fetched
+     * Adds childRelation to be fetched
      *
      * @deprecated
      * @param modelName
@@ -30,4 +30,9 @@ export declare class RelationBuilder implements RelationQueryBuilder {
      * @param func
      */
     relation(modelName: string, type: RelationTypes, localKey: string, foreignKey: string, func?: (builder: QueryBuilderInterface) => QueryBuilderInterface): RelationQueryBuilder | ModelInterface;
+    /**
+     * Adds custom relations
+     * @param relations
+     */
+    withCustom(relations: string[]): RelationQueryBuilder | ModelInterface;
 }

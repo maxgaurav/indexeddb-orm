@@ -123,4 +123,5 @@ export declare class Model extends Aggregate implements ModelInterface {
      * The primary key of the model
      */
     readonly primaryId: string;
+    protected loadCustomRelations(results: any[]): Promise<any>[];
 }

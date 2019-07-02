@@ -1,6 +1,5 @@
 import {
   DEFAULT_PRIMARY_ID,
-  IndexBuilder,
   ModelInterface, ModelKeysInterface,
   RelationTypes,
   TransactionModes
@@ -14,6 +13,7 @@ import {HasMany} from "../relations/has-many.js";
 import {HasManyMulti} from "../relations/has-many-multi.js";
 import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
 import {mergeDeep as _mergeDeep} from "../utils.js";
+import {Relations} from "../relations/relations.js";
 
 export class Model extends Aggregate implements ModelInterface {
 
@@ -28,7 +28,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public all<T>(): Promise<T[]>;
   public all(): Promise<any[]> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = this.request(objectStore);
@@ -69,7 +69,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public first<T>(): Promise<T>;
   public first(): Promise<any> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = this.request(objectStore);
@@ -109,7 +109,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public find<T>(id: any): Promise<T | null>;
   public find(id: any): Promise<any | null> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = objectStore.get(id);
@@ -141,7 +141,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public findIndex<T>(indexName: string, id: any): Promise<T>;
   public findIndex(indexName: string, id: any): Promise<any> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = objectStore.index(indexName).get(id);
@@ -172,7 +172,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public create<T>(data: any): Promise<T>;
   public create(data: any): Promise<any> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.Write);
     const objectStore = transaction.objectStore(this.table.name);
 
@@ -193,7 +193,7 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public createMultiple<T>(entries: any[]): Promise<T[]>;
   public createMultiple(entries: any[]): Promise<any[]> {
-    const tables = this.relationTables(this.relations).concat(this.table.name);
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.Write);
     const objectStore = transaction.objectStore(this.table.name);
 
@@ -496,7 +496,7 @@ export class Model extends Aggregate implements ModelInterface {
       }
     }
 
-    return relationsArray;
+    return relationsArray.concat(this.loadCustomRelations(results));
   }
 
   /**
@@ -506,4 +506,19 @@ export class Model extends Aggregate implements ModelInterface {
     return this.table.primary || DEFAULT_PRIMARY_ID;
   }
 
+  protected loadCustomRelations(results: any[]): Promise<any>[] {
+    const relationPromises: Promise<any>[] = [];
+
+    for (const customRelation of this.customRelations) {
+
+      if(!Reflect.has(this, customRelation)) {
+        throw new Error(`Method ${customRelation} not defined.`);
+      }
+
+      const relation = <Relations>(Reflect.get(this, customRelation)());
+      relationPromises.push(relation.fetch(results));
+    }
+
+    return relationPromises;
+  }
 }

@@ -1,7 +1,7 @@
 import { AggregateInterface, TransactionModes } from "./model.interface.js";
 import { TableSchema } from "../migration/migration.interface.js";
-import { QueryBuilder } from "./query-builder.js";
-export declare abstract class Aggregate extends QueryBuilder implements AggregateInterface {
+import { OrmRelationBuilder } from "./orm-relation-builder.js";
+export declare abstract class Aggregate extends OrmRelationBuilder implements AggregateInterface {
     db: IDBDatabase;
     table: TableSchema;
     constructor(db: IDBDatabase, table: TableSchema);

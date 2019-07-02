@@ -7,30 +7,30 @@ export class HasManyThroughMulti extends Relations {
     public db: IDBDatabase,
     public connector: Connector,
     protected parentModel: ModelInterface,
-    public relation: Relation
+    public childRelation: Relation
   ) {
     super();
   }
 
   public async fetch(results: any[]): Promise<any[]> {
-    let model = this.getRelationModel(this.relation);
-    model = this.filteredModel(model, this.relation);
+    let model = this.getRelationModel(this.childRelation);
+    model = this.filteredModel(model, this.childRelation);
 
     const values = results.reduce(
-      (carry: any[], result) => carry.concat(result[this.getLocalKey(this.parentModel, this.relation)]), []
+      (carry: any[], result) => carry.concat(result[this.getLocalKey(this.parentModel, this.childRelation)]), []
     );
-    model.whereIndexIn(this.relation.foreignKey, values);
+    model.whereIndexIn(this.childRelation.foreignKey, values);
 
     const relationResults = await model.all();
 
-    return this.bindResults(results, relationResults, this.relation);
+    return this.bindResults(results, relationResults, this.childRelation);
   }
 
   public bindResults(parentResults: any[], relationResults: any[], relation: Relation): Promise<any> {
-    const localKey = this.getLocalKey(this.parentModel, this.relation);
+    const localKey = this.getLocalKey(this.parentModel, this.childRelation);
 
     parentResults.forEach(parentResult => {
-      parentResult[this.getRelationModel(relation).table.name] = relationResults.filter(
+      parentResult[this.getAttributeName(this.parentModel, relation)] = relationResults.filter(
         (relationResult: any) => !!parentResult[localKey].find(
           (multiValue: any) => multiValue === relationResult[relation.foreignKey]
         )

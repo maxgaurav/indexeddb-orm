@@ -1,6 +1,8 @@
-import { ModelInterface, Relation, RelationInterface } from "../models/model.interface.js";
+import { ModelInterface, QueryBuilderInterface, Relation } from "../models/model.interface.js";
+import { QueryBuilder } from "../models/query-builder.js";
 import { Connector } from "../connection/connector.js";
-export declare abstract class Relations implements RelationInterface {
+import { RelationInterface } from "./relation.interface.js";
+export declare abstract class Relations extends QueryBuilder implements RelationInterface, QueryBuilderInterface {
     /**
      * IDBDatabase
      */
@@ -10,18 +12,14 @@ export declare abstract class Relations implements RelationInterface {
      */
     abstract connector: Connector;
     /**
-     * Relation object defining the relation to parent model
-     */
-    abstract relation: Relation;
-    /**
-     * Binds relation result to parent result.
+     * Binds childRelation result to parent result.
      * @param parentResults
      * @param relationResults
      * @param relation
      */
     abstract bindResults(parentResults: any | any[], relationResults: any[], relation: Relation): Promise<any>;
     /**
-     * Fetches relation results
+     * Fetches childRelation results
      * @param results
      */
     abstract fetch(results: any[]): Promise<any[]>;
@@ -31,8 +29,9 @@ export declare abstract class Relations implements RelationInterface {
      * @param relation
      */
     filteredModel(model: ModelInterface, relation: Relation): ModelInterface;
+    bindBuilder(model: ModelInterface): ModelInterface;
     /**
-     * Retrieves th relation model instance
+     * Retrieves th childRelation model instance
      * @param relation
      */
     getRelationModel(relation: Relation): ModelInterface;
@@ -42,4 +41,10 @@ export declare abstract class Relations implements RelationInterface {
      * @param relation
      */
     getLocalKey(model: ModelInterface, relation: Relation): string;
+    /**
+     * Returns the attribute name by which childRelation is to be attached with parent model
+     * @param model
+     * @param relation
+     */
+    getAttributeName(model: ModelInterface, relation: Relation): string;
 }
