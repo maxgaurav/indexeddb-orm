@@ -1,6 +1,6 @@
 {
   "name": "indexeddb-orm",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "main": "dist/es2015/index.js",
   "types": "src/index.d.ts",
   "scripts": {
@@ -8,7 +8,7 @@
     "build.browser.all": "./node_modules/.bin/webpack --config=webpack.config.js --mode=production"
   },
   "author": "Max Gaurav max.gaurav@ithands.net",
-  "description": "A promise based wrapper for indexedDB",
+  "description": "A promise based ORM wrapper for indexedDB",
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.4.4",
