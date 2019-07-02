@@ -1,6 +1,6 @@
 {
   "name": "indexeddb-orm",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "dist/es2015/index.js",
   "types": "src/index.d.ts",
   "scripts": {
