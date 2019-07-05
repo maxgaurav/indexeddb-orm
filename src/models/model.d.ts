@@ -17,16 +17,34 @@ export declare class Model extends Aggregate implements ModelInterface {
      */
     first<T>(): Promise<T>;
     /**
+     * Returns fist matching record or throws NotFound exception
+     * @throws NotFound
+     */
+    firstOrFail<T>(): Promise<T>;
+    /**
      * Finds the record on primary key or returns null
      * @param id
      */
     find<T>(id: any): Promise<T | null>;
+    /**
+     * Finds the record on primary key or throws error
+     * @param id
+     * @throws NotFound
+     */
+    findOrFail<T>(id: any): Promise<T | null>;
     /**
      * Finds value at index.
      * @param indexName
      * @param id
      */
     findIndex<T>(indexName: string, id: any): Promise<T>;
+    /**
+     * Finds value at index or throws NotFound exception.
+     * @param indexName
+     * @param id
+     * @throws NotFound
+     */
+    findIndexOrFail<T>(indexName: string, id: any): Promise<T>;
     /**
      * Creates new record entry
      * @param data
@@ -37,6 +55,24 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param entries
      */
     createMultiple<T>(entries: any[]): Promise<T[]>;
+    /**
+     * Finds the first record else creates the record with accordance to builder provided for filtering
+     * @param data
+     */
+    firstOrCreate<T>(data: any): Promise<T>;
+    /**
+     * Finds the record at primary key else creates the record
+     * @param id
+     * @param data
+     */
+    findOrCreate<T>(id: any, data: any): Promise<T>;
+    /**
+     * Finds the record at index else creates the record
+     * @param indexName
+     * @param id
+     * @param data
+     */
+    findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
     /**
      * Deletes matching entry.
      * If no builder/index for filtering is provided then throws error.
@@ -79,6 +115,7 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param id
      * @param data
      * @param mergeDeep
+     * @throws NotFound
      */
     save(id: any, data: any, mergeDeep?: boolean): Promise<any>;
     /**

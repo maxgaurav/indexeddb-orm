@@ -44,8 +44,11 @@ export interface Relation {
 
 export interface OrmRelationBuilderInterface {
   hasOne(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasOne;
+
   hasMany(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasMany;
+
   hasManyMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyMulti;
+
   hasManyThroughMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyThroughMulti;
 }
 
@@ -156,15 +159,40 @@ export interface TransactionHandling {
   openTransaction(mode: TransactionModes): { models: ModelKeysInterface, transaction: IDBTransaction };
 }
 
+export interface ActionOrFailInterface {
+  findOrFail<T>(id: any): Promise<T | null>;
+
+  findOrFail(id: any): Promise<any | null>;
+
+  findIndexOrFail<T>(indexName: string, id: any): Promise<T>;
+
+  findIndexOrFail(indexName: string, id: any): Promise<any>;
+
+  firstOrFail(): Promise<any>;
+
+  firstOrFail<T>(): Promise<T>;
+
+  firstOrCreate<T>(data: any): Promise<T>;
+
+  firstOrCreate(data: any): Promise<any>;
+
+  findOrCreate<T>(id: any, data: any): Promise<T>;
+
+  findOrCreate(id: any, data: any): Promise<any>;
+
+  findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
+
+  findIndexOrCreate(indexName: string, id: any, data: any): Promise<any>;
+}
 
 export interface ModelConstructorInterface {
   new(db: IDBDatabase, table: TableSchema, connector: Connector): ModelInterface;
-  (...args: string[]): ModelInterface;
+
   readonly prototype: ModelInterface;
   TableName: string;
 }
 
-export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling {
+export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling, ActionOrFailInterface {
   table: TableSchema;
 
   all<T>(): Promise<T[]>;

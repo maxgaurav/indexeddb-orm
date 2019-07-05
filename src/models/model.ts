@@ -14,6 +14,7 @@ import {HasManyMulti} from "../relations/has-many-multi.js";
 import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
 import {mergeDeep as _mergeDeep} from "../utils.js";
 import {Relations} from "../relations/relations.js";
+import {NotFound} from "../errors/not-found.js";
 
 export class Model extends Aggregate implements ModelInterface {
 
@@ -104,6 +105,21 @@ export class Model extends Aggregate implements ModelInterface {
   }
 
   /**
+   * Returns fist matching record or throws NotFound exception
+   * @throws NotFound
+   */
+  public async firstOrFail<T>(): Promise<T>;
+  public async firstOrFail(): Promise<any> {
+    const record = await this.first();
+
+    if (!record) {
+      throw new NotFound();
+    }
+
+    return record;
+  }
+
+  /**
    * Finds the record on primary key or returns null
    * @param id
    */
@@ -135,12 +151,34 @@ export class Model extends Aggregate implements ModelInterface {
   }
 
   /**
+   * Finds the record on primary key or throws error
+   * @param id
+   * @throws NotFound
+   */
+  public async findOrFail<T>(id: any): Promise<T | null>;
+  public async findOrFail(id: any): Promise<any | null> {
+    const record = await this.find(id);
+    if (!record) {
+      throw new NotFound();
+    }
+
+    return record;
+  }
+
+  /**
    * Finds value at index.
    * @param indexName
    * @param id
    */
   public findIndex<T>(indexName: string, id: any): Promise<T>;
   public findIndex(indexName: string, id: any): Promise<any> {
+
+    /**
+     * Resetting builders
+     */
+    this.indexBuilder = null;
+    this.builder = [];
+
     const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
@@ -164,6 +202,22 @@ export class Model extends Aggregate implements ModelInterface {
 
       request.addEventListener<'error'>("error", (error) => reject(error));
     });
+  }
+
+  /**
+   * Finds value at index or throws NotFound exception.
+   * @param indexName
+   * @param id
+   * @throws NotFound
+   */
+  public async findIndexOrFail<T>(indexName: string, id: any): Promise<T>;
+  public async findIndexOrFail(indexName: string, id: any): Promise<any> {
+    const record = await this.findIndex(indexName, id);
+    if (!record) {
+      throw new NotFound();
+    }
+
+    return record;
   }
 
   /**
@@ -215,6 +269,54 @@ export class Model extends Aggregate implements ModelInterface {
     }
 
     return Promise.all(promises);
+  }
+
+  /**
+   * Finds the first record else creates the record with accordance to builder provided for filtering
+   * @param data
+   */
+  public async firstOrCreate<T>(data: any): Promise<T>;
+  public async firstOrCreate(data: any): Promise<any> {
+    const record = await this.first();
+
+    if (!record) {
+      return this.create(data);
+    }
+
+    return record;
+  }
+
+  /**
+   * Finds the record at primary key else creates the record
+   * @param id
+   * @param data
+   */
+  public async findOrCreate<T>(id: any, data: any): Promise<T>;
+  public async findOrCreate(id: any, data: any): Promise<any> {
+    const record = await this.find(id);
+
+    if (!record) {
+      return this.create(data);
+    }
+
+    return record;
+  }
+
+  /**
+   * Finds the record at index else creates the record
+   * @param indexName
+   * @param id
+   * @param data
+   */
+  public async findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
+  public async findIndexOrCreate(indexName: string, id: any, data: any): Promise<any> {
+    const record = await this.findIndex(indexName, id);
+
+    if (!record) {
+      return this.create(data);
+    }
+
+    return record;
   }
 
   /**
@@ -366,15 +468,12 @@ export class Model extends Aggregate implements ModelInterface {
    * @param id
    * @param data
    * @param mergeDeep
+   * @throws NotFound
    */
   public async save(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.Write);
-    const record = await this.find<any>(id);
-
-    if (!record) {
-      return Promise.reject('No record found.');
-    }
+    const record = await this.findOrFail<any>(id);
 
     const objectStore = transaction.objectStore(this.table.name);
     const saveData = mergeDeep ? _mergeDeep(record, data) : data;
@@ -511,7 +610,7 @@ export class Model extends Aggregate implements ModelInterface {
 
     for (const customRelation of this.customRelations) {
 
-      if(!Reflect.has(this, customRelation)) {
+      if (!Reflect.has(this, customRelation)) {
         throw new Error(`Method ${customRelation} not defined.`);
       }
 
