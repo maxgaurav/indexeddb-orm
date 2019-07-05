@@ -98,11 +98,7 @@ export class Model extends Aggregate {
         return record;
     }
     findIndex(indexName, id) {
-        /**
-         * Resetting builders
-         */
-        this.indexBuilder = null;
-        this.builder = [];
+        this.resetBuilder();
         const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
         const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
         const objectStore = transaction.objectStore(this.table.name);
@@ -126,6 +122,11 @@ export class Model extends Aggregate {
             throw new NotFound();
         }
         return record;
+    }
+    findAllIndex(indexName, id) {
+        this.resetBuilder();
+        this.whereIndex(indexName, id);
+        return this.all();
     }
     create(data) {
         const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
@@ -241,8 +242,7 @@ export class Model extends Aggregate {
      * @param isMulti
      */
     deleteIndex(indexName, value, isMulti = false) {
-        this.indexBuilder = null;
-        this.builder = [];
+        this.resetBuilder();
         if (isMulti) {
             this.whereIndex(indexName, value);
         }

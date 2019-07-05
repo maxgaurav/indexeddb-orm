@@ -346,5 +346,13 @@ export class QueryBuilder extends RelationBuilder {
         }
         return true;
     }
+    /**
+     * Resets the builder values for filtering
+     */
+    resetBuilder() {
+        this.indexBuilder = null;
+        this.builder = [];
+        return this;
+    }
 }
 //# sourceMappingURL=query-builder.js.map
