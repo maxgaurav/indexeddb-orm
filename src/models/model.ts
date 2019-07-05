@@ -222,8 +222,8 @@ export class Model extends Aggregate implements ModelInterface {
    * @param indexName
    * @param id
    */
-  public findIndexAll<T>(indexName: string, id: any): Promise<T[]>;
-  public findIndexAll(indexName: string, id: any): Promise<any[]> {
+  public findAllIndex<T>(indexName: string, id: any): Promise<T[]>;
+  public findAllIndex(indexName: string, id: any): Promise<any[]> {
     this.resetBuilder();
     this.whereIndex(indexName, id);
     return this.all();

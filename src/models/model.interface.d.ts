@@ -147,8 +147,8 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
     find(id: any): Promise<any | null>;
     findIndex<T>(indexName: string, id: any): Promise<T>;
     findIndex(indexName: string, id: any): Promise<any>;
-    findIndexAll<T>(indexName: string, id: any): Promise<T[]>;
-    findIndexAll(indexName: string, id: any): Promise<any[]>;
+    findAllIndex<T>(indexName: string, id: any): Promise<T[]>;
+    findAllIndex(indexName: string, id: any): Promise<any[]>;
     first(): Promise<any>;
     first<T>(): Promise<T>;
     save(id: any, data: any, mergeDeep: boolean): Promise<boolean>;
