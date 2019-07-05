@@ -1,6 +1,21 @@
 # Changelog
 
-## [3.0.0]() Latest Release
+## [3.1.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.0)
+### Added
+- Add **firstOrFail, findOrFail, findIndexOrFail** actions which will find the value or throw **NotFound** error
+- Add **firstOrCreate, findOrCreate, findIndexOrCreate** actions which will find the value or create new value return it.
+
+## Changed
+- **save** now throws **NotFound** Error over default Error.
+
+### Bug Fixes
+- Fix: Orm Class instance mapping in Schema for typescript causing interface mismatch
+
+
+## [3.0.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.0.1)
+- Readme changes
+
+## [3.0.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.0.0)
 
 ### Added
 - Added **with** to add relation handling. Takes in array of relations.

@@ -6,13 +6,16 @@ An indexedDB wrapper for accessing indexedDB as a promise base api implementatio
 [![npm](https://img.shields.io/npm/v/indexeddb-orm.svg)](https://www.npmjs.com/package/indexeddb-orm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Version 3.0.1
+## Older Version
 For older version please go to branch [2.1.0](https://github.com/maxgaurav/indexeddb-orm/tree/orm-2.1.0)
 
 ## Website
 [maxgaurav.github.io/indexeddb-orm](https://maxgaurav.github.io/indexeddb-orm)
 
 Examples coming soon to the website.
+
+## Changes/Updates/Deprication
+Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELOG.md)
 
 ## Table of Contents
 

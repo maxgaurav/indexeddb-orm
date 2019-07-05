@@ -395,4 +395,13 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
     }
     return true;
   }
+
+  /**
+   * Resets the builder values for filtering
+   */
+  public resetBuilder(): QueryBuilderInterface | ModelInterface {
+    this.indexBuilder = null;
+    this.builder = [];
+    return this;
+  }
 }

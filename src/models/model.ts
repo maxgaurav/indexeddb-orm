@@ -173,11 +173,7 @@ export class Model extends Aggregate implements ModelInterface {
   public findIndex<T>(indexName: string, id: any): Promise<T>;
   public findIndex(indexName: string, id: any): Promise<any> {
 
-    /**
-     * Resetting builders
-     */
-    this.indexBuilder = null;
-    this.builder = [];
+    this.resetBuilder();
 
     const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
@@ -218,6 +214,19 @@ export class Model extends Aggregate implements ModelInterface {
     }
 
     return record;
+  }
+
+  /**
+   * Finds all values for the index
+   *
+   * @param indexName
+   * @param id
+   */
+  public findIndexAll<T>(indexName: string, id: any): Promise<T[]>;
+  public findIndexAll(indexName: string, id: any): Promise<any[]> {
+    this.resetBuilder();
+    this.whereIndex(indexName, id);
+    return this.all();
   }
 
   /**
@@ -390,8 +399,8 @@ export class Model extends Aggregate implements ModelInterface {
    * @param isMulti
    */
   public deleteIndex(indexName: string, value: any, isMulti: boolean = false): Promise<boolean> {
-    this.indexBuilder = null;
-    this.builder = [];
+    this.resetBuilder();
+
     if (isMulti) {
       this.whereIndex(indexName, value);
     } else {

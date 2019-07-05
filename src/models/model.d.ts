@@ -46,6 +46,13 @@ export declare class Model extends Aggregate implements ModelInterface {
      */
     findIndexOrFail<T>(indexName: string, id: any): Promise<T>;
     /**
+     * Finds all values for the index
+     *
+     * @param indexName
+     * @param id
+     */
+    findIndexAll<T>(indexName: string, id: any): Promise<T[]>;
+    /**
      * Creates new record entry
      * @param data
      */

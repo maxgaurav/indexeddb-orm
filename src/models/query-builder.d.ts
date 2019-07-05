@@ -124,4 +124,8 @@ export declare class QueryBuilder extends RelationBuilder implements QueryBuilde
      * @param result
      */
     protected allowedToProcess(result: any): boolean;
+    /**
+     * Resets the builder values for filtering
+     */
+    resetBuilder(): QueryBuilderInterface | ModelInterface;
 }

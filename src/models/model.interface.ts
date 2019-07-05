@@ -147,6 +147,8 @@ export interface QueryBuilderInterface extends RelationQueryBuilder {
   cursorDirection(direction: CursorDirection): QueryBuilderInterface | ModelInterface;
 
   keyRange(indexBuilder: IndexBuilder): IDBKeyRange;
+
+  resetBuilder(): QueryBuilderInterface | ModelInterface;
 }
 
 export interface TransactionHandling {
@@ -222,6 +224,10 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
   findIndex<T>(indexName: string, id: any): Promise<T>;
 
   findIndex(indexName: string, id: any): Promise<any>;
+
+  findIndexAll<T>(indexName: string, id: any): Promise<T[]>;
+
+  findIndexAll(indexName: string, id: any): Promise<any[]>;
 
   first(): Promise<any>;
 
