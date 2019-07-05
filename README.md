@@ -14,7 +14,7 @@ For older version please go to branch [2.1.0](https://github.com/maxgaurav/index
 
 Examples coming soon to the website.
 
-## Changes/Updates/Deprication
+## Changes/Updates/Deprecation
 Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELOG.md)
 
 ## Table of Contents
@@ -29,22 +29,30 @@ Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELO
         * [Create Multiple](#create-multiple)
     * [Searching of the data](#searching-of-the-data)
         * [Find](#find)
+        * [FindOFail](#findorfail)
+        * [FindORCreate](#findorcreate)
         * [First](#first)
+        * [FirstOrFail](#firstorfail)
+        * [FirstOrCreate](#firstorcreate)
+        * [FindIndex](#first)
+        * [FindIndexOrFail](#firstorfail)
+        * [FindIndexOrCreate](#firstorcreate)
+        * [FindAllIndex](#findallindex)
         * [All](#all)
     * [Index Searching](#index-searching)
-        * [whereIndex](#whereIndex)
-        * [whereIndexIn](#whereIndexIn)
-        * [whereMultiIndexIn](#whereMultiIndexIn)
-        * [whereIndexGte](#whereIndexGte)
-        * [whereIndexGt](#whereIndexGt)
-        * [whereIndexLte](#whereIndexLte)
-        * [whereIndexLt](#whereIndexLt)
-        * [whereIndexBetween](#whereIndexBetween)
+        * [whereIndex](#whereindex)
+        * [whereIndexIn](#whereindexin)
+        * [whereMultiIndexIn](#wheremultiindexin)
+        * [whereIndexGte](#whereindexgte)
+        * [whereIndexGt](#whereindexgt)
+        * [whereIndexLte](#whereindexlte)
+        * [whereIndexLt](#whereindexlt)
+        * [whereIndexBetween](#whereindexbetween)
     * [Non Index Searching](#non-index-searching)
         * [where](#where)
         * [Nested Attributes](#nested-attributes)
-        * [whereIn](#whereIn)
-        * [whereInArray](#whereInArrya)
+        * [whereIn](#wherein)
+        * [whereInArray](#whereinarray)
         * [gte](#gte)
         * [gt](#gt)
         * [lte](#lte)
@@ -53,17 +61,17 @@ Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELO
     * [Relations](#relations)
         * [Has One](#has-one)
         * [Has Many](#has-many)
-        * [Has Many Multi Entry](#has-many-multientry)
-        * [Has Many Through Multi Entry](#has-many-through-multientry)
+        * [Has Many Multi Entry](#has-many-multi-entry)
+        * [Has Many Through Multi Entry](#has-many-through-multi-entry)
         * [Custom Relation Builder](#custom-relation-builder)
         * [Nested Relations](#nested-relations)
     * [Updating of Records](#updating-of-records)
         * [save](#save)
         * [update](#update)
-    * [Deletion in table](#deletion-in-table)
+    * [Deletion in table](#deletions-in-table)
         * [delete](#delete)
         * [destroy](#destroy)
-        * [deleteIndex](#delete-index)
+        * [deleteIndex](#deleteindex)
     * [Transactional Actions](#transactional-actions)
     * [Aggregations](#aggregations)
         * [Count](#count)
@@ -80,6 +88,7 @@ Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELO
 ## Installation
 ```
 npm install indexeddb-orm --save
+yarn add indexeddb-orm
 ```
 
 ## Usage
@@ -127,7 +136,8 @@ const db = new Connector(settings);
 
 ## ORM
 
-
+You can create you own custom class extending the **Model** class allowing you to create scoped queries, custom relations
+within the class and much more. Following is an example on how to use and create orm classes.
 
 ```javascript
 import {Model} from './dist/es2015/models/model.js';
@@ -144,7 +154,7 @@ class Users extends Model {
   static TableName = 'users';
   
   userProfile = () => {
-      // the third and fourth parmeter are optional;
+      // the third and fourth parameter are optional;
       // by default the function name would be used as parent models attribute.
       return this.hasOne(UserProfiles, 'userId', '_id', 'userProfile')
         .where('name', 'newName').with([...]).withCustom(['user']); 
@@ -233,10 +243,29 @@ db.connect(async (models) => {
 ### Searching of the data
 
 #### Find
-* Can search for direct id value using the find operation and will return result if exists else will throw an error
+* Can search for direct id value using the find operation and will return result if exists else will return null
 ```javascript
 db.connect().then(async (models) => {
     const record = models.users.find(1);
+});
+```
+
+#### FindOrFail 
+* Will search for direct id(primary key) value and will return value or throw **NotFound** error.
+
+```javascript
+db.connect().then(async (models) => {
+    const record = await models.users.findOrFail(1);
+});
+```
+
+#### FindOrCreate
+* Will find the value at primary key and if no record is found then will create a new record and return it.
+
+```javascript
+const data = {};
+db.connect().then(async (models) => {
+    const record = await models.users.firstOrCreate(data);
 });
 ```
 
@@ -246,6 +275,61 @@ db.connect().then(async (models) => {
 ```javascript
 db.connect().then(async (models) => {
     const record = await models.users.first();
+});
+```
+#### FirstOrFail 
+* Will search for first occurrence in the table and return the value else throws **NotFound** error
+
+```javascript
+db.connect().then(async (models) => {
+    const record = await models.users.firstOrFail();
+});
+```
+
+#### FirstOrCreate
+* Will search for first occurrence in the table and return the value else creates new record
+
+```javascript
+const data = {};
+db.connect().then(async (models) => {
+    const record = await models.users.firstOrCreate(data);
+});
+```
+
+#### FindIndex 
+* Will return the first matching value of the index else will return null
+
+```javascript
+const value = 'something';
+db.connect().then(async (models) => {
+    const record = await models.users.findIndex('indexName', value);
+});
+```
+
+#### FindIndexOrFail 
+* Will search for first occurrence in the table and return the value else throws **NotFound** error.
+
+```javascript
+db.connect().then(async (models) => {
+    const record = await models.users.first();
+});
+```
+
+#### FindIndexOrCreate
+* Will search for first occurrence in the table and return the value else will create a new entry in database and return it.
+
+```javascript
+db.connect().then(async (models) => {
+    const record = await models.users.first();
+});
+```
+
+#### FindAllIndex
+* Will search for all matching indexes and return array of results. If no result is found then an empty array is returned.
+
+```javascript
+db.connect().then(async (models) => {
+    const record = await models.users.findAllIndex('indexName', 'value');
 });
 ```
 
@@ -389,7 +473,7 @@ db.connect().then(async (models) => {
 });
 ```
 
-#### whereIn
+#### whereInArray
 To search for result in a multiple search values for column which contains array of values then pass array as an value for the search
 
 ```javascript
@@ -665,12 +749,21 @@ models.users.delete(3);
 
 #### destroy
 
-This will update the data with matching values according to the query builder given of the table with content provided. The whole content will not be replaced 
-but only the properties provided. Primary key ,updatedAt and createdAt values will be ignored even if provided
+This will delete all the matching records according to the query created
  
 ```javascript
 
 models.users.whereIndex('email', 'test@test.com').where('isAdmin', true).destroy();
+```
+
+#### deleteIndex
+
+This will delete all the matching records on the index only. You can optionally pass the third param to indicate that the
+index is a multi-entry index so that the search is correct.
+ 
+```javascript
+
+models.users.deleteIndex('email', 'test@test.com');
 ```
 
 ### Transactional Actions
@@ -743,3 +836,6 @@ const result = await models.users.whereIndex('email', 'test@test.com').where('is
 **/
 
 ```
+
+## License
+[MIT License](https://github.com/maxgaurav/indexeddb-orm/blob/master/LICENSE.txt)
