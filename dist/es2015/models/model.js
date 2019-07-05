@@ -5,6 +5,7 @@ import { HasMany } from "../relations/has-many.js";
 import { HasManyMulti } from "../relations/has-many-multi.js";
 import { HasManyThroughMulti } from "../relations/has-many-through-multi.js";
 import { mergeDeep as _mergeDeep } from "../utils.js";
+import { NotFound } from "../errors/not-found.js";
 export class Model extends Aggregate {
     constructor(db, table, connector) {
         super(db, table);
@@ -64,6 +65,13 @@ export class Model extends Aggregate {
             request.addEventListener("error", (error) => reject(error));
         });
     }
+    async firstOrFail() {
+        const record = await this.first();
+        if (!record) {
+            throw new NotFound();
+        }
+        return record;
+    }
     find(id) {
         const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
         const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
@@ -82,7 +90,19 @@ export class Model extends Aggregate {
             request.addEventListener("error", (error) => reject(error));
         });
     }
+    async findOrFail(id) {
+        const record = await this.find(id);
+        if (!record) {
+            throw new NotFound();
+        }
+        return record;
+    }
     findIndex(indexName, id) {
+        /**
+         * Resetting builders
+         */
+        this.indexBuilder = null;
+        this.builder = [];
         const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
         const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
         const objectStore = transaction.objectStore(this.table.name);
@@ -99,6 +119,13 @@ export class Model extends Aggregate {
             });
             request.addEventListener("error", (error) => reject(error));
         });
+    }
+    async findIndexOrFail(indexName, id) {
+        const record = await this.findIndex(indexName, id);
+        if (!record) {
+            throw new NotFound();
+        }
+        return record;
     }
     create(data) {
         const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
@@ -133,6 +160,27 @@ export class Model extends Aggregate {
             promises.push(promise);
         }
         return Promise.all(promises);
+    }
+    async firstOrCreate(data) {
+        const record = await this.first();
+        if (!record) {
+            return this.create(data);
+        }
+        return record;
+    }
+    async findOrCreate(id, data) {
+        const record = await this.find(id);
+        if (!record) {
+            return this.create(data);
+        }
+        return record;
+    }
+    async findIndexOrCreate(indexName, id, data) {
+        const record = await this.findIndex(indexName, id);
+        if (!record) {
+            return this.create(data);
+        }
+        return record;
     }
     /**
      * Deletes matching entry.
@@ -262,14 +310,12 @@ export class Model extends Aggregate {
      * @param id
      * @param data
      * @param mergeDeep
+     * @throws NotFound
      */
     async save(id, data, mergeDeep = true) {
         const tables = [this.table.name];
         const transaction = this.getTransaction(tables, TransactionModes.Write);
-        const record = await this.find(id);
-        if (!record) {
-            return Promise.reject('No record found.');
-        }
+        const record = await this.findOrFail(id);
         const objectStore = transaction.objectStore(this.table.name);
         const saveData = mergeDeep ? _mergeDeep(record, data) : data;
         saveData[this.primaryId] = id;
