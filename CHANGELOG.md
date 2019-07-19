@@ -1,12 +1,19 @@
 # Changelog
 
-## [3.1.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.0) _(Latest Release)_
+## [3.1.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.0) _(Latest Release)_
+### Bug Fixes
+- Fixed find or create actions some times opening in read mode only
+
+### Added
+- Find or create actions now throw **InvalidTransaction** error if transaction is not in write mode
+
+## [3.1.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.0)
 ### Added
 - Add **firstOrFail, findOrFail, findIndexOrFail** actions which will find the value or throw **NotFound** error
 - Add **firstOrCreate, findOrCreate, findIndexOrCreate** actions which will find the value or create new value return it.
 - Add **findAllIndex** action which will return all values as array for the matching index.
 
-## Changed
+### Changed
 - **save** now throws **NotFound** Error over default Error.
 - **findIndex** resets the builder settings before finding on index.
 - Readme changes with latest usage of library.
