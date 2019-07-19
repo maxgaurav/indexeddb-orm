@@ -285,6 +285,7 @@ export class Model extends Aggregate implements ModelInterface {
   /**
    * Finds the first record else creates the record with accordance to builder provided for filtering
    * @param data
+   * @throws InvalidTransaction
    */
   public async firstOrCreate<T>(data: any): Promise<T>;
   public async firstOrCreate(data: any): Promise<any> {
@@ -307,6 +308,7 @@ export class Model extends Aggregate implements ModelInterface {
    * Finds the record at primary key else creates the record
    * @param id
    * @param data
+   * @throws InvalidTransaction
    */
   public async findOrCreate<T>(id: any, data: any): Promise<T>;
   public async findOrCreate(id: any, data: any): Promise<any> {
@@ -332,6 +334,7 @@ export class Model extends Aggregate implements ModelInterface {
    * @param indexName
    * @param id
    * @param data
+   * @throws InvalidTransaction
    */
   public async findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
   public async findIndexOrCreate(indexName: string, id: any, data: any): Promise<any> {

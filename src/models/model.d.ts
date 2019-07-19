@@ -65,12 +65,14 @@ export declare class Model extends Aggregate implements ModelInterface {
     /**
      * Finds the first record else creates the record with accordance to builder provided for filtering
      * @param data
+     * @throws InvalidTransaction
      */
     firstOrCreate<T>(data: any): Promise<T>;
     /**
      * Finds the record at primary key else creates the record
      * @param id
      * @param data
+     * @throws InvalidTransaction
      */
     findOrCreate<T>(id: any, data: any): Promise<T>;
     /**
@@ -78,6 +80,7 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param indexName
      * @param id
      * @param data
+     * @throws InvalidTransaction
      */
     findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
     /**
