@@ -1,6 +1,7 @@
 import {
   DEFAULT_PRIMARY_ID,
-  ModelInterface, ModelKeysInterface,
+  ModelInterface,
+  ModelKeysInterface,
   RelationTypes,
   TransactionModes
 } from "./model.interface.js";
@@ -15,6 +16,7 @@ import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
 import {mergeDeep as _mergeDeep} from "../utils.js";
 import {Relations} from "../relations/relations.js";
 import {NotFound} from "../errors/not-found.js";
+import {InvalidTransaction} from "../errors/invalid-transaction.js";
 
 export class Model extends Aggregate implements ModelInterface {
 
@@ -286,6 +288,12 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public async firstOrCreate<T>(data: any): Promise<T>;
   public async firstOrCreate(data: any): Promise<any> {
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const transaction = this.createTransaction(tables, TransactionModes.Write);
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
+
     const record = await this.first();
 
     if (!record) {
@@ -302,6 +310,14 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public async findOrCreate<T>(id: any, data: any): Promise<T>;
   public async findOrCreate(id: any, data: any): Promise<any> {
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const transaction = this.createTransaction(tables, TransactionModes.Write);
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
+
+    this.setTransaction(transaction);
+
     const record = await this.find(id);
 
     if (!record) {
@@ -319,6 +335,12 @@ export class Model extends Aggregate implements ModelInterface {
    */
   public async findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
   public async findIndexOrCreate(indexName: string, id: any, data: any): Promise<any> {
+    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const transaction = this.createTransaction(tables, TransactionModes.Write);
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
+
     const record = await this.findIndex(indexName, id);
 
     if (!record) {
