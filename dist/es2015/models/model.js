@@ -333,6 +333,9 @@ export class Model extends Aggregate {
         const tables = [this.table.name];
         const transaction = this.getTransaction(tables, TransactionModes.Write);
         const record = await this.findOrFail(id);
+        if (transaction.mode !== TransactionModes.Write) {
+            throw new InvalidTransaction('Transaction not in write mode');
+        }
         const objectStore = transaction.objectStore(this.table.name);
         const saveData = mergeDeep ? _mergeDeep(record, data) : data;
         saveData[this.primaryId] = id;
@@ -343,6 +346,57 @@ export class Model extends Aggregate {
             });
             request.addEventListener("error", (error) => reject(error));
         });
+    }
+    /**
+     * Updates all matching records at index
+     * By default deep merges the input data with existing data record.
+     *
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     * @throws NotFound
+     */
+    async saveIndex(indexName, id, data, mergeDeep = true) {
+        const tables = [this.table.name];
+        const transaction = this.getTransaction(tables, TransactionModes.Write);
+        const record = await this.findIndexOrFail(indexName, id);
+        if (transaction.mode !== TransactionModes.Write) {
+            throw new InvalidTransaction('Transaction not in write mode');
+        }
+        return this.save(record[this.primaryId], data, mergeDeep);
+    }
+    /**
+     * Updates all matching records at index
+     * By default deep merges the input data with existing data record.
+     *
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     * @throws NotFound
+     */
+    async saveAllIndex(indexName, id, data, mergeDeep = true) {
+        const tables = [this.table.name];
+        const transaction = this.getTransaction(tables, TransactionModes.Write);
+        if (transaction.mode !== TransactionModes.Write) {
+            throw new InvalidTransaction('Transaction not in write mode');
+        }
+        this.resetBuilder().whereIndex(indexName, id);
+        await this.update(data, mergeDeep);
+        return Promise.resolve(true);
+    }
+    async sync(id, data, mergeDeep = true) {
+        await this.save(id, data, mergeDeep);
+        return this.find(id);
+    }
+    async syncIndex(indexName, id, data, mergeDeep = true) {
+        await this.saveIndex(indexName, id, data, mergeDeep);
+        return this.findIndex(indexName, id);
+    }
+    async syncAllIndex(indexName, id, data, mergeDeep = true) {
+        await this.saveAllIndex(indexName, id, data, mergeDeep);
+        return this.resetBuilder().whereIndex(indexName, id).all();
     }
     /**
      * Retrieves current transaction and if ne transaction exists then creates new one.
