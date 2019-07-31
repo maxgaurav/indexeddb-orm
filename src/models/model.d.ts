@@ -127,7 +127,52 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param mergeDeep
      * @throws NotFound
      */
-    save(id: any, data: any, mergeDeep?: boolean): Promise<any>;
+    save(id: any, data: any, mergeDeep?: boolean): Promise<boolean>;
+    /**
+     * Updates all matching records at index
+     * By default deep merges the input data with existing data record.
+     *
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     * @throws NotFound
+     */
+    saveIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<boolean>;
+    /**
+     * Updates all matching records at index
+     * By default deep merges the input data with existing data record.
+     *
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     * @throws NotFound
+     */
+    saveAllIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<boolean>;
+    /**
+     * Syncs data at primary index and returns newly updated record
+     * @param id
+     * @param data
+     * @param mergeDeep
+     */
+    sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
+    /**
+     * Syncs data at index and returns newly updated record
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     */
+    syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
+    /**
+     * Syncs data at index and returns newly updated record
+     * @param indexName
+     * @param id
+     * @param data
+     * @param mergeDeep
+     */
+    syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
     /**
      * Retrieves current transaction and if ne transaction exists then creates new one.
      *

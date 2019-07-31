@@ -235,6 +235,22 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
 
   save(id: any, data: any, mergeDeep: boolean): Promise<boolean>;
 
+  saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+
+  saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+
+  sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
+
+  sync(id: any, data: any, mergeDeep: boolean): Promise<any>;
+
+  syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
+
+  syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any>;
+
+  syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
+
+  syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any[]>;
+
   /**
    * @deprecated
    * @param id

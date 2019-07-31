@@ -1,4 +1,5 @@
 import {
+  CursorDirection,
   DEFAULT_PRIMARY_ID,
   ModelInterface,
   ModelKeysInterface,
@@ -504,10 +505,14 @@ export class Model extends Aggregate implements ModelInterface {
    * @param mergeDeep
    * @throws NotFound
    */
-  public async save(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
+  public async save(id: any, data: any, mergeDeep: boolean = true): Promise<boolean> {
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.Write);
     const record = await this.findOrFail<any>(id);
+
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
 
     const objectStore = transaction.objectStore(this.table.name);
     const saveData = mergeDeep ? _mergeDeep(record, data) : data;
@@ -520,6 +525,90 @@ export class Model extends Aggregate implements ModelInterface {
       });
       request.addEventListener<'error'>("error", (error) => reject(error));
     });
+  }
+
+  /**
+   * Updates all matching records at index
+   * By default deep merges the input data with existing data record.
+   *
+   * @param indexName
+   * @param id
+   * @param data
+   * @param mergeDeep
+   * @throws NotFound
+   */
+  public async saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<boolean> {
+    const tables = [this.table.name];
+    const transaction = this.getTransaction(tables, TransactionModes.Write);
+    const record = await this.findIndexOrFail<any>(indexName, id);
+
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
+
+    return this.save(record[this.primaryId], data, mergeDeep);
+  }
+
+  /**
+   * Updates all matching records at index
+   * By default deep merges the input data with existing data record.
+   *
+   * @param indexName
+   * @param id
+   * @param data
+   * @param mergeDeep
+   * @throws NotFound
+   */
+  public async saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<boolean> {
+    const tables = [this.table.name];
+    const transaction = this.getTransaction(tables, TransactionModes.Write);
+
+    if (transaction.mode !== TransactionModes.Write) {
+      throw new InvalidTransaction('Transaction not in write mode');
+    }
+
+    this.resetBuilder().whereIndex(indexName, id);
+
+    await this.update(data, mergeDeep);
+    return Promise.resolve(true);
+  }
+
+  /**
+   * Syncs data at primary index and returns newly updated record
+   * @param id
+   * @param data
+   * @param mergeDeep
+   */
+  public async sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
+  public async sync(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
+    await this.save(id, data, mergeDeep);
+    return this.find(id);
+  }
+
+  /**
+   * Syncs data at index and returns newly updated record
+   * @param indexName
+   * @param id
+   * @param data
+   * @param mergeDeep
+   */
+  public async syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
+  public async syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any> {
+    await this.saveIndex(indexName, id, data, mergeDeep);
+    return this.findIndex(indexName, id);
+  }
+
+  /**
+   * Syncs data at index and returns newly updated record
+   * @param indexName
+   * @param id
+   * @param data
+   * @param mergeDeep
+   */
+  public async syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
+  public async syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any[]> {
+    await this.saveAllIndex(indexName, id, data, mergeDeep);
+    return (this.resetBuilder().whereIndex(indexName, id) as Model).all();
   }
 
   /**
