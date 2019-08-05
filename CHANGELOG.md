@@ -1,6 +1,17 @@
 # Changelog
 
-## [3.1.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.0) _(Latest Release)_
+## [3.2.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.1) _(Latest Release)_
+
+### Added
+- Sync actions **(sync, syncIndex, syncIndexAll)** to update and retrieve the updated record on success.
+- Added schema configuration to allow opt-in for maintaining synced on date when calling sync actions. Will add/update **syncOn** attribute
+- Added **saveIndex** to save data on index. It's optimized for single action transaction over update
+- Added **saveAllIndex** to save data on all matching index.
+
+### Other
+- Refactored **model.ts** file to multiple files to maintain single file single responsibility principle. 
+
+## [3.1.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.1)
 ### Bug Fixes
 - Fixed find or create actions some times opening in read mode only
 

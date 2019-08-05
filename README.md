@@ -67,6 +67,8 @@ Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELO
         * [Nested Relations](#nested-relations)
     * [Updating of Records](#updating-of-records)
         * [save](#save)
+        * [saveIndex](#save-index)
+        * [saveAllIndex](#save-all-index)
         * [update](#update)
     * [Deletion in table](#deletions-in-table)
         * [delete](#delete)
@@ -77,6 +79,10 @@ Read [ChangeLog](https://github.com/maxgaurav/indexeddb-orm/blob/master/CHANGELO
         * [Count](#count)
         * [Average](#average)
         * [Reduce](#Reduce)
+    * [Syncing](#syncing)
+        * [sync](#sync)
+        * [syncIndex](#sync-index)
+        * [syncAllIndex](#sync-all-index)
     
 
 ## Features
@@ -625,7 +631,7 @@ const addresses = await models.addresss.with([{
 
 /**
  * each address object will have an users property which will be an array of matching users.
-/**
+ */
 ``` 
 
 #### Has Many Through Multi Entry
@@ -647,7 +653,7 @@ const addresses = await models.addresss.with([{
 
 /**
  * each address object will have an users property which will be an array of matching users.
-/**
+*/
 ``` 
 
 #### Custom Relation Builder
@@ -718,6 +724,34 @@ Primary key ,updatedAt and createdAt values will be ignored even if provided
 ```javascript
 
 models.users.save(1,  {
+    isAdmin : false
+});
+```
+
+#### Save Index
+
+This will update the data at the given index of the table with content provided for first matching index. The whole content will not be replaced 
+but only the properties provided by default. To prevent deep merging you can optionally pass third parameter as false.
+
+Primary key ,updatedAt and createdAt values will be ignored even if provided
+ 
+```javascript
+
+models.users.saveIndex('indexName', 1,  {
+    isAdmin : false
+});
+```
+
+#### Save All  Index
+
+This will update the data at the given index of the table with content provided for all matching index. The whole content will not be replaced 
+but only the properties provided by default. To prevent deep merging you can optionally pass third parameter as false.
+
+Primary key ,updatedAt and createdAt values will be ignored even if provided
+ 
+```javascript
+
+models.users.saveIndex('indexName', 1,  {
     isAdmin : false
 });
 ```
@@ -837,5 +871,47 @@ const result = await models.users.whereIndex('email', 'test@test.com').where('is
 
 ```
 
+### Syncing
+Sync actions allow syncing of new data and returns the updated record back. It is best choice to use when you want to map a record through an API or other service.
+
+All Syncing actions can update the **syncOn** column if **SyncColumn** in migration of table schema is set to true. You can override the default column name using **SyncColumnName** attribute.
+column name using **
+
+#### Sync
+The **sync** action syncs at the primary key. By default it deep merges the data passed on but by providing the third parameter
+as false you can completely replace the data.
+
+```javascript
+const updatedDataReceivedFromApi = {};
+await models.users.sync(10, updatedDataReceivedFromApi);
+```
+
+#### sync
+The **sync** action syncs at the primary key. By default it deep merges the data passed on but by providing the third parameter
+as false you can completely replace the data.
+
+```javascript
+const updatedDataReceivedFromApi = {};
+await models.users.sync(10, updatedDataReceivedFromApi);
+```
+
+#### syncIndex
+The **syncIndex** action syncs at the index value at first matching record. By default it deep merges the data passed on but by providing the third parameter
+as false you can completely replace the data.
+
+```javascript
+const updatedDataReceivedFromApi = {};
+await models.users.syncIndex('indexName', 10, updatedDataReceivedFromApi);
+```
+
+#### syncAllIndex
+The **syncIndex** action syncs at the index value for all matching record. By default it deep merges the data passed on but by providing the third parameter
+as false you can completely replace the data.
+
+```javascript
+const updatedDataReceivedFromApi = {};
+await models.users.syncAllIndex('indexName', 10, updatedDataReceivedFromApi);
+```
+
 ## License
-[MIT License](https://github.com/maxgaurav/indexeddb-orm/blob/master/LICENSE.txt)
+[MIT License](https://github.com/maxgaurav/indexeddb-orm/blob/master/LICENSE.txt) 
