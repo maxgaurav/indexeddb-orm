@@ -54,4 +54,9 @@ export declare class Model extends FindOrCreateActions implements ModelInterface
      * @param results
      */
     protected loadCustomRelations(results: any[]): Promise<any>[];
+    /**
+     * Adds sync column if table requires to have sync date
+     * @param data
+     */
+    private syncObj;
 }

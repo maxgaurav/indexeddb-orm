@@ -1,4 +1,5 @@
 import { ModelConstructorInterface } from "../models/model.interface.js";
+export declare const DEFAULT_SYNC_COLUMN_NAME = "syncOn";
 export interface MigrationInterface {
     run(): Promise<TableSchema[]>;
     createObjectStore(schema: TableSchema): IDBObjectStore;
@@ -6,6 +7,7 @@ export interface MigrationInterface {
     createIndex(column: TableColumn, objectStore: IDBObjectStore): IDBIndex;
     dropIndex(column: string, objectStore: IDBObjectStore): boolean;
     listObjectStores(): IDBObjectStore[];
+    setupSyncColumn(schema: TableSchema, objectStore: IDBObjectStore): void;
 }
 export interface TableColumn {
     name: string;
@@ -19,6 +21,8 @@ export interface TableSchema {
     ormClass?: ModelConstructorInterface;
     primary?: string;
     objectStore?: IDBObjectStore | null;
+    syncColumn?: boolean;
+    syncColumnName?: string;
 }
 export interface Database {
     name: string;

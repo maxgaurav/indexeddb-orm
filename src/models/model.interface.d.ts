@@ -4,6 +4,9 @@ import { HasOne } from "../relations/has-one.js";
 import { HasMany } from "../relations/has-many.js";
 import { HasManyThroughMulti } from "../relations/has-many-through-multi.js";
 import { HasManyMulti } from "../relations/has-many-multi.js";
+/**
+ * Default index name and attribute name for auto-generating key
+ */
 export declare const DEFAULT_PRIMARY_ID = "_id";
 export interface AggregateInterface {
     count(): Promise<number>;
@@ -12,11 +15,17 @@ export interface AggregateInterface {
     reduce<T>(func: (value: any, result: any) => any, defaultCarry?: any): Promise<T>;
     reduce(func: (value: any, result: any) => any, defaultCarry?: any): Promise<any>;
 }
+/**
+ * Transaction modes available
+ */
 export declare enum TransactionModes {
     ReadOnly = "readonly",
     Write = "readwrite",
     VersionChange = "versionchange"
 }
+/**
+ * Relation Types available
+ */
 export declare enum RelationTypes {
     HasOne = "hasOne",
     HasMany = "hasMany",

@@ -1,4 +1,4 @@
-import {MigrationInterface, TableColumn, TableSchema} from "./migration.interface.js";
+import {DEFAULT_SYNC_COLUMN_NAME, MigrationInterface, TableColumn, TableSchema} from "./migration.interface.js";
 import {DEFAULT_PRIMARY_ID} from "../models/model.interface.js";
 
 export class Migration implements MigrationInterface {
@@ -20,6 +20,7 @@ export class Migration implements MigrationInterface {
 
       this.createColumns(table, table.objectStore);
       this.dropOldColumns(table, table.objectStore);
+      this.setupSyncColumn(table, table.objectStore);
     }
 
     for (const tableName of this.allStoreNames()) {
@@ -126,5 +127,28 @@ export class Migration implements MigrationInterface {
     }
 
     return stores;
+  }
+
+  /**
+   * Returns true if column is to be created
+   * @param schema
+   * @param objectStore
+   */
+  public setupSyncColumn(schema: TableSchema, objectStore: IDBObjectStore): void {
+    const columnName = schema.syncColumnName || DEFAULT_SYNC_COLUMN_NAME;
+
+    if (schema.syncColumn) {
+      if (!objectStore.indexNames.contains(columnName)) {
+        this.createIndex({
+          name: columnName,
+          index: columnName
+        }, objectStore);
+      }
+
+    } else {
+      if (objectStore.indexNames.contains(columnName)) {
+        this.dropIndex(columnName, objectStore);
+      }
+    }
   }
 }

@@ -5,6 +5,9 @@ import {HasMany} from "../relations/has-many.js";
 import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
 import {HasManyMulti} from "../relations/has-many-multi.js";
 
+/**
+ * Default index name and attribute name for auto-generating key
+ */
 export const DEFAULT_PRIMARY_ID = '_id';
 
 export interface AggregateInterface {
@@ -19,12 +22,18 @@ export interface AggregateInterface {
   reduce(func: (value: any, result: any) => any, defaultCarry?: any): Promise<any>;
 }
 
+/**
+ * Transaction modes available
+ */
 export enum TransactionModes {
   ReadOnly = 'readonly',
   Write = 'readwrite',
   VersionChange = 'versionchange'
 }
 
+/**
+ * Relation Types available
+ */
 export enum RelationTypes {
   HasOne = 'hasOne',
   HasMany = 'hasMany',
@@ -212,7 +221,6 @@ export interface BaseWriteActionsInterface {
   saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
 
   saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
-
 
   /**
    * @deprecated

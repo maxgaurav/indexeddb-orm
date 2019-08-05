@@ -51,4 +51,10 @@ export declare class Migration implements MigrationInterface {
      * Returns all object store instances in database
      */
     listObjectStores(): IDBObjectStore[];
+    /**
+     * Returns true if column is to be created
+     * @param schema
+     * @param objectStore
+     */
+    setupSyncColumn(schema: TableSchema, objectStore: IDBObjectStore): void;
 }

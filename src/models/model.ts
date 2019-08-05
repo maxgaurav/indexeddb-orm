@@ -4,7 +4,7 @@ import {
   ModelKeysInterface, RelationTypes,
   TransactionModes
 } from "./model.interface.js";
-import {TableSchema} from "../migration/migration.interface.js";
+import {DEFAULT_SYNC_COLUMN_NAME, TableSchema} from "../migration/migration.interface.js";
 import {Connector} from "../connection/connector.js";
 import {FindOrCreateActions} from "./find-or-create-actions.js";
 import {HasOne} from "../relations/has-one.js";
@@ -12,6 +12,7 @@ import {HasMany} from "../relations/has-many.js";
 import {HasManyMulti} from "../relations/has-many-multi.js";
 import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
 import {Relations} from "../relations/relations.js";
+import {mergeDeep as mergeDeepUtil} from "../utils.js";
 
 export class Model extends FindOrCreateActions implements ModelInterface {
 
@@ -29,7 +30,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
    */
   public async sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async sync(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
-    await this.save(id, data, mergeDeep);
+    await this.save(id, this.syncObj(data), mergeDeep);
     return this.find(id);
   }
 
@@ -42,7 +43,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
    */
   public async syncIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any> {
-    await this.saveIndex(indexName, id, data, mergeDeep);
+    await this.saveIndex(indexName, id, this.syncObj(data), mergeDeep);
     return this.findIndex(indexName, id);
   }
 
@@ -55,7 +56,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
    */
   public async syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T[]>;
   public async syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any[]> {
-    await this.saveAllIndex(indexName, id, data, mergeDeep);
+    await this.saveAllIndex(indexName, id, this.syncObj(data), mergeDeep);
     return (this.resetBuilder().whereIndex(indexName, id) as Model).all();
   }
 
@@ -143,5 +144,20 @@ export class Model extends FindOrCreateActions implements ModelInterface {
     }
 
     return relationPromises;
+  }
+
+  /**
+   * Adds sync column if table requires to have sync date
+   * @param data
+   */
+  private syncObj(data: any): any {
+    if (this.table.syncColumn) {
+      const attr = this.table.syncColumnName || DEFAULT_SYNC_COLUMN_NAME;
+      const obj: { [key: string]: any | Date } = {};
+      obj[attr] = new Date();
+      return mergeDeepUtil(data, obj);
+    }
+
+    return data;
   }
 }
