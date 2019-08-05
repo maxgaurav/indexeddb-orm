@@ -156,7 +156,7 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param data
      * @param mergeDeep
      */
-    sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
+    sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
     /**
      * Syncs data at index and returns newly updated record
      * @param indexName
@@ -164,7 +164,7 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param data
      * @param mergeDeep
      */
-    syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
+    syncIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T>;
     /**
      * Syncs data at index and returns newly updated record
      * @param indexName
@@ -172,7 +172,7 @@ export declare class Model extends Aggregate implements ModelInterface {
      * @param data
      * @param mergeDeep
      */
-    syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
+    syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T[]>;
     /**
      * Retrieves current transaction and if ne transaction exists then creates new one.
      *

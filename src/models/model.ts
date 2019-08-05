@@ -579,7 +579,7 @@ export class Model extends Aggregate implements ModelInterface {
    * @param data
    * @param mergeDeep
    */
-  public async sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
+  public async sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async sync(id: any, data: any, mergeDeep: boolean = true): Promise<any> {
     await this.save(id, data, mergeDeep);
     return this.find(id);
@@ -592,7 +592,7 @@ export class Model extends Aggregate implements ModelInterface {
    * @param data
    * @param mergeDeep
    */
-  public async syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
+  public async syncIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any> {
     await this.saveIndex(indexName, id, data, mergeDeep);
     return this.findIndex(indexName, id);
@@ -605,7 +605,7 @@ export class Model extends Aggregate implements ModelInterface {
    * @param data
    * @param mergeDeep
    */
-  public async syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
+  public async syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T[]>;
   public async syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean = true): Promise<any[]> {
     await this.saveAllIndex(indexName, id, data, mergeDeep);
     return (this.resetBuilder().whereIndex(indexName, id) as Model).all();
