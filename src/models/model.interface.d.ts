@@ -119,6 +119,8 @@ export interface ActionOrFailInterface {
     findIndexOrFail(indexName: string, id: any): Promise<any>;
     firstOrFail(): Promise<any>;
     firstOrFail<T>(): Promise<T>;
+}
+export interface FindOrCreateActionInterface {
     firstOrCreate<T>(data: any): Promise<T>;
     firstOrCreate(data: any): Promise<any>;
     findOrCreate<T>(id: any, data: any): Promise<T>;
@@ -126,15 +128,7 @@ export interface ActionOrFailInterface {
     findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
     findIndexOrCreate(indexName: string, id: any, data: any): Promise<any>;
 }
-export interface ModelConstructorInterface {
-    new (db: IDBDatabase, table: TableSchema, connector: Connector): ModelInterface;
-    readonly prototype: ModelInterface;
-    TableName: string;
-}
-export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling, ActionOrFailInterface {
-    table: TableSchema;
-    all<T>(): Promise<T[]>;
-    all(): Promise<any[]>;
+export interface BaseWriteActionsInterface {
     create<T>(data: any): Promise<T>;
     create(data: any): Promise<any>;
     createMultiple<T>(entries: any[]): Promise<T[]>;
@@ -143,6 +137,19 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
     delete(id: any): Promise<boolean>;
     destroy(): Promise<boolean>;
     deleteIndex(indexName: string, value: any, isMulti: boolean): Promise<boolean>;
+    save(id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+    saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+    saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+    /**
+     * @deprecated
+     * @param id
+     */
+    destroyId(id: any): Promise<boolean>;
+    truncate(): Promise<boolean>;
+}
+export interface BaseSearchActionsInterface {
+    all<T>(): Promise<T[]>;
+    all(): Promise<any[]>;
     find<T>(id: any): Promise<T | null>;
     find(id: any): Promise<any | null>;
     findIndex<T>(indexName: string, id: any): Promise<T>;
@@ -151,21 +158,20 @@ export interface ModelInterface extends AggregateInterface, RelationQueryBuilder
     findAllIndex(indexName: string, id: any): Promise<any[]>;
     first(): Promise<any>;
     first<T>(): Promise<T>;
-    save(id: any, data: any, mergeDeep: boolean): Promise<boolean>;
-    saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
-    saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+}
+export interface ModelConstructorInterface {
+    new (db: IDBDatabase, table: TableSchema, connector: Connector): ModelInterface;
+    readonly prototype: ModelInterface;
+    TableName: string;
+}
+export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling, ActionOrFailInterface, FindOrCreateActionInterface, BaseSearchActionsInterface, BaseWriteActionsInterface {
+    table: TableSchema;
     sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
     sync(id: any, data: any, mergeDeep: boolean): Promise<any>;
     syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
     syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any>;
     syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
     syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any[]>;
-    /**
-     * @deprecated
-     * @param id
-     */
-    destroyId(id: any): Promise<boolean>;
-    truncate(): Promise<boolean>;
 }
 export interface ModelKeysInterface {
     [key: string]: ModelInterface;
