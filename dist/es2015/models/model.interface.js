@@ -1,10 +1,19 @@
+/**
+ * Default index name and attribute name for auto-generating key
+ */
 export const DEFAULT_PRIMARY_ID = '_id';
+/**
+ * Transaction modes available
+ */
 export var TransactionModes;
 (function (TransactionModes) {
     TransactionModes["ReadOnly"] = "readonly";
     TransactionModes["Write"] = "readwrite";
     TransactionModes["VersionChange"] = "versionchange";
 })(TransactionModes || (TransactionModes = {}));
+/**
+ * Relation Types available
+ */
 export var RelationTypes;
 (function (RelationTypes) {
     RelationTypes["HasOne"] = "hasOne";

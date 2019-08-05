@@ -1,3 +1,4 @@
+import { DEFAULT_SYNC_COLUMN_NAME } from "./migration.interface.js";
 import { DEFAULT_PRIMARY_ID } from "../models/model.interface.js";
 export class Migration {
     constructor(tables, db, transaction) {
@@ -19,6 +20,7 @@ export class Migration {
             }
             this.createColumns(table, table.objectStore);
             this.dropOldColumns(table, table.objectStore);
+            this.setupSyncColumn(table, table.objectStore);
         }
         for (const tableName of this.allStoreNames()) {
             if (!this.tables.find(table => table.name === tableName)) {
@@ -108,6 +110,27 @@ export class Migration {
             stores.push(this.transaction.objectStore(tableName));
         }
         return stores;
+    }
+    /**
+     * Returns true if column is to be created
+     * @param schema
+     * @param objectStore
+     */
+    setupSyncColumn(schema, objectStore) {
+        const columnName = schema.syncColumnName || DEFAULT_SYNC_COLUMN_NAME;
+        if (schema.syncColumn) {
+            if (!objectStore.indexNames.contains(columnName)) {
+                this.createIndex({
+                    name: columnName,
+                    index: columnName
+                }, objectStore);
+            }
+        }
+        else {
+            if (objectStore.indexNames.contains(columnName)) {
+                this.dropIndex(columnName, objectStore);
+            }
+        }
     }
 }
 //# sourceMappingURL=migration.js.map

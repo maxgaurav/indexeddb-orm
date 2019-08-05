@@ -1,7 +1,7 @@
 import { TransactionModes } from "./model.interface.js";
-import { OrmRelationBuilder } from "./orm-relation-builder.js";
 import { nestedAttributeValue } from "../utils.js";
-export class Aggregate extends OrmRelationBuilder {
+import { BaseModel } from "./base-model.js";
+export class Aggregate extends BaseModel {
     constructor(db, table) {
         super();
         this.db = db;
