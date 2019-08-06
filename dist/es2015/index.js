@@ -2,11 +2,11 @@ import { Connector } from "./connection/connector.js";
 import { Model } from "./models/model.js";
 import { Migration } from "./migration/migration.js";
 import { CursorDirection, RelationTypes, TransactionModes } from "./models/model.interface.js";
-((window) => {
-    window.idb = (schema) => {
+((self) => {
+    self.idb = (schema) => {
         return new Connector(schema);
     };
-    window.idbTypes = {
+    self.idbTypes = {
         CursorTypes: {
             'AscendingUnique': CursorDirection.AscendingUnique,
             'Ascending': CursorDirection.Ascending,
@@ -25,6 +25,6 @@ import { CursorDirection, RelationTypes, TransactionModes } from "./models/model
             'VersionChange': TransactionModes.VersionChange,
         }
     };
-})(window);
+})(self);
 export { Connector, Model, Migration, RelationTypes, CursorDirection };
 //# sourceMappingURL=index.js.map

@@ -54,7 +54,11 @@ export class Connector {
      * Returns the IDBFactory.
      */
     indexedDB() {
-        return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        const idb = indexedDB || self.indexedDB || self.mozIndexedDB || self.webkitIndexedDB || self.msIndexedDB;
+        if (!idb) {
+            throw new Error("IndexedDB constructor not found in environment");
+        }
+        return idb;
     }
     /**
      * Called when database version is updated. Runs migrations to update schema structure
