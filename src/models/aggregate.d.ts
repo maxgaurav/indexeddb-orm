@@ -20,6 +20,6 @@ export declare abstract class Aggregate extends BaseModel implements AggregateIn
      * @param func
      * @param defaultCarry
      */
-    reduce(func: (value: any, result: any) => any, defaultCarry: any): Promise<any>;
+    reduce<T extends any, U extends any>(func: (value: U, result: any) => any, defaultCarry: any): Promise<T>;
     reduce<T>(func: (value: any, result: any) => any, defaultCarry: any): Promise<T>;
 }

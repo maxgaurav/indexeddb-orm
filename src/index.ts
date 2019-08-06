@@ -3,16 +3,14 @@ import {Model} from "./models/model.js";
 import {Migration} from "./migration/migration.js";
 import {CursorDirection, RelationTypes, TransactionModes} from "./models/model.interface.js";
 import {Database} from "./migration/migration.interface.js";
-import {WindowInterface} from "./window.interface.js";
 
-declare const window: WindowInterface;
+((self) => {
 
-((window) => {
-  window.idb = (schema: Database) => {
+  self.idb = (schema: Database) => {
     return new Connector(schema);
   };
 
-  window.idbTypes = {
+  self.idbTypes = {
     CursorTypes: {
       'AscendingUnique': CursorDirection.AscendingUnique,
       'Ascending': CursorDirection.Ascending,
@@ -31,7 +29,7 @@ declare const window: WindowInterface;
       'VersionChange': TransactionModes.VersionChange,
     }
   };
-})(window);
+})(self as any);
 
 
 export {Connector, Model, Migration, RelationTypes, CursorDirection};

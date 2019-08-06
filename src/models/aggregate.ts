@@ -100,15 +100,15 @@ export abstract class Aggregate extends BaseModel implements AggregateInterface 
    * @param func
    * @param defaultCarry
    */
-  public reduce(func: (value: any, result: any) => any, defaultCarry: any): Promise<any>;
+  public reduce<T extends any, U extends any>(func: (value: U, result: any) => any, defaultCarry: any): Promise<T>;
   public reduce<T>(func: (value: any, result: any) => any, defaultCarry: any): Promise<T>;
-  public reduce<T extends any, U extends any>(func: (value: U, result: any) => any, defaultCarry: any): Promise<T> {
+  public reduce(func: (value: any, result: any) => any, defaultCarry: any): Promise<any>{
     const tables = [this.table.name];
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = this.request(objectStore);
 
-    return new Promise<T>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let result = defaultCarry;
       request.addEventListener<'success'>("success", async (event) => {
         const cursor = (<IDBResultEvent>event).target.result as IDBCursorWithValue | undefined;

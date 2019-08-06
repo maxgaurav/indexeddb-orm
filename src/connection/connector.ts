@@ -1,12 +1,9 @@
 import {ConnectorInterface} from "./connector.interface.js";
 import {Database, MigrationInterface, TableSchema} from "../migration/migration.interface.js";
 import {DBSuccessEvent, DBVersionChangeEvent} from "./idb-event.interface.js";
-import {WindowInterface} from "../window.interface.js";
 import {Migration} from "../migration/migration.js";
 import {ModelInterface, ModelKeysInterface, TransactionModes} from "../models/model.interface.js";
 import {Model} from "../models/model.js";
-
-declare const window: WindowInterface;
 
 /**
  *
@@ -74,7 +71,12 @@ export class Connector implements ConnectorInterface {
    * Returns the IDBFactory.
    */
   public indexedDB(): IDBFactory {
-    return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    const idb = indexedDB || self.indexedDB || (self as any).mozIndexedDB || (self as any).webkitIndexedDB || (self as any).msIndexedDB;
+    if (!idb) {
+      throw new Error("IndexedDB constructor not found in environment");
+    }
+
+    return idb;
   }
 
   /**
