@@ -116,8 +116,6 @@ export class Connector implements ConnectorInterface {
           } else {
             return new Model(event.target.result, table, this);
           }
-
-
         }
       });
     }

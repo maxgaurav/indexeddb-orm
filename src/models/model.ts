@@ -74,9 +74,16 @@ export class Model extends FindOrCreateActions implements ModelInterface {
 
       Object.defineProperty(models, table.name, {
         get: () => {
-          const model = new Model(<IDBDatabase>this.db, table, this.connector);
+          let model: ModelInterface;
+          if (this.table.ormClass) {
+            model = new this.table.ormClass(<IDBDatabase>this.db, table, this.connector);
+          } else {
+            model = new Model(<IDBDatabase>this.db, table, this.connector);
+          }
+
           model.setTransaction(transaction);
           return model;
+
         }
       });
     }
