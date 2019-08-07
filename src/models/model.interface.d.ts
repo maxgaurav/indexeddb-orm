@@ -175,12 +175,12 @@ export interface ModelConstructorInterface {
 }
 export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling, ActionOrFailInterface, FindOrCreateActionInterface, BaseSearchActionsInterface, BaseWriteActionsInterface {
     table: TableSchema;
-    sync<T>(id: any, data: any, mergeDeep: boolean): Promise<T>;
-    sync(id: any, data: any, mergeDeep: boolean): Promise<any>;
-    syncIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T>;
-    syncIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any>;
-    syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<T[]>;
-    syncAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<any[]>;
+    sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
+    sync(id: any, data: any, mergeDeep?: boolean): Promise<any>;
+    syncIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T>;
+    syncIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<any>;
+    syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T[]>;
+    syncAllIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<any[]>;
 }
 export interface ModelKeysInterface {
     [key: string]: ModelInterface;
