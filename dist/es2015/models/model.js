@@ -36,7 +36,13 @@ export class Model extends FindOrCreateActions {
         for (const table of this.connector.migrationSchema.tables) {
             Object.defineProperty(models, table.name, {
                 get: () => {
-                    const model = new Model(this.db, table, this.connector);
+                    let model;
+                    if (this.table.ormClass) {
+                        model = new this.table.ormClass(this.db, table, this.connector);
+                    }
+                    else {
+                        model = new Model(this.db, table, this.connector);
+                    }
                     model.setTransaction(transaction);
                     return model;
                 }
