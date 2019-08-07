@@ -16,7 +16,8 @@
     "allowJs": false,
     "strict": true,
     "outDir": "dist/es2015",
-    "declarationDir": "./src"
+    "declarationDir": "./src",
+    "incremental": true
   },
   "include": [
     "src/**/*.ts"
