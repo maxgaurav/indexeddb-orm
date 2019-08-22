@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.2.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.1.1) _(Latest Release)_
+## [3.2.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.2.0) _(Latest Release)_
 ### Bug Fixes
 - Fix **openTransaction** on model not returning ORM Class.
 
@@ -10,6 +10,8 @@
 - Added **saveIndex** to save data on index. It's optimized for single action transaction over update
 - Added **saveAllIndex** to save data on all matching index.
 
+### Changed
+- **Connector** class and **index** file refactored to remove reference of **window** action so that the package can be imported in web workers. 
 
 ### Other
 - Refactored **model.ts** file to multiple files to maintain single file single responsibility principle. 
