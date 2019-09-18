@@ -61,4 +61,8 @@ export declare class Connector implements ConnectorInterface {
         models: ModelKeysInterface;
         transaction: IDBTransaction;
     };
+    /**
+     * Closes currently open connection to database
+     */
+    close(): Promise<boolean>;
 }

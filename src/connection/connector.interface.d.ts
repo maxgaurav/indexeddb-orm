@@ -10,4 +10,5 @@ export interface ConnectorInterface {
         models: ModelKeysInterface;
         transaction: IDBTransaction;
     };
+    close(): Promise<boolean>;
 }

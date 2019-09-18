@@ -14,5 +14,7 @@ export interface ConnectorInterface {
   getDatabase(): IDBDatabase | null;
 
   openTransaction(mode: TransactionModes): { models: ModelKeysInterface, transaction: IDBTransaction };
+
+  close(): Promise<boolean>;
 }
 

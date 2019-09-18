@@ -163,4 +163,16 @@ export class Connector implements ConnectorInterface {
 
     return {models, transaction};
   }
+
+  /**
+   * Closes currently open connection to database
+   */
+  public close(): Promise<boolean> {
+    if (this.database) {
+      this.database.close();
+      return Promise.resolve(true);
+    }
+
+    return Promise.reject('No Connection open');
+  }
 }
