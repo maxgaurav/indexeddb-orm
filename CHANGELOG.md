@@ -1,6 +1,11 @@
 # Changelog
 
-## [3.2.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.2.0) _(Latest Release)_
+## [3.2.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.2.1) _(Latest Release)_
+
+### Added
+- Added close connection function **close** to close currently open connection 
+
+## [3.2.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.2.0)
 ### Bug Fixes
 - Fix **openTransaction** on model not returning ORM Class.
 
