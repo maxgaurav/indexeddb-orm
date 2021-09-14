@@ -1,9 +1,9 @@
-import {TableSchema} from "../migration/migration.interface.js";
-import {Connector} from "../connection/connector.js";
-import {HasOne} from "../relations/has-one.js";
-import {HasMany} from "../relations/has-many.js";
-import {HasManyThroughMulti} from "../relations/has-many-through-multi.js";
-import {HasManyMulti} from "../relations/has-many-multi.js";
+import { TableSchema } from '../migration/migration.interface.js';
+import { Connector } from '../connection/connector.js';
+import { HasOne } from '../relations/has-one.js';
+import { HasMany } from '../relations/has-many.js';
+import { HasManyThroughMulti } from '../relations/has-many-through-multi.js';
+import { HasManyMulti } from '../relations/has-many-multi.js';
 
 /**
  * Default index name and attribute name for auto-generating key
@@ -15,11 +15,20 @@ export interface AggregateInterface {
 
   average(attribute: string): Promise<number>;
 
-  reduce<T, U>(func: (value: U, result: any) => any, defaultCarry?: any): Promise<T>;
+  reduce<T, U>(
+    func: (value: U, result: any) => any,
+    defaultCarry?: any,
+  ): Promise<T>;
 
-  reduce<T>(func: (value: any, result: any) => any, defaultCarry?: any): Promise<T>;
+  reduce<T>(
+    func: (value: any, result: any) => any,
+    defaultCarry?: any,
+  ): Promise<T>;
 
-  reduce(func: (value: any, result: any) => any, defaultCarry?: any): Promise<any>;
+  reduce(
+    func: (value: any, result: any) => any,
+    defaultCarry?: any,
+  ): Promise<any>;
 }
 
 /**
@@ -28,7 +37,7 @@ export interface AggregateInterface {
 export enum TransactionModes {
   ReadOnly = 'readonly',
   Write = 'readwrite',
-  VersionChange = 'versionchange'
+  VersionChange = 'versionchange',
 }
 
 /**
@@ -38,7 +47,7 @@ export enum RelationTypes {
   HasOne = 'hasOne',
   HasMany = 'hasMany',
   HasManyMultiEntry = 'hasManyMultiEntry',
-  HasManyThroughMultiEntry = 'hasManyThroughMultiEntry'
+  HasManyThroughMultiEntry = 'hasManyThroughMultiEntry',
 }
 
 export interface Relation {
@@ -52,13 +61,33 @@ export interface Relation {
 }
 
 export interface OrmRelationBuilderInterface {
-  hasOne(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasOne;
+  hasOne(
+    model: ModelConstructorInterface,
+    foreignKey: string,
+    localKey?: string,
+    parentKeyName?: string,
+  ): HasOne;
 
-  hasMany(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasMany;
+  hasMany(
+    model: ModelConstructorInterface,
+    foreignKey: string,
+    localKey?: string,
+    parentKeyName?: string,
+  ): HasMany;
 
-  hasManyMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyMulti;
+  hasManyMultiEntry(
+    model: ModelConstructorInterface,
+    foreignKey: string,
+    localKey?: string,
+    parentKeyName?: string,
+  ): HasManyMulti;
 
-  hasManyThroughMultiEntry(model: ModelConstructorInterface, foreignKey: string, localKey?: string, parentKeyName?: string): HasManyThroughMulti;
+  hasManyThroughMultiEntry(
+    model: ModelConstructorInterface,
+    foreignKey: string,
+    localKey?: string,
+    parentKeyName?: string,
+  ): HasManyThroughMulti;
 }
 
 export interface RelationQueryBuilder {
@@ -68,9 +97,7 @@ export interface RelationQueryBuilder {
 
   tableNames(relations: TableSchema[]): string[];
 
-  with(relations: Relation[]): RelationQueryBuilder | ModelInterface;
-
-  withCustom(relations: string[]): RelationQueryBuilder | ModelInterface;
+  with(relations: (Relation | string)[]): RelationQueryBuilder | ModelInterface;
 
   /**
    * @deprecated
@@ -80,7 +107,12 @@ export interface RelationQueryBuilder {
    * @param foreignKey
    * @param func
    */
-  relation(modelName: string, type: RelationTypes, localKey: string, foreignKey: string, func?: (builder: QueryBuilderInterface) => QueryBuilderInterface
+  relation(
+    modelName: string,
+    type: RelationTypes,
+    localKey: string,
+    foreignKey: string,
+    func?: (builder: QueryBuilderInterface) => QueryBuilderInterface,
   ): RelationQueryBuilder | ModelInterface;
 }
 
@@ -99,7 +131,7 @@ export enum CursorDirection {
   Ascending = 'next',
   AscendingUnique = 'nextunique',
   Descending = 'prev',
-  DescendingUnique = 'prevunique'
+  DescendingUnique = 'prevunique',
 }
 
 export interface IndexBuilder {
@@ -121,39 +153,87 @@ export interface QueryBuilderInterface extends RelationQueryBuilder {
 
   cursor: CursorDirection | null;
 
-  whereIndex(indexName: string, value: any): QueryBuilderInterface | ModelInterface;
+  whereIndex(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  whereIndexIn(indexName: string, values: any[]): QueryBuilderInterface | ModelInterface;
+  whereIndexIn(
+    indexName: string,
+    values: any[],
+  ): QueryBuilderInterface | ModelInterface;
 
-  whereMultiIndexIn(indexName: string, values: any[], unique?: boolean): QueryBuilderInterface | ModelInterface;
+  whereMultiIndexIn(
+    indexName: string,
+    values: any[],
+    unique?: boolean,
+  ): QueryBuilderInterface | ModelInterface;
 
-  indexGte(indexName: string, value: any): QueryBuilderInterface | ModelInterface;
+  indexGte(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  indexGt(indexName: string, value: any): QueryBuilderInterface | ModelInterface;
+  indexGt(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  indexLt(indexName: string, value: any): QueryBuilderInterface | ModelInterface;
+  indexLt(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  indexLte(indexName: string, value: any): QueryBuilderInterface | ModelInterface;
+  indexLte(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  indexBetween(indexName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface;
+  indexBetween(
+    indexName: string,
+    lower: any,
+    upper: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  where(attributeName: string, value: any): QueryBuilderInterface | ModelInterface;
+  where(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  whereIn(attributeName: string, values: any[]): QueryBuilderInterface | ModelInterface;
+  whereIn(
+    attributeName: string,
+    values: any[],
+  ): QueryBuilderInterface | ModelInterface;
 
-  gte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface;
+  gte(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
   gt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface;
 
-  lte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface;
+  lte(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface;
 
   lt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface;
 
-  between(attributeName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface;
+  between(
+    attributeName: string,
+    lower: any,
+    upper: any,
+  ): QueryBuilderInterface | ModelInterface;
 
-  whereInArray(attributeName: string, values: any[], unique: boolean): QueryBuilderInterface | ModelInterface;
+  whereInArray(
+    attributeName: string,
+    values: any[],
+    unique: boolean,
+  ): QueryBuilderInterface | ModelInterface;
 
-  cursorDirection(direction: CursorDirection): QueryBuilderInterface | ModelInterface;
+  cursorDirection(
+    direction: CursorDirection,
+  ): QueryBuilderInterface | ModelInterface;
 
   keyRange(indexBuilder: IndexBuilder): IDBKeyRange;
 
@@ -161,13 +241,20 @@ export interface QueryBuilderInterface extends RelationQueryBuilder {
 }
 
 export interface TransactionHandling {
-  getTransaction(stores: string[], mode: TransactionModes, overwrite: boolean): IDBTransaction;
+  getTransaction(
+    stores: string[],
+    mode: TransactionModes,
+    overwrite: boolean,
+  ): IDBTransaction;
 
   setTransaction(transaction: IDBTransaction): void;
 
   createTransaction(stores: string[], mode: TransactionModes): IDBTransaction;
 
-  openTransaction(mode: TransactionModes): { models: ModelKeysInterface, transaction: IDBTransaction };
+  openTransaction(mode: TransactionModes): {
+    models: ModelKeysInterface;
+    transaction: IDBTransaction;
+  };
 }
 
 export interface ActionOrFailInterface {
@@ -213,14 +300,27 @@ export interface BaseWriteActionsInterface {
 
   destroy(): Promise<boolean>;
 
-  deleteIndex(indexName: string, value: any, isMulti: boolean): Promise<boolean>;
-
+  deleteIndex(
+    indexName: string,
+    value: any,
+    isMulti: boolean,
+  ): Promise<boolean>;
 
   save(id: any, data: any, mergeDeep: boolean): Promise<boolean>;
 
-  saveIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+  saveIndex(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep: boolean,
+  ): Promise<boolean>;
 
-  saveAllIndex(indexName: string, id: any, data: any, mergeDeep: boolean): Promise<boolean>;
+  saveAllIndex(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep: boolean,
+  ): Promise<boolean>;
 
   /**
    * @deprecated
@@ -254,26 +354,61 @@ export interface BaseSearchActionsInterface {
 }
 
 export interface ModelConstructorInterface {
-  new(db: IDBDatabase, table: TableSchema, connector: Connector): ModelInterface;
+  new (
+    db: IDBDatabase,
+    table: TableSchema,
+    connector: Connector,
+  ): ModelInterface;
 
   readonly prototype: ModelInterface;
   TableName: string;
 }
 
-export interface ModelInterface extends AggregateInterface, RelationQueryBuilder, QueryBuilderInterface, TransactionHandling, ActionOrFailInterface, FindOrCreateActionInterface, BaseSearchActionsInterface, BaseWriteActionsInterface {
+export interface BaseModelInterface {
   table: TableSchema;
+}
 
+export interface ModelInterface
+  extends AggregateInterface,
+    RelationQueryBuilder,
+    QueryBuilderInterface,
+    TransactionHandling,
+    ActionOrFailInterface,
+    FindOrCreateActionInterface,
+    BaseSearchActionsInterface,
+    BaseWriteActionsInterface,
+    BaseModelInterface {
   sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
 
   sync(id: any, data: any, mergeDeep?: boolean): Promise<any>;
 
-  syncIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T>;
+  syncIndex<T>(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep?: boolean,
+  ): Promise<T>;
 
-  syncIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<any>;
+  syncIndex(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep?: boolean,
+  ): Promise<any>;
 
-  syncAllIndex<T>(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<T[]>;
+  syncAllIndex<T>(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep?: boolean,
+  ): Promise<T[]>;
 
-  syncAllIndex(indexName: string, id: any, data: any, mergeDeep?: boolean): Promise<any[]>;
+  syncAllIndex(
+    indexName: string,
+    id: any,
+    data: any,
+    mergeDeep?: boolean,
+  ): Promise<any[]>;
 }
 
 export interface ModelKeysInterface {

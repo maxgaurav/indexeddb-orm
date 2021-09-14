@@ -1,8 +1,10 @@
-import {TransactionModes} from "./model.interface.js";
-import {OrmRelationBuilder} from "./orm-relation-builder.js";
+import { TransactionModes } from './model.interface.js';
+import { OrmRelationBuilder } from './orm-relation-builder.js';
 
-export abstract class TransactionHandling extends OrmRelationBuilder implements TransactionHandling {
-
+export abstract class TransactionHandling
+  extends OrmRelationBuilder
+  implements TransactionHandling
+{
   protected transaction: IDBTransaction | null = null;
 
   /**
@@ -12,7 +14,11 @@ export abstract class TransactionHandling extends OrmRelationBuilder implements 
    * @param mode
    * @param overwrite
    */
-  public getTransaction(stores: string[], mode: TransactionModes, overwrite: boolean = false): IDBTransaction {
+  public getTransaction(
+    stores: string[],
+    mode: TransactionModes,
+    overwrite = false,
+  ): IDBTransaction {
     if (this.transaction === null || overwrite) {
       this.transaction = this.createTransaction(stores, mode);
     }
@@ -32,7 +38,10 @@ export abstract class TransactionHandling extends OrmRelationBuilder implements 
    * @param stores
    * @param mode
    */
-  public createTransaction(stores: string[], mode: TransactionModes): IDBTransaction {
+  public createTransaction(
+    stores: string[],
+    mode: TransactionModes,
+  ): IDBTransaction {
     const transaction = this.db.transaction(stores, mode);
     this.setTransaction(transaction);
 

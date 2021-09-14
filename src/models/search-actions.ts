@@ -1,9 +1,14 @@
-import {Aggregate} from "./aggregate.js";
-import {BaseSearchActionsInterface, TransactionModes} from "./model.interface.js";
-import {IDBResultEvent} from "../connection/idb-event.interface.js";
+import { Aggregate } from './aggregate.js';
+import {
+  BaseSearchActionsInterface,
+  TransactionModes,
+} from './model.interface.js';
+import { IDBResultEvent } from '../connection/idb-event.interface.js';
 
-export abstract class SearchActions extends Aggregate implements BaseSearchActionsInterface {
-
+export abstract class SearchActions
+  extends Aggregate
+  implements BaseSearchActionsInterface
+{
   protected abstract loadRelations(results: any[]): Promise<any>[];
 
   protected abstract loadCustomRelations(results: any[]): Promise<any>[];
@@ -13,19 +18,21 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
    */
   public all<T>(): Promise<T[]>;
   public all(): Promise<any[]> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = this.request(objectStore);
 
     return new Promise<any[]>((resolve, reject) => {
-
-      let results: any[] = [];
-      request.addEventListener<'success'>("success", async (event) => {
-        const cursor = (<IDBResultEvent>event).target.result as IDBCursorWithValue | undefined;
+      const results: any[] = [];
+      request.addEventListener<'success'>('success', async (event) => {
+        const cursor = (<IDBResultEvent>event).target.result as
+          | IDBCursorWithValue
+          | undefined;
 
         if (cursor) {
-
           if (!this.allowedToProcess(cursor.value)) {
             return cursor.continue();
           }
@@ -44,9 +51,8 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
         resolve(results);
       });
 
-      request.addEventListener<'error'>("error", (error) => reject(error));
+      request.addEventListener<'error'>('error', (error) => reject(error));
     });
-
   }
 
   /**
@@ -54,19 +60,21 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
    */
   public first<T>(): Promise<T>;
   public first(): Promise<any> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = this.request(objectStore);
 
     return new Promise<any[]>((resolve, reject) => {
-
       let result: any;
-      request.addEventListener<'success'>("success", async (event) => {
-        const cursor = (<IDBResultEvent>event).target.result as IDBCursorWithValue | undefined;
+      request.addEventListener<'success'>('success', async (event) => {
+        const cursor = (<IDBResultEvent>event).target.result as
+          | IDBCursorWithValue
+          | undefined;
 
         if (cursor) {
-
           if (!this.allowedToProcess(cursor.value)) {
             return cursor.continue();
           }
@@ -84,7 +92,7 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
         resolve(result);
       });
 
-      request.addEventListener<'error'>("error", (error) => reject(error));
+      request.addEventListener<'error'>('error', (error) => reject(error));
     });
   }
 
@@ -94,14 +102,15 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
    */
   public find<T>(id: any): Promise<T | null>;
   public find(id: any): Promise<any | null> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = objectStore.get(id);
 
     return new Promise<any[]>((resolve, reject) => {
-
-      request.addEventListener<'success'>("success", async (event) => {
+      request.addEventListener<'success'>('success', async (event) => {
         const result = (event as IDBResultEvent).target.result;
 
         if (!result || this.relations.length === 0) {
@@ -115,7 +124,7 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
         resolve(result || null);
       });
 
-      request.addEventListener<'error'>("error", (error) => reject(error));
+      request.addEventListener<'error'>('error', (error) => reject(error));
     });
   }
 
@@ -126,17 +135,17 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
    */
   public findIndex<T>(indexName: string, id: any): Promise<T>;
   public findIndex(indexName: string, id: any): Promise<any> {
-
     this.resetBuilder();
 
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.getTransaction(tables, TransactionModes.ReadOnly);
     const objectStore = transaction.objectStore(this.table.name);
     const request = objectStore.index(indexName).get(id);
 
     return new Promise<any[]>((resolve, reject) => {
-
-      request.addEventListener<'success'>("success", async (event) => {
+      request.addEventListener<'success'>('success', async (event) => {
         const result = (event as IDBResultEvent).target.result;
 
         if (!result || this.relations.length === 0) {
@@ -150,7 +159,7 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
         resolve(result);
       });
 
-      request.addEventListener<'error'>("error", (error) => reject(error));
+      request.addEventListener<'error'>('error', (error) => reject(error));
     });
   }
 
@@ -166,5 +175,4 @@ export abstract class SearchActions extends Aggregate implements BaseSearchActio
     this.whereIndex(indexName, id);
     return this.all();
   }
-
 }

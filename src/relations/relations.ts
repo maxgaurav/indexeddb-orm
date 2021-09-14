@@ -1,16 +1,19 @@
 import {
-  DEFAULT_PRIMARY_ID, ModelConstructorInterface,
+  BaseModelInterface,
+  DEFAULT_PRIMARY_ID,
   ModelInterface,
   QueryBuilderInterface,
-  Relation, RelationTypes,
-} from "../models/model.interface.js";
-import {Model} from "../models/model.js";
-import {QueryBuilder} from "../models/query-builder.js";
-import {Connector} from "../connection/connector.js";
-import {RelationInterface} from "./relation.interface.js";
+  Relation,
+} from '../models/model.interface.js';
+import { Model } from '../models/model.js';
+import { QueryBuilder } from '../models/query-builder.js';
+import { Connector } from '../connection/connector.js';
+import { RelationInterface } from './relation.interface.js';
 
-export abstract class Relations extends QueryBuilder implements RelationInterface, QueryBuilderInterface {
-
+export abstract class Relations
+  extends QueryBuilder
+  implements RelationInterface, QueryBuilderInterface
+{
   /**
    * IDBDatabase
    */
@@ -27,7 +30,11 @@ export abstract class Relations extends QueryBuilder implements RelationInterfac
    * @param relationResults
    * @param relation
    */
-  public abstract bindResults(parentResults: any | any[], relationResults: any[], relation: Relation): Promise<any>;
+  public abstract bindResults(
+    parentResults: any | any[],
+    relationResults: any[],
+    relation: Relation,
+  ): Promise<any>;
 
   /**
    * Fetches childRelation results
@@ -40,7 +47,10 @@ export abstract class Relations extends QueryBuilder implements RelationInterfac
    * @param model
    * @param relation
    */
-  public filteredModel(model: ModelInterface, relation: Relation): ModelInterface {
+  public filteredModel(
+    model: ModelInterface,
+    relation: Relation,
+  ): ModelInterface {
     model = this.bindBuilder(model);
     const builder = new QueryBuilder();
 
@@ -66,8 +76,10 @@ export abstract class Relations extends QueryBuilder implements RelationInterfac
   public getRelationModel(relation: Relation): ModelInterface {
     let model: ModelInterface;
 
-    if (typeof relation.model === "string") {
-      const tableSchema = this.connector.migrationSchema.tables.find(table => table.name === relation.model);
+    if (typeof relation.model === 'string') {
+      const tableSchema = this.connector.migrationSchema.tables.find(
+        (table) => table.name === relation.model,
+      );
       if (!tableSchema) {
         throw new Error('Table schema not found');
       }
@@ -85,7 +97,7 @@ export abstract class Relations extends QueryBuilder implements RelationInterfac
    * @param model
    * @param relation
    */
-  public getLocalKey(model: ModelInterface, relation: Relation): string {
+  public getLocalKey(model: BaseModelInterface, relation: Relation): string {
     const primaryKey = model.table.primary || DEFAULT_PRIMARY_ID;
     return relation.localKey ? relation.localKey : primaryKey;
   }
@@ -95,7 +107,10 @@ export abstract class Relations extends QueryBuilder implements RelationInterfac
    * @param model
    * @param relation
    */
-  public getAttributeName(model: ModelInterface, relation: Relation): string {
+  public getAttributeName(
+    model: BaseModelInterface,
+    relation: Relation,
+  ): string {
     return relation.attributeName || model.table.name;
   }
 }

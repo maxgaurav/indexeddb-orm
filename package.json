@@ -1,31 +1,27 @@
 {
   "name": "indexeddb-orm",
-  "version": "3.2.1",
-  "main": "./dist/es2015/index.js",
+  "version": "4.0.0-alpha.1",
+  "main": "./dist/index.js",
   "types": "./src/index.d.ts",
   "scripts": {
-    "build.browser.module": "./node_modules/.bin/tsc --build tsconfig.json",
-    "build.browser.all": "./node_modules/.bin/webpack --config=webpack.config.js --mode=production"
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "watch": "rimraf dist && tsc -p tsconfig.build.json --watch",
+    "prepublish": "npm run build"
   },
   "author": "Max Gaurav max.gaurav@ithands.net",
   "description": "A promise based ORM wrapper for indexedDB",
   "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-transform-runtime": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "@babel/runtime": "^7.4.5",
-    "babel-loader": "^8.0.6",
-    "ts-loader": "^6.0",
-    "tslint": "^5.18.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-no-toplevel-property-access": "^0.0.2",
-    "typescript": "^3.5",
-    "vrsource-tslint-rules": "^6.0.0",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5"
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.0",
+    "typescript": "^4.4.3"
   },
   "files": [
-    "/src",
     "/dist"
   ],
   "keywords": [
@@ -43,5 +39,7 @@
     "url": "https://github.com/maxgaurav/indexeddb-orm.git"
   },
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "rimraf": "^3.0.2"
+  }
 }

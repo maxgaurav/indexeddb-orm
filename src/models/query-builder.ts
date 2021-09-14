@@ -4,13 +4,15 @@ import {
   IndexBuilder,
   ModelInterface,
   QueryBuilderInterface,
-  QueryTypes
-} from "./model.interface.js";
-import {RelationBuilder} from "./relation.builder.js";
-import {nestedAttributeValue} from "../utils.js";
+  QueryTypes,
+} from './model.interface.js';
+import { RelationBuilder } from './relation.builder.js';
+import { nestedAttributeValue } from '../utils.js';
 
-export class QueryBuilder extends RelationBuilder implements QueryBuilderInterface {
-
+export class QueryBuilder
+  extends RelationBuilder
+  implements QueryBuilderInterface
+{
   /**
    * Index filter setting
    */
@@ -31,11 +33,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param value
    */
-  public whereIndex(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public whereIndex(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value,
-      type: QueryTypes.Where
+      type: QueryTypes.Where,
     };
 
     return this;
@@ -46,11 +51,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param values
    */
-  public whereIndexIn(indexName: string, values: any[]): QueryBuilderInterface | ModelInterface {
+  public whereIndexIn(
+    indexName: string,
+    values: any[],
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value: values,
-      type: QueryTypes.WhereIn
+      type: QueryTypes.WhereIn,
     };
 
     return this;
@@ -62,11 +70,16 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param values
    * @param unique
    */
-  public whereMultiIndexIn(indexName: string, values: any[], unique: boolean = false): QueryBuilderInterface | ModelInterface {
+  public whereMultiIndexIn(
+    indexName: string,
+    values: any[],
+    unique = false,
+  ): QueryBuilderInterface | ModelInterface {
+    // @todo unique: What was it for. need to see was it for filtering duplicate values when provided in values property
     this.indexBuilder = {
       index: indexName,
       value: values,
-      type: QueryTypes.WhereInArray
+      type: QueryTypes.WhereInArray,
     };
 
     return this;
@@ -77,11 +90,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param value
    */
-  public indexGte(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public indexGte(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value,
-      type: QueryTypes.GreaterThanEqual
+      type: QueryTypes.GreaterThanEqual,
     };
     return this;
   }
@@ -91,11 +107,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param value
    */
-  public indexGt(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public indexGt(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value,
-      type: QueryTypes.GreaterThan
+      type: QueryTypes.GreaterThan,
     };
     return this;
   }
@@ -105,11 +124,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param value
    */
-  public indexLte(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public indexLte(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value,
-      type: QueryTypes.LessThanEqual
+      type: QueryTypes.LessThanEqual,
     };
 
     return this;
@@ -120,11 +142,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexName
    * @param value
    */
-  public indexLt(indexName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public indexLt(
+    indexName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value,
-      type: QueryTypes.LessThan
+      type: QueryTypes.LessThan,
     };
     return this;
   }
@@ -135,11 +160,15 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param lower
    * @param upper
    */
-  public indexBetween(indexName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface {
+  public indexBetween(
+    indexName: string,
+    lower: any,
+    upper: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.indexBuilder = {
       index: indexName,
       value: [lower, upper],
-      type: QueryTypes.Between
+      type: QueryTypes.Between,
     };
     return this;
   }
@@ -149,11 +178,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param value
    */
-  public where(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public where(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value,
-      type: QueryTypes.Where
+      type: QueryTypes.Where,
     });
     return this;
   }
@@ -163,11 +195,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param values
    */
-  public whereIn(attributeName: string, values: any[]): QueryBuilderInterface | ModelInterface {
+  public whereIn(
+    attributeName: string,
+    values: any[],
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value: values,
-      type: QueryTypes.WhereIn
+      type: QueryTypes.WhereIn,
     });
 
     return this;
@@ -179,12 +214,16 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param values
    * @param unique
    */
-  public whereInArray(attributeName: string, values: any[], unique: boolean = false): QueryBuilderInterface | ModelInterface {
-
+  public whereInArray(
+    attributeName: string,
+    values: any[],
+    unique = false,
+  ): QueryBuilderInterface | ModelInterface {
+    // @todo unique: What was it for. need to see was it for filtering duplicate values when provided in values property
     this.builder.push({
       attribute: attributeName,
       value: values,
-      type: QueryTypes.WhereInArray
+      type: QueryTypes.WhereInArray,
     });
 
     return this;
@@ -195,11 +234,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param value
    */
-  public gte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public gte(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value,
-      type: QueryTypes.GreaterThanEqual
+      type: QueryTypes.GreaterThanEqual,
     });
     return this;
   }
@@ -209,11 +251,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param value
    */
-  public gt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public gt(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value,
-      type: QueryTypes.GreaterThan
+      type: QueryTypes.GreaterThan,
     });
     return this;
   }
@@ -223,11 +268,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param value
    */
-  public lte(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public lte(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value,
-      type: QueryTypes.LessThanEqual
+      type: QueryTypes.LessThanEqual,
     });
     return this;
   }
@@ -237,11 +285,14 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param attributeName
    * @param value
    */
-  public lt(attributeName: string, value: any): QueryBuilderInterface | ModelInterface {
+  public lt(
+    attributeName: string,
+    value: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value,
-      type: QueryTypes.LessThan
+      type: QueryTypes.LessThan,
     });
     return this;
   }
@@ -252,16 +303,22 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param lower
    * @param upper
    */
-  public between(attributeName: string, lower: any, upper: any): QueryBuilderInterface | ModelInterface {
+  public between(
+    attributeName: string,
+    lower: any,
+    upper: any,
+  ): QueryBuilderInterface | ModelInterface {
     this.builder.push({
       attribute: attributeName,
       value: [lower, upper],
-      type: QueryTypes.Between
+      type: QueryTypes.Between,
     });
     return this;
   }
 
-  public cursorDirection(direction: CursorDirection): QueryBuilderInterface | ModelInterface {
+  public cursorDirection(
+    direction: CursorDirection,
+  ): QueryBuilderInterface | ModelInterface {
     this.cursor = direction;
     return this;
   }
@@ -271,44 +328,58 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param indexBuilder
    */
   public keyRange(indexBuilder: IndexBuilder): IDBKeyRange {
-
     let range: IDBKeyRange;
     switch (indexBuilder.type) {
-      case QueryTypes.Where :
+      case QueryTypes.Where:
         range = IDBKeyRange.only(indexBuilder.value);
         break;
 
-      case QueryTypes.WhereIn :
+      case QueryTypes.WhereIn:
         this.whereIn(indexBuilder.index, indexBuilder.value);
-        let values = indexBuilder.value.sort();
-        range = IDBKeyRange.bound(values[0], values[values.length - 1], false, false);
+        const values = indexBuilder.value.sort();
+        range = IDBKeyRange.bound(
+          values[0],
+          values[values.length - 1],
+          false,
+          false,
+        );
         break;
 
-      case QueryTypes.GreaterThanEqual :
+      case QueryTypes.GreaterThanEqual:
         range = IDBKeyRange.lowerBound(indexBuilder.value, false);
         break;
 
-      case QueryTypes.GreaterThan :
+      case QueryTypes.GreaterThan:
         range = IDBKeyRange.lowerBound(indexBuilder.value, true);
         break;
 
-      case QueryTypes.LessThanEqual :
+      case QueryTypes.LessThanEqual:
         range = IDBKeyRange.upperBound(indexBuilder.value, false);
         break;
 
-      case QueryTypes.LessThan :
+      case QueryTypes.LessThan:
         range = IDBKeyRange.lowerBound(indexBuilder.value, true);
         break;
 
-      case QueryTypes.Between :
-        range = IDBKeyRange.bound(indexBuilder.value[0], indexBuilder.value[1], false, false);
+      case QueryTypes.Between:
+        range = IDBKeyRange.bound(
+          indexBuilder.value[0],
+          indexBuilder.value[1],
+          false,
+          false,
+        );
         break;
       case QueryTypes.WhereInArray:
         this.whereInArray(indexBuilder.index, indexBuilder.value);
-        let whereInArrayValues = indexBuilder.value.sort();
-        range = IDBKeyRange.bound(whereInArrayValues[0], whereInArrayValues[whereInArrayValues.length - 1], false, false);
+        const whereInArrayValues = indexBuilder.value.sort();
+        range = IDBKeyRange.bound(
+          whereInArrayValues[0],
+          whereInArrayValues[whereInArrayValues.length - 1],
+          false,
+          false,
+        );
         break;
-      default :
+      default:
         throw 'Invalid builder type given';
     }
 
@@ -320,11 +391,12 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
    * @param result
    */
   protected allowedToProcess(result: any): boolean {
-
     for (const builder of this.builder) {
       switch (builder.type) {
         case QueryTypes.Where:
-          if (!nestedAttributeValue(builder.attribute, result) === builder.value) {
+          if (
+            !nestedAttributeValue(builder.attribute, result) === builder.value
+          ) {
             return false;
           }
           break;
@@ -364,7 +436,9 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
           break;
 
         case QueryTypes.GreaterThan:
-          if (nestedAttributeValue(builder.attribute, result) <= builder.value) {
+          if (
+            nestedAttributeValue(builder.attribute, result) <= builder.value
+          ) {
             return false;
           }
           break;
@@ -374,7 +448,9 @@ export class QueryBuilder extends RelationBuilder implements QueryBuilderInterfa
           }
           break;
         case QueryTypes.LessThan:
-          if (nestedAttributeValue(builder.attribute, result) >= builder.value) {
+          if (
+            nestedAttributeValue(builder.attribute, result) >= builder.value
+          ) {
             return false;
           }
           break;

@@ -1,6 +1,6 @@
-import {Connector} from "../dist/es2015/index.js";
-import {Model} from "../dist/es2015/models/model.js";
-import {RelationTypes} from "../dist/es2015/models/model.interface.js";
+import {Connector} from "../dist/index.js";
+import {Model} from "../dist/models/model.js";
+import {RelationTypes} from "../dist/models/model.interface.js";
 
 class Users extends Model {
   static TableName = 'users';

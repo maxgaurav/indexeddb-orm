@@ -1,3 +1,1 @@
-export class InvalidTransaction extends Error {
-
-}
+export class InvalidTransaction extends Error {}

@@ -25,7 +25,8 @@ export function nestedAttributeValue(attributeString: string, value: any): any {
  */
 export function mergeDeep(
   object1: { [key: string]: any | any[] },
-  object2: { [key: string]: any | any[] }): { [key: string]: any | any[] } {
+  object2: { [key: string]: any | any[] },
+): { [key: string]: any | any[] } {
   for (const key in object1) {
     if (object2.hasOwnProperty(key)) {
       if (object2[key] instanceof Object) {

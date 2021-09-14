@@ -1,8 +1,10 @@
-import {MigrationInterface} from "../migration/migration.interface.js";
-import {ModelKeysInterface, TransactionModes} from "../models/model.interface.js";
+import { MigrationInterface } from '../migration/migration.interface.js';
+import {
+  ModelKeysInterface,
+  TransactionModes,
+} from '../models/model.interface.js';
 
 export interface ConnectorInterface {
-
   connect(): Promise<ModelKeysInterface>;
 
   destroy(databaseName: string): Promise<boolean>;
@@ -13,8 +15,10 @@ export interface ConnectorInterface {
 
   getDatabase(): IDBDatabase | null;
 
-  openTransaction(mode: TransactionModes): { models: ModelKeysInterface, transaction: IDBTransaction };
+  openTransaction(mode: TransactionModes): {
+    models: ModelKeysInterface;
+    transaction: IDBTransaction;
+  };
 
   close(): Promise<boolean>;
 }
-

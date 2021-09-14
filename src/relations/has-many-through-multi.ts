@@ -1,13 +1,14 @@
-import {Relations} from "./relations.js";
-import {ModelInterface, Relation} from "../models/model.interface.js";
-import {Connector} from "../connection/connector.js";
+import { Relations } from './relations.js';
+import { Relation } from '../models/model.interface.js';
+import { Connector } from '../connection/connector.js';
+import { OrmRelationBuilder } from '../models/orm-relation-builder.js';
 
 export class HasManyThroughMulti extends Relations {
   constructor(
     public db: IDBDatabase,
     public connector: Connector,
-    protected parentModel: ModelInterface,
-    public childRelation: Relation
+    protected parentModel: OrmRelationBuilder,
+    public childRelation: Relation,
   ) {
     super();
   }
@@ -17,7 +18,11 @@ export class HasManyThroughMulti extends Relations {
     model = this.filteredModel(model, this.childRelation);
 
     const values = results.reduce(
-      (carry: any[], result) => carry.concat(result[this.getLocalKey(this.parentModel, this.childRelation)]), []
+      (carry: any[], result) =>
+        carry.concat(
+          result[this.getLocalKey(this.parentModel, this.childRelation)],
+        ),
+      [],
     );
     model.whereIndexIn(this.childRelation.foreignKey, values);
 
@@ -26,15 +31,22 @@ export class HasManyThroughMulti extends Relations {
     return this.bindResults(results, relationResults, this.childRelation);
   }
 
-  public bindResults(parentResults: any[], relationResults: any[], relation: Relation): Promise<any> {
+  public bindResults(
+    parentResults: any[],
+    relationResults: any[],
+    relation: Relation,
+  ): Promise<any> {
     const localKey = this.getLocalKey(this.parentModel, this.childRelation);
 
-    parentResults.forEach(parentResult => {
-      parentResult[this.getAttributeName(this.parentModel, relation)] = relationResults.filter(
-        (relationResult: any) => !!parentResult[localKey].find(
-          (multiValue: any) => multiValue === relationResult[relation.foreignKey]
-        )
-      );
+    parentResults.forEach((parentResult) => {
+      parentResult[this.getAttributeName(this.parentModel, relation)] =
+        relationResults.filter(
+          (relationResult: any) =>
+            !!parentResult[localKey].find(
+              (multiValue: any) =>
+                multiValue === relationResult[relation.foreignKey],
+            ),
+        );
     });
 
     return Promise.resolve(parentResults);

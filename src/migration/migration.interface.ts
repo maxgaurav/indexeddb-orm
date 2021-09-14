@@ -1,4 +1,4 @@
-import {ModelConstructorInterface} from "../models/model.interface.js";
+import { ModelConstructorInterface } from '../models/model.interface.js';
 
 export const DEFAULT_SYNC_COLUMN_NAME = 'syncOn';
 

@@ -7,16 +7,16 @@
     "experimentalDecorators": true,
     "lib": [
       "dom",
-      "es7"
+      "ES2020",
     ],
     "module": "es6",
     "moduleResolution": "classic",
     "sourceMap": true,
-    "target": "es2017",
+    "target": "ES2019",
     "allowJs": false,
     "strict": true,
-    "outDir": "dist/es2015",
-    "declarationDir": "./src",
+    "outDir": "dist",
+    "declarationDir": "./dist",
     "incremental": true
   },
   "include": [

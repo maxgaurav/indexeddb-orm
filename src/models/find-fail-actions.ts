@@ -1,8 +1,7 @@
-import {SearchActions} from "./search-actions.js";
-import {NotFound} from "../errors/not-found.js";
+import { SearchActions } from './search-actions.js';
+import { NotFound } from '../errors/not-found.js';
 
 export abstract class FindFailActions extends SearchActions {
-
   /**
    * Returns fist matching record or throws NotFound exception
    * @throws NotFound
@@ -48,5 +47,4 @@ export abstract class FindFailActions extends SearchActions {
 
     return record;
   }
-
 }

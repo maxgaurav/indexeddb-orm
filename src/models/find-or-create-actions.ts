@@ -1,8 +1,14 @@
-import {BaseWriteActions} from "./base-write-actions.js";
-import {FindOrCreateActionInterface, TransactionModes} from "./model.interface.js";
-import {InvalidTransaction} from "../errors/invalid-transaction.js";
+import { BaseWriteActions } from './base-write-actions.js';
+import {
+  FindOrCreateActionInterface,
+  TransactionModes,
+} from './model.interface.js';
+import { InvalidTransaction } from '../errors/invalid-transaction.js';
 
-export abstract class FindOrCreateActions extends BaseWriteActions implements FindOrCreateActionInterface {
+export abstract class FindOrCreateActions
+  extends BaseWriteActions
+  implements FindOrCreateActionInterface
+{
   /**
    * Finds the first record else creates the record with accordance to builder provided for filtering
    * @param data
@@ -10,7 +16,9 @@ export abstract class FindOrCreateActions extends BaseWriteActions implements Fi
    */
   public async firstOrCreate<T>(data: any): Promise<T>;
   public async firstOrCreate(data: any): Promise<any> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.createTransaction(tables, TransactionModes.Write);
     if (transaction.mode !== TransactionModes.Write) {
       throw new InvalidTransaction('Transaction not in write mode');
@@ -33,7 +41,9 @@ export abstract class FindOrCreateActions extends BaseWriteActions implements Fi
    */
   public async findOrCreate<T>(id: any, data: any): Promise<T>;
   public async findOrCreate(id: any, data: any): Promise<any> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.createTransaction(tables, TransactionModes.Write);
     if (transaction.mode !== TransactionModes.Write) {
       throw new InvalidTransaction('Transaction not in write mode');
@@ -57,9 +67,19 @@ export abstract class FindOrCreateActions extends BaseWriteActions implements Fi
    * @param data
    * @throws InvalidTransaction
    */
-  public async findIndexOrCreate<T>(indexName: string, id: any, data: any): Promise<T>;
-  public async findIndexOrCreate(indexName: string, id: any, data: any): Promise<any> {
-    const tables = this.tableNames(this.connector.migrationSchema.tables).concat(this.table.name);
+  public async findIndexOrCreate<T>(
+    indexName: string,
+    id: any,
+    data: any,
+  ): Promise<T>;
+  public async findIndexOrCreate(
+    indexName: string,
+    id: any,
+    data: any,
+  ): Promise<any> {
+    const tables = this.tableNames(
+      this.connector.migrationSchema.tables,
+    ).concat(this.table.name);
     const transaction = this.createTransaction(tables, TransactionModes.Write);
     if (transaction.mode !== TransactionModes.Write) {
       throw new InvalidTransaction('Transaction not in write mode');

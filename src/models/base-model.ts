@@ -1,8 +1,11 @@
-import {TransactionHandling} from "./transaction-handling.js";
-import {TableSchema} from "../migration/migration.interface.js";
+import { TransactionHandling } from './transaction-handling.js';
+import { TableSchema } from '../migration/migration.interface.js';
+import { BaseModelInterface } from './model.interface.js';
 
-export abstract class BaseModel extends TransactionHandling {
-
+export abstract class BaseModel
+  extends TransactionHandling
+  implements BaseModelInterface
+{
   public abstract table: TableSchema;
 
   public abstract get primaryId(): string;
@@ -16,11 +19,13 @@ export abstract class BaseModel extends TransactionHandling {
 
     if (this.indexBuilder) {
       const keyRange = this.keyRange(this.indexBuilder);
-      const cursor = this.indexBuilder.index !== this.primaryId ? objectStore.index(this.indexBuilder.index) : objectStore;
+      const cursor =
+        this.indexBuilder.index !== this.primaryId
+          ? objectStore.index(this.indexBuilder.index)
+          : objectStore;
       return cursor.openCursor(keyRange, direction);
     } else {
       return objectStore.openCursor(undefined, direction);
     }
   }
-
 }
