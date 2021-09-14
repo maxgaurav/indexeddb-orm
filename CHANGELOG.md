@@ -1,4 +1,11 @@
 # Changelog
+## [4.0.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.1)
+
+### Changed
+- Removed es2015 dist and moved to module dist.
+- Combined **with** relation to allow both orm class relation name and direct relation
+- Mapped declaration files directly
+
 
 ## [3.2.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v3.2.1) _(Latest Release)_
 

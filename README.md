@@ -98,11 +98,11 @@ yarn add indexeddb-orm
 ```
 
 ## Usage
-* An setting parameter needs to be created for database structure handling. Models will be populated using the table names provided.
+* A setting parameter needs to be created for database structure handling. Models will be populated using the table names provided.
 * Use the idb function and pass base configuration with database structure.
 ```javascript
 
-import {Connector} from './dist/es2015/connection/connector.js';
+import {Connector} from './dist/connection/connector.js';
 
 const settings = {
     name : 'nameOfDatabase',
@@ -146,7 +146,7 @@ You can create you own custom class extending the **Model** class allowing you t
 within the class and much more. Following is an example on how to use and create orm classes.
 
 ```javascript
-import {Model} from './dist/es2015/models/model.js';
+import {Model} from './dist/models/model.js';
 
 class UserProfiles extends Model{
   static TableName = 'userProfile';
@@ -163,7 +163,7 @@ class Users extends Model {
       // the third and fourth parameter are optional;
       // by default the function name would be used as parent models attribute.
       return this.hasOne(UserProfiles, 'userId', '_id', 'userProfile')
-        .where('name', 'newName').with([...]).withCustom(['user']); 
+        .where('name', 'newName').with([...]).with(['user']); 
   }
 }
 
@@ -385,7 +385,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereIndexGte
-Search of index values against the point greater or equal to the given value. It is case sensitive
+Search of index values against the point greater or equal to the given value. It is case-sensitive
 
 ```javascript
 db.connect().then(async (models) => {
@@ -396,7 +396,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereIndexGt
-Search of index values against the point greater only to the given value. It is case sensitive.
+Search of index values against the point greater only to the given value. It is case-sensitive.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -407,7 +407,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereIndexLte
-Search of index values against the point less than or equal to the given value. It is case sensitive
+Search of index values against the point less than or equal to the given value. It is case-sensitive
 
 ```javascript
 db.connect().then(async (models) => {
@@ -418,7 +418,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereIndexLt
-Search of index values against the point less than only to the given value. It is case sensitive.
+Search of index values against the point less than only to the given value. It is case-sensitive.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -429,7 +429,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereIndexBetween
-Search of index values betweent the given lower and upper bound values. It is case sensitive for string values.
+Search of index values between the given lower and upper bound values. It is case-sensitive for string values.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -469,7 +469,7 @@ db.connect().then(async (models) => {
 
 
 #### whereIn
-To search for result in a multiple search values for column then pass array as an value for the search
+To search for result in a multiple search values for column then pass array as a value for the search
 
 ```javascript
 
@@ -480,7 +480,7 @@ db.connect().then(async (models) => {
 ```
 
 #### whereInArray
-To search for result in a multiple search values for column which contains array of values then pass array as an value for the search
+To search for result in a multiple search values for column which contains array of values then pass array as a value for the search
 
 ```javascript
 
@@ -491,7 +491,7 @@ db.connect().then(async (models) => {
 ```
 
 #### gte
-Search of values against the point greater or equal to the given value. It is case sensitive
+Search of values against the point greater or equal to the given value. It is case-sensitive
 
 ```javascript
 db.connect().then(async (models) => {
@@ -502,7 +502,7 @@ db.connect().then(async (models) => {
 ```
 
 #### gt
-Search of values against the point greater only to the given value. It is case sensitive.
+Search of values against the point greater only to the given value. It is case-sensitive.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -513,7 +513,7 @@ db.connect().then(async (models) => {
 ```
 
 #### lte
-Search of values against the point less than or equal to the given value. It is case sensitive
+Search of values against the point less than or equal to the given value. It is case-sensitive
 
 ```javascript
 db.connect().then(async (models) => {
@@ -524,7 +524,7 @@ db.connect().then(async (models) => {
 ```
 
 #### lt
-Search of values against the point less than only to the given value. It is case sensitive.
+Search of values against the point less than only to the given value. It is case-sensitive.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -534,7 +534,7 @@ db.connect().then(async (models) => {
 });
 ```
 #### between
-Search of index values between the given lower and upper bound values. It is case sensitive for string values.
+Search of index values between the given lower and upper bound values. It is case-sensitive for string values.
 
 ```javascript
 db.connect().then(async (models) => {
@@ -578,7 +578,7 @@ The has one relation maps a single column of primary model containing the id ref
 Example a user instance having one user contact. The user contact fetching the user model using relation.
 
 ```javascript
-import {RelationTypes} from './dist/es2015/models/model.interface.js';
+import {RelationTypes} from './dist/models/model.interface.js';
 
 const profiles = await models.userProfiles.with([{
         model: models.users, 
@@ -594,14 +594,13 @@ const profiles = await models.userProfiles.with([{
 ```
 
 #### Has Many
-The has many relation maps single column of primary model containing the id reference of other table/object store with
-with matching id. 
+The has many relation maps single column of primary model containing the id reference of other table/object store matching id. 
 
 Example a user having multiple contacts. The user model query with all contacts associated.
 
 
 ```javascript
-import {RelationTypes} from './dist/es2015/models/model.interface.js';
+import {RelationTypes} from './dist/models/model.interface.js';
 
 const users = await models.users.whereIndexIn('id',[1,2,10,11])
     .where('isAdmin', true)
@@ -617,10 +616,10 @@ const users = await models.users.whereIndexIn('id',[1,2,10,11])
 The has many multi entry relation works just like has many but the primary model column value is an array set as
  multi-entry index.
  
-Example a address table/object store having relation to multiple users using userIds as array with mutli entry index.
+Example: A address table/object store having relation to multiple users using userIds as array with multi entry index.
 
 ```javascript
-import {RelationTypes} from './dist/es2015/models/model.interface.js';
+import {RelationTypes} from './dist/models/model.interface.js';
 
 const addresses = await models.addresss.with([{
       model: model.users, 
@@ -637,12 +636,12 @@ const addresses = await models.addresss.with([{
 #### Has Many Through Multi Entry
 
 The has many through multi entry relation is used when the parent model which is setting the relation has the index as multi entry.
-This is reverse of has manu multi entry where child has index as multi.
+This is reverse of has many multi entry where child has an index of type multi entry.
  
-Example a address table/object store having relation to multiple users using userIds as array with mutli entry index.
+Example: A address table/object store having relation to multiple users using userIds as array with multi entry index.
 
 ```javascript
-import {RelationTypes} from './dist/es2015/models/model.interface.js';
+import {RelationTypes} from './dist/models/model.interface.js';
 
 const addresses = await models.addresss.with([{
       model: model.users, 
@@ -657,11 +656,11 @@ const addresses = await models.addresss.with([{
 ``` 
 
 #### Custom Relation Builder
-* Using the **withCustom** you can load custom relations defined in the ORM class.
+* Using the **with** you can load custom relations defined in the ORM class.
 
 
 ```javascript
-import {Model} from './dist/es2015/models/model.js';
+import {Model} from './dist/models/model.js';
 
 class UserProfile extends Model {
   static TableName = 'userProfiles'; 
@@ -677,7 +676,7 @@ class User extends Model {
 
 const users = await models.users.whereIndexIn('id',[1,2,10,11])
     .where('isAdmin', true)
-    .withCustom(['userProfile'])
+    .with(['userProfile'])
     .all();
 
 /**
@@ -686,10 +685,10 @@ const users = await models.users.whereIndexIn('id',[1,2,10,11])
 ```
 
 #### Nested Relations
-* You can also call for nested relation to nth level using the secondry query builder of the relation
+* You can also call for nested relation to nth level using the secondary query builder of the relation
 
 ```javascript
-import {RelationTypes} from './dist/es2015/models/model.interface.js';
+import {RelationTypes} from './dist/models/model.interface.js';
 
 const users = await models.users.whereIndexIn('id',[1,2,10,11])
     .where('isAdmin', true)
@@ -742,7 +741,7 @@ models.users.saveIndex('indexName', 1,  {
 });
 ```
 
-#### Save All  Index
+#### Save All Index
 
 This will update the data at the given index of the table with content provided for all matching index. The whole content will not be replaced 
 but only the properties provided by default. To prevent deep merging you can optionally pass third parameter as false.
@@ -804,15 +803,15 @@ models.users.deleteIndex('email', 'test@test.com');
 Sometimes it is needed to work in a single transaction and commit the content once or fail throughout. For this purpose one
 can use the transaction functionality in the system.
 
-Open a transaction in any of the model and it will return entire list of models in transaction mode. Transaction mode is required to be set.
+Open a transaction in any of the model, it will return entire list of models in transaction mode. Transaction mode is required to be set.
 
 Calling **transaction.abort()** will cause the transaction to fail.
 
 
 #### Usage
 ```javascript
-import {Connector} from './dist/es2015/connection/connector.js';
-import {TransactionModes} from './dist/es2015/models/model.interface.js';
+import {Connector} from './dist/connection/connector.js';
+import {TransactionModes} from './dist/models/model.interface.js';
 
 let db = new Connector(config);
 
@@ -838,7 +837,7 @@ db.connect().then(async (models) => {
 
 #### Count
 
-The count will return total number of records in the table against the result obtained by query builer object
+The count will return total number of records in the table against the result obtained by query builder object
 
 
 ```javascript
@@ -848,7 +847,7 @@ const count = await models.users.whereIndex('email', 'test@test.com').where('isA
 
 #### Average
 
-Aggregate of the result at the given column will be provided. If the column contains non numeric value then it will be treated as a ZERO value 
+Aggregate of the result at the given column will be provided. If the column contains non-numeric value then it will be treated as a ZERO value 
 
 
 ```javascript
@@ -859,7 +858,7 @@ const nestedAverage = await models.users.whereIndex('userId', 10).where('firstNa
 
 #### Reduce
 
-Reduce process can be fired using the reduce function passed. If needed an default value can be passed as a second parameter 
+Reduce process can be fired using the reduce function passed. If needed a default value can be passed as a second parameter 
 
 
 ```javascript
@@ -872,13 +871,13 @@ const result = await models.users.whereIndex('email', 'test@test.com').where('is
 ```
 
 ### Syncing
-Sync actions allow syncing of new data and returns the updated record back. It is best choice to use when you want to map a record through an API or other service.
+Sync actions allow syncing of new data and returns the updated record back. It is the best choice when you want to map a record through an API or other service.
 
 All Syncing actions can update the **syncOn** column if **SyncColumn** in migration of table schema is set to true. You can override the default column name using **SyncColumnName** attribute.
 column name using **
 
 #### Sync
-The **sync** action syncs at the primary key. By default it deep merges the data passed on but by providing the third parameter
+The **sync** action syncs at the primary key. By default, it deep merges the data passed on but by providing the third parameter
 as false you can completely replace the data.
 
 ```javascript
@@ -895,7 +894,7 @@ const updatedDataReceivedFromApi = {};
 await models.users.sync(10, updatedDataReceivedFromApi);
 ```
 
-#### syncIndex
+#### Sync Index
 The **syncIndex** action syncs at the index value at first matching record. By default it deep merges the data passed on but by providing the third parameter
 as false you can completely replace the data.
 
@@ -904,7 +903,7 @@ const updatedDataReceivedFromApi = {};
 await models.users.syncIndex('indexName', 10, updatedDataReceivedFromApi);
 ```
 
-#### syncAllIndex
+#### Sync All Index
 The **syncIndex** action syncs at the index value for all matching record. By default it deep merges the data passed on but by providing the third parameter
 as false you can completely replace the data.
 
