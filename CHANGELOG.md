@@ -1,4 +1,10 @@
 # Changelog
+## [4.0.0-alpha.3](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.3)
+
+### Fixed
+- The sync actions kept staying in read only transaction mode causing write or update action to fail.
+  - Using findOrCreate and findIndexOrCreate internally rather than find check and create. 
+
 ## [4.0.0-alpha.2](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.2)
 
 ### Changed

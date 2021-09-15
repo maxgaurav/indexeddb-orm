@@ -37,10 +37,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
    */
   public async sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async sync(id: any, data: any, mergeDeep = true): Promise<any> {
-    const existing = !!(await this.find(id));
-    if (!existing) {
-      return this.create(data);
-    }
+    await this.findOrCreate(id, data);
     await this.save(id, this.syncObj(data), mergeDeep);
     return this.find(id);
   }
@@ -65,10 +62,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
     data: any,
     mergeDeep = true,
   ): Promise<any> {
-    const existing = !!(await this.findIndex(indexName, id));
-    if (!existing) {
-      return this.create(data);
-    }
+    await this.findIndexOrCreate(indexName, id, data);
     await this.saveIndex(indexName, id, this.syncObj(data), mergeDeep);
     return this.findIndex(indexName, id);
   }
