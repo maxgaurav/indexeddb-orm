@@ -37,12 +37,17 @@ export class Model extends FindOrCreateActions implements ModelInterface {
    */
   public async sync<T>(id: any, data: any, mergeDeep?: boolean): Promise<T>;
   public async sync(id: any, data: any, mergeDeep = true): Promise<any> {
+    const existing = !!(await this.find(id));
+    if (!existing) {
+      return this.create(data);
+    }
     await this.save(id, this.syncObj(data), mergeDeep);
     return this.find(id);
   }
 
   /**
-   * Syncs data at index and returns newly updated record
+   * Syncs data at index and returns newly updated record.
+   * If no record is found then it will create it with the data provided.
    * @param indexName
    * @param id
    * @param data
@@ -60,12 +65,17 @@ export class Model extends FindOrCreateActions implements ModelInterface {
     data: any,
     mergeDeep = true,
   ): Promise<any> {
+    const existing = !!(await this.findIndex(indexName, id));
+    if (!existing) {
+      return this.create(data);
+    }
     await this.saveIndex(indexName, id, this.syncObj(data), mergeDeep);
     return this.findIndex(indexName, id);
   }
 
   /**
-   * Syncs data at index and returns newly updated record
+   * Syncs data at index and returns newly updated record.
+   * If no record is found then it will create it with the data provided.
    * @param indexName
    * @param id
    * @param data
@@ -100,7 +110,7 @@ export class Model extends FindOrCreateActions implements ModelInterface {
       mode,
     );
 
-    const models: { [key: string]: ModelInterface } = {};
+    const models: ModelKeysInterface<any> = {};
 
     for (const table of this.connector.migrationSchema.tables) {
       Object.defineProperty(models, table.name, {

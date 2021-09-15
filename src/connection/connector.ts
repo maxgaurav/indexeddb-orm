@@ -6,7 +6,6 @@ import {
 import { DBSuccessEvent, DBVersionChangeEvent } from './idb-event.interface.js';
 import { Migration } from '../migration/migration.js';
 import {
-  ModelInterface,
   ModelKeysInterface,
   TransactionModes,
 } from '../models/model.interface.js';
@@ -37,7 +36,7 @@ export class Connector implements ConnectorInterface {
   /**
    * Create/Update and connects the database
    */
-  public connect(): Promise<ModelKeysInterface> {
+  public connect<T extends string = string>(): Promise<ModelKeysInterface<T>> {
     this.dbOpenConnection = this.indexedDB().open(
       this.migrationSchema.name,
       this.migrationSchema.version,
@@ -109,9 +108,7 @@ export class Connector implements ConnectorInterface {
    * Called when connection to database is successful. Creates various models for the tables.
    * @param event
    */
-  protected completeHandler(event: DBSuccessEvent): {
-    [key: string]: ModelInterface;
-  } {
+  protected completeHandler(event: DBSuccessEvent): ModelKeysInterface {
     const storeNames = this.migrationSchema.tables.map((table) => table.name);
     const transaction =
       event.target.transaction || event.target.result.transaction(storeNames);
@@ -125,7 +122,7 @@ export class Connector implements ConnectorInterface {
     this.migration = migration;
 
     const stores = migration.listObjectStores();
-    const models: { [key: string]: ModelInterface } = {};
+    const models: ModelKeysInterface = {};
 
     for (const store of stores) {
       const table = <TableSchema>(
@@ -177,7 +174,7 @@ export class Connector implements ConnectorInterface {
       mode,
     );
 
-    const models: { [key: string]: ModelInterface } = {};
+    const models: ModelKeysInterface = {};
 
     for (const table of this.migrationSchema.tables) {
       Object.defineProperty(models, table.name, {

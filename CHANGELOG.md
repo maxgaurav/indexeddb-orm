@@ -1,5 +1,18 @@
 # Changelog
-## [4.0.0](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.1)
+## [4.0.0-alpha.2](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.2)
+
+### Changed
+- The **sync** now auto creates record if not found else updates it like previously.
+- The **syncIndex** now auto creates record if not found else updates it like previously
+- The **ModelKeyInterface** changed to type which takes in union of store names so that typescript system can auto complete object keys of models
+- The **connect** function of connector has a generic input to return type cast model names.
+```typescript
+const models: ModelKeysInterface<'user', 'userProfile'> = promisedModles;
+// model.user will auto complete through typescript
+
+```
+
+## [4.0.0-alpha.1](https://github.com/maxgaurav/indexeddb-orm/releases/tag/v4.0.0-alpha.1)
 
 ### Changed
 - Removed es2015 dist and moved to module dist.

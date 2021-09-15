@@ -411,6 +411,7 @@ export interface ModelInterface
   ): Promise<any[]>;
 }
 
-export interface ModelKeysInterface {
-  [key: string]: ModelInterface;
-}
+export type ModelKeysInterface<T extends string = string> = Record<
+  T,
+  ModelInterface
+>;
