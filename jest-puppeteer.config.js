@@ -1,7 +1,9 @@
 // jest-puppeteer.config.js
 require('dotenv').config()
 
+const openChrome = process.env.PUPPETEER_OPEN_CHROME
 const port = process.env.PUPPETEER_PORT
+
 module.exports = {
   server: {
     command: `http-server -a 127.0.0.1 --port ${port} ./`,
@@ -10,7 +12,7 @@ module.exports = {
   },
   launch: {
     dumpio: true,
-    headless: false,
+    headless: openChrome != 'true',
     product: 'chrome',
     args: [`--window-size=1200,1080`],
     defaultViewport: {
