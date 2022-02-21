@@ -10,7 +10,7 @@
       "es7"
     ],
     "module": "es6",
-    "moduleResolution": "classic",
+    "moduleResolution": "Node",
     "sourceMap": true,
     "target": "es2017",
     "allowJs": false,

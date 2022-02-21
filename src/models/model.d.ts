@@ -48,7 +48,7 @@ export declare class Model extends FindOrCreateActions implements ModelInterface
     /**
      * The primary key of the model
      */
-    readonly primaryId: string;
+    get primaryId(): string;
     /**
      * Loads custom relation created in the ORM classes extending the base model class
      * @param results
