@@ -11,7 +11,7 @@ describe('simple model', () => {
       await page.goto(`http://127.0.0.1:${port}/example/index.html`)
     })
    
-    it('Create model with one attribute that is required', async () => {
+    it('Create model with one attribute that is unique', async () => {
     
         // wait for variables to be present in the dom
         await page.waitForFunction(() => 'Connector' in window);
