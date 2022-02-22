@@ -3,3 +3,4 @@
 /dist
 .DS_Store
 dist/es2015/tsconfig.tsbuildinfo
+.env

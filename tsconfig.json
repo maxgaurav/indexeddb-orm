@@ -10,11 +10,11 @@
       "ES2020",
     ],
     "module": "es6",
-    "moduleResolution": "classic",
+    "moduleResolution": "Node",
     "sourceMap": true,
     "target": "ES2019",
     "allowJs": false,
-    "strict": true,
+    "strict": false,
     "outDir": "dist",
     "declarationDir": "./dist",
     "incremental": true
