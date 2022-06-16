@@ -2,7 +2,7 @@
   "name": "indexeddb-orm",
   "version": "4.0.0-alpha.3",
   "main": "./dist/index.js",
-  "types": "./src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
