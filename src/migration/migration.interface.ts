@@ -20,7 +20,7 @@ export interface MigrationInterface {
 
 export interface TableColumn {
   name: string;
-  index: string[] | string;
+  index?: string[] | string;
   attributes?: IDBIndexParameters;
   dbIndex?: IDBIndex | null;
 }
